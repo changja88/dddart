@@ -1643,7 +1643,7 @@ class GraphEditor {
 }
 ```
 
-> Dart 고유 구현 트릭은 implementation-dart 스킬을 참조한다.
+> Dart 고유 구현 트릭은 implementation-dart §2(Effective Dart 선별)·§6(Dart 3 문법)을 참조한다.
 
 ---
 

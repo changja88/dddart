@@ -41,7 +41,7 @@ infra_layer는 종류 3폴더다 (규약 §3.4 — 폴더·명명 사실은 disc
 - 서버가 에러 바디를 주면 `BadRequestResponse.fromJson`으로 그대로 싣고(서버가 보낸 `isShow`를 그대로 존중), 클라에서 생긴 실패는 `errorType`으로 기인을 구분해 생성한다 — 어휘는 `timeout`·`parse`·`unknown`.
 - `BadRequestResponse`는 freezed 모델로 필드 3개다(HaffHaff 실물 철자): `errorType`(JSON `error_type`)·`msg`(`msg`)·`isShow`(`is_show`). **클라 생성 에러는 `isShow: true`로 만든다** — 위 *왜*가 "타임아웃은 isShow:false로 무음"을 고장으로 진단했으므로, 정규화가 그 무음을 재생산하지 않는다(표시·소비 정책 자체는 architecture-state §4 소유).
 
-표준 골격 — 계약의 직역이다(dio·retrofit 표기법 상세는 implementation-flutter 소유):
+표준 골격 — 계약의 직역이다(dio·retrofit 표기법 상세는 implementation-flutter §4 소유):
 
 ```dart
 // common/network/safe_api_call.dart — 파일명 = 주 선언명 snake_case. Right=성공 (§3)
@@ -96,7 +96,7 @@ class ChannelRepo {
 
 - 엔티티의 모델링(entity/value_object 구분은 architecture-ddd §3·애그리거트 경계는 §4)은 architecture-ddd 소유 — 이 스킬은 "유입 경로에 변환 계층을 두지 않는다"는 계약만 소유한다.
 - 도메인 엔티티에 storage 어노테이션을 붙이지 않는다 — hive 어댑터 선언은 §5의 어댑터 파일 소속이다.
-- retrofit `@RestApi`·dio 클라이언트 표기법은 implementation-flutter 소유.
+- retrofit `@RestApi`·dio 클라이언트 표기법은 implementation-flutter §4 소유.
 
 ## §5. 로컬 데이터 2층 — BC 캐시 vs 엔진·전역
 
@@ -109,7 +109,7 @@ class ChannelRepo {
 
 - **Repo 하나가 원격+로컬 DataSource를 조합**해 단일 진실 원천 역할을 한다 — 자리 부재로 생기던 `*_box_repo` 변형(HaffHaff drift)을 만들지 않는다.
 - 다른 BC·전역 서비스가 이 데이터를 원하면 **이 BC의 UseCase를 호출**한다 — box 직접 접근 금지 (규약 §9-9: HaffHaff에서 member·notice 캐시가 common에 가면서 역의존과 문 없는 직접 접근 10곳+이 실측됐다).
-- **hive 어댑터 노출**: BC 엔티티의 어댑터 등록 함수는 `data_source/<bc>_hive_adapters.dart` 한 파일에 모은다 — `root_initializer`가 import할 수 있는 유일한 BC infra 파일이다(시동 배선 — 규약 §3.4·§3.6). 어댑터 선언(`@GenerateAdapters` 류)도 이 파일 소속. hive 표기법은 implementation-flutter 소유.
+- **hive 어댑터 노출**: BC 엔티티의 어댑터 등록 함수는 `data_source/<bc>_hive_adapters.dart` 한 파일에 모은다 — `root_initializer`가 import할 수 있는 유일한 BC infra 파일이다(시동 배선 — 규약 §3.4·§3.6). 어댑터 선언(@HiveType 저장 전용 Box 모델)도 이 파일 소속 — **@GenerateAdapters는 비채택**(패키지 1파일 강제가 BC 분산 선언과 충돌). hive 표기법·typeId 대역 규칙은 implementation-flutter §5 소유.
 - 디스크 캐시(이 절) vs 메모리 keepAlive 캐시의 소유 경계는 §1 — 메모리 쪽은 architecture-state §9.
 
 ## §6. infra service — 수동 SDK 어댑터

@@ -56,7 +56,7 @@ VM은 화면 1개의 상태 주인이다 (규약 §3.3): `build()`가 `FutureOr<
 - **액션 전용 VM도 최소 State를 갖는다** — error 필드 1개짜리 State가 최소형이다.
 - *왜* — 직노출은 액션 에러를 담을 자리가 없어 전역 다이얼로그 직행을 유발한다(HaffHaff 실측: App 44개 중 36개가 ErrorDialog 직접 호출 — 그 오염 경로의 입구가 State 부재다).
 - State는 `application_layer/state/`의 freezed 모델이고 노출 주체(화면·관심사·기능)와 같은 접두를 쓴다 — 명명·위치 사실은 discipline-houserules §1·§4.
-- State에는 **액션 실패 표준 필드** `BadRequestResponse? error`를 둔다(§4). freezed 문법 상세는 implementation-dart 소유.
+- State에는 **액션 실패 표준 필드** `BadRequestResponse? error`를 둔다(§4). freezed 문법 상세는 implementation-dart §4 소유.
 
 화면 상태 모델이 domain_layer가 아니라 application_layer에 사는 이유 (규약 §9-4·§9-7): state 파일은 VM·View만 import한다(HaffHaff 사용처 추적 — 도메인 코드 사용 0건) = 화면이 바뀔 때 같이 바뀌는 ViewModel 계층의 소유물이다.
 
@@ -66,12 +66,12 @@ VM은 화면 1개의 상태 주인이다 (규약 §3.3): `build()`가 `FutureOr<
 
 | 채널 | 실패 지점 | 경로 | 표시 |
 |---|---|---|---|
-| ① 조회(빌드) | `build()` | BadRequestResponse를 **throw** → `AsyncValue.error` | view의 error 빌더 — 화면 단위 에러·재시도 (riverpod 내장 메커니즘) |
+| ① 조회(빌드) | `build()` | BadRequestResponse를 **throw** → `AsyncValue.error` | view의 error 빌더 — 화면 단위 에러·재시도 (riverpod 내장 메커니즘. **자동 재시도는 전역 OFF**가 dddart 확정 — 표기는 implementation-riverpod §8) |
 | ② 액션 | 버튼·제출 등 메서드 | State의 표준 필드 `BadRequestResponse? error`에 담는다 | View가 `ref.listen`으로 감지·표시(`isShow` 존중) 후 **`consumeError()`로 명시 소비** |
 
 UseCase는 Repo의 Either를 통과·조합하며 새 throw를 만들지 않는다 — 조회 실패를 AsyncValue.error로 넘기는 throw는 **VM의 일**이다 (규약 §3.4).
 
-**정식 예제** — base VM·공용 헬퍼 없이 이 패턴을 그대로 반복한다 (HaffHaff "플래그→listen→표시→리셋" 33파일 관례의 에러 확장). freezed·@riverpod 표기법 상세는 implementation-dart·implementation-riverpod 소유:
+**정식 예제** — base VM·공용 헬퍼 없이 이 패턴을 그대로 반복한다 (HaffHaff "플래그→listen→표시→리셋" 33파일 관례의 에러 확장). freezed·@riverpod 표기법 상세는 implementation-dart §4·implementation-riverpod §2 소유:
 
 ```dart
 // application_layer/state/channel_summary_state.dart (개념 1차 분할 전 평면 — 성장 규칙은 discipline-houserules §2)
@@ -97,6 +97,7 @@ class ChannelSummaryVM extends _$ChannelSummaryVM {
 
   Future<void> leaveChannel(String channelId) async {
     final result = await ChannelUseCase().leaveChannel(channelId);
+    if (!ref.mounted) return; // 액션 중 화면 이탈 — dispose 후 state 접근은 riverpod 3에서 throw
     result.fold(
       (error) => state = AsyncData(state.requireValue.copyWith(error: error)), // ② 액션 실패
       (_) => ref.invalidateSelf(), // 성공 — 목록 재조회
@@ -110,10 +111,10 @@ class ChannelSummaryVM extends _$ChannelSummaryVM {
 
 // presentation_layer/view/channel_summary_view.dart — View 쪽 소비 (build 안)
 ref.listen(channelSummaryVMProvider, (previous, next) {
-  final error = next.valueOrNull?.error;
+  final error = next.value?.error; // riverpod 3: value는 무throw — valueOrNull은 3.0에서 제거됨
   if (error == null) return;
   if (error.isShow) {
-    // 표시 — design_system 컴포넌트를 View가 context로 호출 (architecture-ui §7, 호출 표기는 implementation-flutter)
+    // 표시 — design_system 컴포넌트를 View가 context로 호출 (architecture-ui §7, 호출 표기는 implementation-flutter §6)
   }
   ref.read(channelSummaryVMProvider.notifier).consumeError(); // 명시 소비 — 재빌드 재표시 방지
 });
@@ -153,13 +154,13 @@ HaffHaff의 `refresh_notifier`(8개 BC의 VM 12개를 import해 `ref.refresh`를
 |---|---|
 | 데이터가 바뀌어서 다른 화면도 갱신돼야 한다 | **그 BC의 SharedState**(§5) — 변화를 일으킨 쪽이 SharedState를 갱신하고, 갱신이 필요한 화면의 VM·View가 watch한다 |
 | 앱 라이프사이클(복귀 등)발 갱신 | **root_lifecycle_handler → BC service**(§6·§10) — 전역 이벤트의 분배는 root, 도메인 반응은 BC |
-| 탭 재탭 스크롤톱 | **root_view가 직접 처리** — BC는 신호를 듣지 않는다. 메커니즘 상세(PrimaryScrollController 등)는 implementation-flutter 소유(규약 §10-5 ④ — 그 스킬 작성 시 결정될 **미결** 항목) |
+| 탭 재탭 스크롤톱 | **root_view가 직접 처리** — BC는 신호를 듣지 않는다. 메커니즘은 2단 동작(중첩이면 첫 화면 복귀·루트면 스크롤톱)으로 확정(2026-06-12 §10-5 ④) — 구현 표기는 implementation-flutter §3 소유 |
 
 공통 원칙: **VM을 바깥에서 조작하지 않는다.** `ref.refresh`를 타 BC·common이 호출하는 구조는 어떤 명분이든 금지 채널(타 BC VM 접근)의 우회다.
 
 ## §9. keepAlive — 수명 결정 기준
 
-이 스킬은 **수명 결정**(어느 변종을 쓰고 언제 keepAlive인가)을 소유하고, `@Riverpod(keepAlive: true)` **표기법**은 implementation-riverpod이 소유한다.
+이 스킬은 **수명 결정**(어느 변종을 쓰고 언제 keepAlive인가)을 소유하고, `@Riverpod(keepAlive: true)` **표기법**은 implementation-riverpod §3이 소유한다.
 
 | 대상 | 수명 | keepAlive |
 |---|---|---|
