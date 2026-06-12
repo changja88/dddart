@@ -6,13 +6,16 @@ dddart 스킬 9종의 코퍼스 원료·작업본은 여기서 관리한다. 배
 
 ```
 workspace/reference/<스킬>/reference/
-├── external.md   # 외부 원료 — dddjango 이식분, 일반 지식
-├── internal.md   # 내부 원료 — 제1 규약 슬라이스, HaffHaff 실측
-├── review.md     # 적대 점검 기록
-└── final.md      # 합성 최종본 — 배포본 references/final.md와 본문 동일 유지
+├── internal.md   # 사용자 직접 제공 원료 — 읽은 책의 요약. 에이전트가 만들지 않는다.
+├── external.md   # 외부 자료 조사 — 에이전트 수행 (공식 문서·평판 자료. ddd·cleancode는 dddjango final 반입분이 이 슬롯)
+├── review.md     # internal·external 교차 리뷰 기록
+└── final.md      # 최종 합성본 — 배포본 references/final.md와 본문 동일 유지
 ```
 
-네 파일이 전부 필수는 아니다. 직격 이식 스킬(ddd·cleancode·houserules)은 final.md만으로 시작할 수 있다(dddjango도 동일).
+네 파일이 전부 필수는 아니다(dddjango도 houserules·implementation-django 계열은 final만 보유).
+
+- **internal.md는 사용자만 제공한다.** dddjango에서 internal이 없던 스킬은 dddart에서도 없다. ddd·cleancode의 사용자 서적 요약은 이미 dddjango final(=반입된 external) 안에 합성돼 있다.
+- **제1 규약·본설계·HaffHaff 실측은 internal이 아니다.** 확정 설계 문서이므로 코퍼스에 슬라이스 사본을 만들지 않고, final 합성 때 `workspace/design/` 문서를 직접 원료로 읽고 §번호로 인용한다(사본은 규약 개정 시 stale 신뢰원이 되는 drift 표면).
 
 ## 미러 불변식 (dddjango corpus_mirror_sync 승계)
 
