@@ -177,6 +177,9 @@ View ─→ VM·SharedState ────┐
 - **DI 없음**(§9-13): UseCase는 VM 안에서, Repo는 UseCase 안에서, DataSource는 Repo 안에서 **직접 생성**한다. `@riverpod` provider는 VM·SharedState·Service 3종뿐이다. UseCase·Repo·DataSource는 **무상태**다 — 상태는 box·서버·State 모델에만 둔다 (호출처마다 새 인스턴스가 생겨도 동작이 같아야 "직접 생성"과 "단일 진실 원천"이 양립한다).
 - `service/`(application) vs `service/`(infra) 구분: **능동이면 application** — 이벤트를 받아 유스케이스를 구동(UseCase 호출). **수동이면 infra** — 호출당하는 SDK 어댑터(§3.4).
 - **판정 소유(2026-06-12 적대 리뷰 개정)**: **도메인 어휘로 진술되는 판정은 1곳째부터 domain이 기본**이다 — 설계 명세가 행위 목록의 모든 수치·비교·자격 판정에 소유자(domain vs VM 변환)를 항목별로 라벨링하고, VM 소유를 주장하려면 *왜*를 적는다(신규 기능의 판정은 항상 소비처 1곳이라 복제 규칙만으론 빈혈에 집행자가 없다). 같은 도메인 판정이 **Model 밖 2곳**(VM·view·section·ui_extension·State getter 포함 — "VM 2곳"에서 확장)에 복제되면 `domain_service/`·`specification/`으로 강등한다 — VM의 일은 변환이지 판정이 아니다 (코드 규율 상세는 §10-5 ③).
+- **State 계약(2026-06-12 §10-5 ① 확정)**: VM은 도메인 엔티티·패키지 타입을 직노출하지 않고 **항상 자기 freezed `*State`를 노출**한다 — 무한스크롤 PagingState는 State의 필드로, 액션 전용 VM도 최소 State(error 필드 1개). *왜* — 직노출은 액션 에러를 담을 자리가 없어 전역 다이얼로그 직행(HaffHaff App 36/44 오염 경로)을 유발한다. 백스톱 NM4(삼총사)와 한 몸.
+- **에러 표시 2채널(2026-06-12 §10-5 ① 확정)**: ① 조회(빌드) 실패 — VM `build()`가 BadRequestResponse를 throw → `AsyncValue.error` → view의 error 빌더(화면 단위 에러·재시도, riverpod 내장 메커니즘) ② 액션 실패 — State의 표준 필드 `BadRequestResponse? error`에 담고, View가 `ref.listen`으로 감지·표시(`isShow` 존중) 후 **`consumeError()`를 호출해 명시 소비**(null 리셋 — 재빌드 재표시 방지). HaffHaff의 "플래그→listen→표시→리셋" 33파일 관례의 에러 확장이며, 과거형 사건명·DateTime 핵 위장 이벤트 금지는 유지. **base VM·공용 헬퍼는 만들지 않는다** — 패턴 3줄은 스킬 코퍼스의 정식 예제로 주입(상속은 전 VM을 한 몸으로 묶는 결합 표면, AI coder에겐 반복이 더 결정적).
+- **컨트롤러는 View 소유(2026-06-12 §10-5 ① 확정)**: TextEditingController·FocusNode 등 UI 컨트롤러는 View(StatefulWidget/hooks)가 보유하고 값은 VM 메서드 인자로 전달한다(HaffHaff 실측: 입력 컨트롤러의 VM 보유 0건 — 이미 관례. ScrollController 3건은 스크롤톱 메커니즘으로 별도 처방 §10-5 ④). 백스톱 IM12(application flutter 전면 금지)와 한 몸.
 
 다섯 종류 폴더(`use_case/`·`view_model/`·`state/`·`shared_state/`·`service/`) 전부 BC 생성 시 비어도 항상 만든다(§5).
 
@@ -190,6 +193,8 @@ View ─→ VM·SharedState ────┐
 | `service/` | **수동 SDK 어댑터** — 호출당하는 쪽, 상태 없음, UseCase를 모름. Repo의 자매(서버 API 대신 플랫폼 SDK를 감쌈) | `<기능>_service.dart` | `<기능>Service` | `inapp_purchase_service.dart` (store) |
 
 > 폴더명은 `repository/`(전체 표기), 파일 접미사는 `_repo.dart`(축약) — HaffHaff 다수 관례를 표준으로 고정.
+>
+> **실패의 단일 출구(2026-06-12 §10-5 ① 확정)**: `safeApiCall`은 DioException만이 아니라 **모든 예외**(타임아웃·JSON 파싱·타입 캐스트)를 잡아 `BadRequestResponse`로 정규화한다(`errorType`으로 기인 구분 — `timeout`·`parse`·`unknown`). Repo·infra service는 어떤 실패도 throw로 탈출시키지 않는다 — **전 실패 = Either**. UseCase는 Repo의 Either를 통과·조합하며 새 throw를 만들지 않는다(조회 실패를 AsyncValue.error로 넘기는 throw는 VM의 일 — §3.3 에러 2채널). *왜* — HaffHaff 실측: 파싱 실패는 그물 밖으로 탈출해 미정의 동작(크래시·무한 로딩), 타임아웃은 `isShow:false`로 무음, 좋아요류 에러는 Either 통째 폐기 — 실패의 절반이 사용자에게 도달하지 못했다.
 >
 > infra `service/`는 무상태 plain class다. 상태를 보유하고 플랫폼 이벤트에 반응하며 UseCase를 호출하는 **능동** service는 `application_layer/service/` 소속이다(§3.3). HaffHaff의 `permission_service.dart`(keepAlive Notifier·App 호출·상태 노출)는 infra에 있지만 성격상 application_layer 물건 — drift로 분류(§8).
 >
@@ -360,7 +365,7 @@ BC를 만들면 **4계층 폴더와 모든 표준 종류 폴더를 항상 생성
 | `enum/` | 전역 enum — 단 전 화면 라우트 enum은 실격(전체 지식 + §3.1 단일 출처와 중복, §8) | `global_key.dart`·`env_loader.dart` |
 | `util/` | 순수 유틸 — 포맷터·계산기·확장 함수 | `time_calculator.dart` (`show_snackbar`는 시각 동작 — `design_system/util/` 소속, §8) |
 
-**design_system/ — BC 어휘도 도메인 어휘도 모르는 시각 요소.** `design_system/`은 `application/`·`root/`를 import하지 않는다(백스톱 검사 대상). §3.5 판별 3에서 "BC 어휘를 모르는 조각"이 내려오는 자리다. 구성은 업계 표준 구조(토큰 + 컴포넌트 + 규칙)를 따른다:
+**design_system/ — BC 어휘도 도메인 어휘도 모르는 시각 요소.** `design_system/`은 `application/`·`root/`를 import하지 않는다(백스톱 검사 대상). 컴포넌트는 **전역 navigator 키로 스스로를 표시하는 static `show()` 경로를 갖지 않는다**(2026-06-12 §10-5 ① 확정) — 표시는 View가 context로 호출한다. *왜* — 이 문이 열려 있으면 UseCase의 UI 직행(§8 drift — ErrorDialog 직접 호출 36/44)이 재발한다. §3.5 판별 3에서 "BC 어휘를 모르는 조각"이 내려오는 자리다. 구성은 업계 표준 구조(토큰 + 컴포넌트 + 규칙)를 따른다:
 
 | 폴더 | 역할 | 규칙 |
 |---|---|---|
@@ -506,5 +511,5 @@ HaffHaff-App 안에서 발견된 변형들. dddart는 새로 만드는 코드에
 2. 백스톱 스크립트 초기 세트 — 이 트리의 어떤 불변식을 결정적으로 검사할지 (예: 계층 폴더 표기, domain_layer의 flutter import, 종류-접미사 일치)
 3. 스킬 9종 코퍼스 — dddjango 이식 3종(architecture-ddd·discipline-cleancode·discipline-houserules)과 신규 6종의 작성 순서
 4. 저장소 골격 생성 — `dddart/`·`codex-dddart/`·`workspace/` + 매니페스트 + sync 도구 이식
-5. 코드 규율 디테일 (2026-06-11 이연) — ① Model 출구 에러 계약: Repo·infra service의 throw 금지 여부, `safeApiCall`이 DioException 외 예외도 잡도록 보강할지 + VM→View 에러 표시 채널 상세(방향은 View의 `ref.listen` — §9-7, State 에러 필드명·일회성 소비 규약, 공용 헬퍼·base VM의 위치·명명) + 백스톱 연동 2건(2026-06-12 §10-2 확정 — 그때까지 백스톱은 규약 문면대로 집행): State 파일 없는 VM(`AsyncValue<엔티티>` 직노출) 허용 여부(NM4 연동), 컨트롤러(TextEditingController 등) 소유 계층(IM12 flutter 전면 금지가 View 소유 함의) ② ~~Either 방향~~ — **Right=성공으로 확정**(2026-06-12, §3.4 — 기존 프로젝트 관례 우선 단서만 유지) ③ 애그리거트 "일관성 경계"의 코드 규율(루트 경유 변경 원칙 등 — freezed 불변+직파싱 하에서의 최소 규칙, VM 판정 강등 규칙(§3.3)의 상세 포함) ④ root 탭 재탭 스크롤톱 상세 — root_view의 PrimaryScrollController 처리(§8). discipline-cleancode·implementation 스킬 작성 시 결정(귀속 확정 2026-06-12 — 코드 내용 규율은 cleancode, 파일트리는 houserules).
+5. 코드 규율 디테일 (2026-06-11 이연) — ① Model 출구 에러 계약 — **확정(2026-06-12, 결정 5건 전부 권장 채택·본문 승격: §3.3 State 계약·에러 2채널·컨트롤러 / §3.4 실패의 단일 출구 / §6 전역 키 show 금지)**: safeApiCall 전 예외 정규화(throw 탈출 금지) · 조회 실패=AsyncValue.error·액션 실패=State `error` 필드+`consumeError()` 명시 소비 · 전 VM freezed State 직노출 금지(백스톱 NM4 최종 확정) · 컨트롤러 View 소유(IM12 최종 확정) · base VM·공용 헬퍼 없음 ② ~~Either 방향~~ — **Right=성공으로 확정**(2026-06-12, §3.4 — 기존 프로젝트 관례 우선 단서만 유지) ③ 애그리거트 "일관성 경계"의 코드 규율(루트 경유 변경 원칙 등 — freezed 불변+직파싱 하에서의 최소 규칙, VM 판정 강등 규칙(§3.3)의 상세 포함) ④ root 탭 재탭 스크롤톱 상세 — root_view의 PrimaryScrollController 처리(§8). discipline-cleancode·implementation 스킬 작성 시 결정(귀속 확정 2026-06-12 — 코드 내용 규율은 cleancode, 파일트리는 houserules).
 6. 도메인 이벤트 — `event/`는 제거됨(§9-15, 2026-06-11). 교차 BC 비동기 통지 요구가 실제로 발생하면 이 항목에서 재논의한다 — 그 전까지 shared_state로 위장하지 않는다(§8).

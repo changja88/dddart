@@ -4,8 +4,7 @@
 
 ## 즉시 할 일
 
-1. **§10-5 ① 선결정**(§10-3 착수 전, 사용자와 결정) — State 에러 필드·일회성 소비 + 백스톱 연동 2건(State 파일 없는 VM 허용 여부 — NM4 / 컨트롤러 소유 계층 — IM12). 제1 규약 §10-5 ①에 등재됨.
-2. → **§10-3 스킬 9종 코퍼스** 착수.
+1. **§10-3 스킬 9종 코퍼스 착수** — 선결정(§10-5 ①) **완료**(2026-06-12, 결정 5건 전부 권장 채택: safeApiCall 전 예외 정규화 / 에러 2채널(조회=AsyncValue.error·액션=State `error`+`consumeError()`) / 전 VM freezed State 직노출 금지 / 컨트롤러 View 소유 / base VM 없음+전역 키 show 금지 — 제1 규약 §3.3·§3.4·§6 본문 승격). 가이드: 본설계 §8 절 귀속표 · 필독 reference는 houserules 1개 · 16종 공유 reference 1파일 · houserules SKILL.md 체크리스트 ≤8KB.
 
 > 백스톱은 **구현 완료**(2026-06-12, 사용자 결정 A — 즉시 구현): `dddart/scripts/`(러너+패밀리 4+extract_contract+픽스처 13종). analyze 0·픽스처 13/13·HaffHaff 스모크(전역 1,462건 drift 정합 / gated 클린 트리 0건). 상세는 백스톱 설계 §12.
 
