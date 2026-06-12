@@ -2,7 +2,7 @@
 
 > **지위**: 백스톱(결정적 러너)이 못 보는 **의미 판별**의 단일 출처. 백스톱 = 사후 불변식(위반 검출), 이 문서 = 판별 절차(배치 결정). **1차 결정자와 검증자가 같은 이 파일을 적재한다** — 두 에이전트가 다른 기준으로 판정하면 반송 루프가 생긴다.
 > **출처**: 본설계 §9(배정표)·파이널 리뷰 §6(목록)·제1 규약(절차 원문). 본문 속 `(규약 §N)`은 출처 표기다.
-> 구성: §1~§12 = 배정표 12행, 판별 17종. 각 절 = 배정 → 절차 → 신호·판례.
+> 구성: §1~§12 = 배정표 12행, 판별 17종 — 행별 종수: §3=3종·§6=2종·§8=2종(domain_service "중심"·UseCase "도메인 개념 단위" — "domain 기본"은 판별이 아니라 전제)·§9=2종, 나머지 8행 각 1종, 합 17. 각 절 = 배정 → 절차 → 신호·판례.
 
 | § | 판별 | 1차 결정 | 검증 |
 |---|---|---|---|
@@ -13,7 +13,7 @@
 | 5 | handler 입장 ("2+ BC 분배") | architect | state |
 | 6 | "거의 빈 VM" (root_vm) · 푸시 "정규화" 의미론 | architect | state → discipline-reviewer |
 | 7 | common "살아있는 상태" | architect | state → discipline-reviewer |
-| 8 | domain_service "중심" · UseCase "도메인 개념 단위" | architect | ddd → discipline-reviewer |
+| 8 | 판정·계산의 귀속 — domain 기본 · domain_service "중심" · UseCase "도메인 개념 단위" | architect | ddd → discipline-reviewer |
 | 9 | "두 번째 개념" 식별 · "같은 개념 같은 철자" | architect (파일 목록 소유) | discipline-reviewer (coder는 구현 중 2차 발견자) |
 | 10 | 과거형 사건명 (형태소) | architect (파일명은 명세 결정) | state → discipline-reviewer |
 | 11 | main.dart "최소형" | coder | discipline-reviewer |
@@ -69,7 +69,7 @@
 
 **신호**: common 코드에 Stream·ValueNotifier·콜백 리스트가 자라남 / "변경 시 알림" 요구 등장. 단순 read/write 저장(전역 데이터)은 합법 — 듣는 자가 생기는 순간이 경계다.
 
-## §8. domain_service "중심" · UseCase "도메인 개념 단위"
+## §8. 판정·계산의 귀속 — domain 기본 · domain_service "중심" · UseCase "도메인 개념 단위"
 
 **전제** (규약 §3.3 — 반송 시 인용 조문): **도메인 어휘로 진술되는 판정·계산은 1곳째부터 domain이 기본**이다 — VM의 일은 변환이지 판정이 아니며, VM 소유를 주장하려면 *왜*를 적는다. 판정 소유·강등 규칙의 상세는 architecture-ddd 소유 — 이 절은 domain 안에서의 *귀속처* 판별만 다룬다.
 
