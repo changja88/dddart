@@ -79,7 +79,7 @@ dddart  [✓ 스코프] → [▶ 설계] → [· 구현] → [· 마무리]
 
 판별된 **모드와 근거를 G0 배너의 1급 항목으로 항상 표시**하고 승인받는다(dddjango "모호하면 확인"보다 강화). *왜* — 입구는 단일 커맨드+자연어 판별 유지(사용자 사전 분류는 코드를 본 조사보다 부정확, 커맨드 분리는 표면 2배), 모드 추론은 lens 추론(폐지)과 달리 오판이 항상 게이트에 표면화되고 근거가 기계적이라 추론을 둬도 된다.
 
-**전제조건 검사**(신설 — 적대 리뷰 A7): git 저장소 여부·작업 트리 청결을 확인한다. 비git이면 git 스냅샷·touched-gate가 전체 검사로 퇴화함을 G0 배너에 고지. dirty면 "커밋/스태시 후 진행 vs 그대로 진행(중단 복구 불가 고지)"을 배너 항목으로 표면화 — 사용자 WIP를 파이프라인이 무단 커밋·파괴하지 않는다.
+**전제조건 검사**(신설 — 적대 리뷰 A7): git 저장소 여부·작업 트리 청결을 확인한다. 비git이면 **`git init`+초기 커밋을 제안**한다(2026-06-12 §10-2 확정 — added/touched 게이트·git 스냅샷 복구의 성립 조건, 승인 시 실행). 거부 시 git 스냅샷·touched-gate가 전체 검사로 퇴화함을 G0 배너에 고지. dirty면 "커밋/스태시 후 진행 vs 그대로 진행(중단 복구 불가 고지)"을 배너 항목으로 표면화 — 사용자 WIP를 파이프라인이 무단 커밋·파괴하지 않는다.
 
 **서버 계약 출처 해소**:
 1. 커맨드 인자에 OpenAPI 주소가 있으면 그것을 쓰고 config에 저장/갱신.
@@ -197,10 +197,10 @@ implementation 3종은 dddjango 5종의 대응 이식(2026-06-12 확인):
 
 ## 10. 다음 단계로 전달하는 요구사항
 
-- **§10-2(백스톱)**:
+- **§10-2(백스톱)** — **설계 확정(2026-06-12): `2026-06-12-backstop-design.md`**(검사 51종·러너·extract_contract — 이 절 요구사항 전부 충족, 구현 시점만 미결):
   - touched-gate 기본 + **예외 절**(적대 리뷰 정합 B2): 순환 래칫 = 전역 검사 + 베이스라인(저장 위치 `.dddart/` 루트) / 골격 완비 = 신규 생성 BC 한정 / 구조·명명 = added 파일 기준(modified 레거시 오탐 방지).
   - **추가 백스톱 4건**: ① `application_layer/service/**`에서 `_navigator` import·`.go(` 호출 금지 ② `view_model/`·`shared_state/`·`use_case/`에서 `design_system/` import 금지(ui_extension·presentation·root scaffold만 허용) ③ `application_layer/**`에서 `BuildContext`·`package:flutter/material` import 금지 ④ repository 추상 클래스(인터페이스) 금지.
   - **러너 스크립트 1개**(전체 실행·집계 — 커맨드 인라인 금지) + **`extract-contract.py`**(paths 선별+`$ref` 전이 폐쇄 추출)도 §10-2 산출물.
-- **§10-3(스킬)**: 절 귀속 가이드(§8) 적용. **필독 reference는 houserules 표준 트리 1개뿐**(dddjango 컨텍스트 예산 성립 조건의 명시 승계 — coder가 references 전량을 읽으면 ~140k+ 토큰으로 불가). houserules SKILL.md는 체크리스트 ≤8KB + 세부는 references. **16종 공유 reference 1파일** 작성. **§10-5 ①(State 에러 필드·일회성 소비)을 §10-3 착수 전 선결정**(state 리뷰어 점검 기준의 미결 규약 선참조 해소).
+- **§10-3(스킬)**: 절 귀속 가이드(§8) 적용. **필독 reference는 houserules 표준 트리 1개뿐**(dddjango 컨텍스트 예산 성립 조건의 명시 승계 — coder가 references 전량을 읽으면 ~140k+ 토큰으로 불가). houserules SKILL.md는 체크리스트 ≤8KB + 세부는 references. **16종 공유 reference 1파일** 작성. **§10-5 ①(State 에러 필드·일회성 소비 + 백스톱 연동 2건 — 백스톱 설계 §11-④)을 §10-3 착수 전 선결정**(state 리뷰어 점검 기준의 미결 규약 선참조 해소).
 - **§10-4(파일 작성)**: "dddjango 동일" 항목 용어 치환 이식 + `argument-hint` 기존 문구. 추가 — **discipline-reviewer 본문 ~15KB 상한**(판례·변종은 references로 — dddjango 실물 40KB가 경고) / **codex 미러 기능 축소표**(argument-hint 부재·MCP 감지 상이·이미지 입력 비보장 → 치수·색 토큰 텍스트 메모로 강등) 1급 산출 / `$ARGUMENTS`에서 URL 추출 규칙 명시 / `build-state.json` 스키마 정의 / openapi 취득 도구 확정(Bash curl 기본) / Coordinator 경계 문구는 §1의 "직접 쓰는 것" 목록으로(dddjango 원문 그대로 이식 금지).
 - **슬라이스 분할 2단계 실측(§6 잠정 확정의 최종화)**: §10-4 후 같은 기능을 안 1과 안 2(행위 세로+결정적 묶기)로 비교 빌드(dddjango `workspace/eval/` 방식). 지표: 토큰·호출 수 / 반송·복구 비용 / 발견 수·G2 통과율. 상세: `2026-06-12-slice-simulation.md` · 적대 리뷰 리포트는 git 이력(커밋 `6186dcc`).

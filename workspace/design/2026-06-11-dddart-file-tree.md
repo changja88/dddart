@@ -20,6 +20,7 @@
 ```
 lib/
 ├── main.dart                                # 엔트리포인트 최소형 — root_initializer 호출 + runApp 조립만 (§3.6)
+├── firebase_options.dart                    # (Firebase 채택 시) flutterfire 생성물 — 도구 고정 위치·자동 생성, 백스톱 검사 제외 (2026-06-12 §10-2 확정)
 ├── root/                                    # 합성 루트 (§3.6) — 전체를 아는 유일한 곳, 계층 없음 (역할 4폴더)
 │   ├── router/                              #   ① 내비 그래프
 │   │   └── root_router.dart                 #     전 BC <bc>_router 합산
@@ -278,7 +279,7 @@ View ─→ VM·SharedState ────┐
 
 ### 3.7 계층 import 매트릭스
 
-BC 내부의 허용 import 방향 (행=from, 열=to — 백스톱 검사 대상). `common/`은 전 계층에서 import 가능하되 domain_layer만 예외(순수 Dart, §3.2). **`design_system/`은 presentation·BC 루트(scaffold)에서만** — domain은 순수 Dart라 불가이고, **application_layer(VM·SharedState·UseCase·State)도 금지**다(2026-06-12 적대 리뷰 개정: 시각 토큰 매핑이 VM으로 새면 ui_extension "유일한 자리" 규칙(§3.5)이 무너진다 — 백스톱 검사 대상, `BuildContext`·material import 금지와 동일 축):
+BC 내부의 허용 import 방향 (행=from, 열=to — 백스톱 검사 대상). `common/`은 전 계층에서 import 가능하되 domain_layer만 예외(순수 Dart, §3.2). **`design_system/`은 presentation·BC 루트(scaffold·router)에서만** — domain은 순수 Dart라 불가이고, **application_layer(VM·SharedState·UseCase·State)도 금지**다(2026-06-12 적대 리뷰 개정: 시각 토큰 매핑이 VM으로 새면 ui_extension "유일한 자리" 규칙(§3.5)이 무너진다 — 백스톱 검사 대상, `BuildContext`·material import 금지와 동일 축). router 허용은 2026-06-12 §10-2 확정 — GoRoute pageBuilder의 전환 토큰(AppDuration 등)이 실전 수요라, 금지하면 매직 넘버(`Duration(milliseconds: 300)`)를 유도해 "시각 값 단일 출처"가 오히려 깨진다:
 
 | from \ to | domain | application | infra | presentation | BC 루트 |
 |---|---|---|---|---|---|
@@ -505,5 +506,5 @@ HaffHaff-App 안에서 발견된 변형들. dddart는 새로 만드는 코드에
 2. 백스톱 스크립트 초기 세트 — 이 트리의 어떤 불변식을 결정적으로 검사할지 (예: 계층 폴더 표기, domain_layer의 flutter import, 종류-접미사 일치)
 3. 스킬 9종 코퍼스 — dddjango 이식 3종(architecture-ddd·discipline-cleancode·discipline-houserules)과 신규 6종의 작성 순서
 4. 저장소 골격 생성 — `dddart/`·`codex-dddart/`·`workspace/` + 매니페스트 + sync 도구 이식
-5. 코드 규율 디테일 (2026-06-11 이연) — ① Model 출구 에러 계약: Repo·infra service의 throw 금지 여부, `safeApiCall`이 DioException 외 예외도 잡도록 보강할지 + VM→View 에러 표시 채널 상세(방향은 View의 `ref.listen` — §9-7, State 에러 필드명·일회성 소비 규약, 공용 헬퍼·base VM의 위치·명명) ② ~~Either 방향~~ — **Right=성공으로 확정**(2026-06-12, §3.4 — 기존 프로젝트 관례 우선 단서만 유지) ③ 애그리거트 "일관성 경계"의 코드 규율(루트 경유 변경 원칙 등 — freezed 불변+직파싱 하에서의 최소 규칙, VM 판정 강등 규칙(§3.3)의 상세 포함) ④ root 탭 재탭 스크롤톱 상세 — root_view의 PrimaryScrollController 처리(§8). discipline-cleancode·implementation 스킬 작성 시 결정(귀속 확정 2026-06-12 — 코드 내용 규율은 cleancode, 파일트리는 houserules).
+5. 코드 규율 디테일 (2026-06-11 이연) — ① Model 출구 에러 계약: Repo·infra service의 throw 금지 여부, `safeApiCall`이 DioException 외 예외도 잡도록 보강할지 + VM→View 에러 표시 채널 상세(방향은 View의 `ref.listen` — §9-7, State 에러 필드명·일회성 소비 규약, 공용 헬퍼·base VM의 위치·명명) + 백스톱 연동 2건(2026-06-12 §10-2 확정 — 그때까지 백스톱은 규약 문면대로 집행): State 파일 없는 VM(`AsyncValue<엔티티>` 직노출) 허용 여부(NM4 연동), 컨트롤러(TextEditingController 등) 소유 계층(IM12 flutter 전면 금지가 View 소유 함의) ② ~~Either 방향~~ — **Right=성공으로 확정**(2026-06-12, §3.4 — 기존 프로젝트 관례 우선 단서만 유지) ③ 애그리거트 "일관성 경계"의 코드 규율(루트 경유 변경 원칙 등 — freezed 불변+직파싱 하에서의 최소 규칙, VM 판정 강등 규칙(§3.3)의 상세 포함) ④ root 탭 재탭 스크롤톱 상세 — root_view의 PrimaryScrollController 처리(§8). discipline-cleancode·implementation 스킬 작성 시 결정(귀속 확정 2026-06-12 — 코드 내용 규율은 cleancode, 파일트리는 houserules).
 6. 도메인 이벤트 — `event/`는 제거됨(§9-15, 2026-06-11). 교차 BC 비동기 통지 요구가 실제로 발생하면 이 항목에서 재논의한다 — 그 전까지 shared_state로 위장하지 않는다(§8).
