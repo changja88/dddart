@@ -22,6 +22,7 @@
 | 이미지 입력 | `design-ref/` 이미지를 에이전트가 판독 | **비보장** | **치수·색 토큰·요소 목록 텍스트 메모(`design-ref/notes.md`)로 강등** — 이미지는 보조, 메모가 시각 근거 |
 | 디자인 MCP 보조 경로 | 세션 MCP 감지 | 감지 방식 상이·비보장 | 기본 경로(사용자 내보낸 파일 셸 `cp` 동결)만 신뢰 |
 | 플러그인 경로 변수 | `${CLAUDE_PLUGIN_ROOT}` | **미해석** | 커맨드·역할 스킬에서는 "이 스킬 디렉터리의 scripts/"·"로드한 스킬 폴더의 references/"로 환언 완료. **코퍼스 references/final.md 안에 남은 `${CLAUDE_PLUGIN_ROOT}`는 byte-exact 불변식 때문에 의도된 잔존** — "이 스킬들이 설치된 플러그인 루트"로 읽는다(공유 reference는 `discipline-houserules/references/undecidable.md`) |
+| 커맨드 호출 제어 | `disable-model-invocation: true` (`/dddart` 명시 호출 전용) | description 매칭으로 자가 트리거 가능 | description의 음성 트리거("단순 단일 파일 수정…에는 쓰지 않는다")로 오발동 완화 |
 
 ## 동기 절차
 
