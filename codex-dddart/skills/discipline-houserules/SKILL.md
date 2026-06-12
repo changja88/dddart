@@ -1,0 +1,64 @@
+---
+name: discipline-houserules
+description: dddart 파이프라인 에이전트 주입용 — 생성하는 Flutter 코드의 파일트리·디렉터리 구조·명명·import 방향 하우스룰. 코드를 어느 디렉터리에 어떤 이름으로 만들지 결정하거나 검수할 때 로드한다.
+user-invocable: false
+---
+
+# dddart 하우스룰
+
+dddart가 만드는 코드에 한정된 집안 규칙이다. **표준 파일트리·명명·import의 사실은 `references/final.md`가 단일 출처**이고, 이 본문은 그 사실을 쓰는 결정 절차다. 보편 클린코드는 discipline-cleancode, 계층 동작 규율은 architecture 4종(ddd·ui·state·data), 문법 표기는 implementation 3종(dart·flutter·riverpod) 소유.
+
+## §1 파일트리 결정 순서
+
+새 코드를 배치할 때 위에서부터, 결론이 나면 멈춘다.
+
+1. **표준은 새로 만드는 코드부터 적용한다 — 기존 코드의 수정·개명·이동을 요구하지 않는다**(final.md §7). 적용 경계는 둘로 갈린다: 표기(파일명·접미사·클래스)는 **모든 새 파일**에, 폴더 구조는 **신규 단위부터** — §2 경계 규칙.
+2. **신규 단위(BC·애그리거트·개념 폴더·화면)는 표준 트리를 적용한다** — `references/final.md` §1을 반드시 읽는다. 생략·축소 불가 골격(§3 정신, YAGNI로 접을 수 없다):
+   - BC = **4계층 + 표준 종류 폴더 전부** 항상 생성, 비어도 `.gitkeep`(final.md §3). 선택 폴더 없음.
+   - domain_layer는 **항상 애그리거트(개념) 1차** + 루트 파일 `<aggregate>.dart`. 불명확하면 BC 동명 애그리거트.
+   - application·presentation은 **두 번째 개념 등장 시** 개념 1차 분할, infra는 평면 유지(final.md §2).
+   - `application/` 직속은 BC 폴더만. BC 루트 직속은 `<bc>_router.dart`·`<bc>_navigator.dart` 둘만.
+   - `lib/root/`는 자체 골격(역할 4폴더, scaffold만 삼총사), design_system은 4폴더(foundation·theme·component·util)+foundation 7토큰 자리 — 부품군 폴더는 수요 시 생성(final.md §3·§6).
+3. **배치 판별**: BC 어휘를 알면 그 BC → 전 BC 조립이면 `lib/root/` → 시각 부품이면 `design_system/` → 그 외 횡단 기반만 `common/`(final.md §6). 이름은 명명 총괄표(final.md §4)에서 찾는다 — 위치·접두·접미사가 전부 정해져 있다.
+4. **의미 판별 17종**(view/section, BC 어휘, 판정·계산의 귀속, 살아있는 상태, 두 번째 개념 등)은 `references/undecidable.md`의 절차·배정을 따른다 — 1차 결정자와 검증자가 같은 파일을 본다.
+5. **새로 만드는 단위들 사이에서 레이아웃을 혼용하지 않는다** — 레거시 단위 내부 추가는 §2의 경계 규칙.
+
+## §2 충돌 중재
+
+- **사실 vs 절차**: 트리·명명·import의 *사실*은 final.md가 권위다. architecture 4종 스킬은 그 사실 위의 판별·결정 *절차*를 소유한다 — 두 문서가 어긋나 보이면 사실은 final.md, 절차는 lens 스킬을 따르고, 진짜 모순이면 보고한다(임의 절충 금지).
+- **레거시 vs 표준 — 경계 규칙(표기는 파일, 구조는 단위)**: ⓐ 새로 만드는 **파일**은 어느 폴더에 두든 표준 표기만 쓴다 — final.md §7 표의 변형 표기(`_app.dart`·`viewmodel/` 류)로 새 파일·새 폴더를 만들지 않는다(백스톱 명명 검사는 added 파일 기준·폴더 무관 발화). ⓑ **폴더 구조**의 표준 강제는 신규 단위(BC·개념 폴더·화면 삼총사)부터 — 레거시 단위 내부 추가에 표준 폴더 신설을 강제하지 않고, 기존 파일의 개명·이동도 요구하지 않는다(final.md §7·§8).
+- **명세 vs 하우스룰**: 설계 명세가 이 골격을 생략·축소하면 명세 오류로 보고한다 — 검수자는 명세가 아니라 이 하우스룰과 코드를 대조한다.
+
+## §3 레드 플래그
+
+다음이 보이면 구조 결정이 빠졌거나 평면을 답습한 신호다(상세 교정표는 final.md §7):
+
+- 4계층·종류 폴더 생략, domain_layer 평면(애그리거트 폴더 없음), `application/` 직속에 BC 아닌 파일.
+- 구명칭·변형: `app/`·`bridge/`·`block/`(→ use_case·shared_state·section), `viewmodel/`·`repo/` 폴더, `_view_state.dart`, `container/`.
+- 화면 삼총사 접두 불일치(VM 기준 — `<화면>_view`↔`_vm`↔`_state`), UseCase가 화면명, section에 화면 접두 없음, widget이 화면 State를 받음.
+- navigator가 presentation_layer에, 라우트 path·name 리터럴이 `<bc>_router.dart` 밖에.
+- BC 코드가 `root_` 파일을 import(`root/` import는 main.dart뿐), `common/`·`design_system/`이 `application/`·`root/`를 import, `common/`에 `@riverpod`·BC 어휘·비표준 종류 폴더.
+- domain_layer에 `package:flutter`, VM·UseCase·State에 design_system import(허용 위치는 닫힌 열거 — final.md §5), 타 BC의 Repo·box·VM·SharedState 직접 접근(4채널 밖 — final.md §5).
+- `@riverpod`가 VM·SharedState·Service·root 2변종 밖에(UseCase·Repo·DataSource는 plain class 직접 생성).
+- shared_state에 과거형 사건명(`*_added` 류), component 직속 파일·정크드로어 군, `Color(0x…)`·생 `TextStyle` 리터럴(foundation 토큰만).
+- main.dart 비대(테마 조립·라우트 분기·전역 인스턴스).
+
+## §4 백스톱 연동
+
+파이프라인 게이트에서 결정적 러너가 구조(ST)·import(IM)·명명(NM)·순환(CY) 4패밀리를 검사한다 — 발견은 전부 blocker·일괄 반송. 게이트는 added(새 파일·디렉터리)·added 줄·신규 단위 기준이라 **레거시에는 불발화한다** — "새 코드부터 표준"의 기계 집행. 검사를 흉내내지 말고 이 하우스룰대로 만들면 통과한다. 러너 사용법·게이트 의미론은 final.md §8, 러너가 못 보는 의미 판별은 undecidable.md 소유.
+
+## 상세 레퍼런스
+
+| 주제 | 위치 |
+|---|---|
+| 표준 트리 전문·root 핵심 사실 | [`references/final.md`](references/final.md) §1 |
+| 성장 규칙(개념 1차·종류 2차·동결) | final.md §2 |
+| 골격 완비 표(계층별 종류 폴더) | final.md §3 |
+| 명명 총괄표·공통 원칙 | final.md §4 |
+| import 매트릭스·4채널·root 방향 | final.md §5 |
+| common·design_system 입장 판별 | final.md §6 |
+| drift 교정표(변형→표준) | final.md §7 |
+| 백스톱 러너·게이트 의미론 | final.md §8 |
+| 의미 판별 17종 절차·배정 | [`references/undecidable.md`](references/undecidable.md) |
+
+각 절은 필요한 절만 읽는다(전체 로드 불필요 — `## §N.` 헤더로 grep 가능).

@@ -1,0 +1,4 @@
+interface:
+  display_name: "dddart"
+  short_description: "Flutter 기능을 간소화 DDD+MVVM으로 요구→설계→구현까지 게이트로 빌드"
+  default_prompt: "Use dddart to build one feature into an existing Flutter project with simplified DDD + strict MVVM: scope (G0) → design (G1) → implementation (G2), dispatching design-architect, four reviewers (ddd/ui/state/data), coder, and discipline-reviewer as subagents. Requires multi_agent."

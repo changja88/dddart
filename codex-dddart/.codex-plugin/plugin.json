@@ -1,0 +1,39 @@
+{
+  "name": "dddart",
+  "version": "0.1.0",
+  "description": "기존 Flutter 프로젝트에 한 기능을 간소화 DDD+철저한 MVVM으로 요구→설계→구현까지 단계 게이트로 빌드하는 오케스트레이터. 코디네이터가 전문 역할 서브에이전트를 디스패치한다.",
+  "author": {
+    "name": "hyun",
+    "email": "dev@numchida.com"
+  },
+  "keywords": [
+    "flutter",
+    "dart",
+    "ddd",
+    "mvvm",
+    "riverpod",
+    "orchestrator",
+    "subagents",
+    "clean-code",
+    "codex"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "dddart",
+    "shortDescription": "Flutter 기능을 간소화 DDD+MVVM으로 요구→설계→구현까지 게이트로 빌드",
+    "longDescription": "dddart는 기존 Flutter 프로젝트에 한 기능을 간소화 DDD 4계층(domain/application/infra/presentation) + 철저한 MVVM으로 추가한다. dddart 코디네이터가 design-architect·리뷰어 4종(ddd/ui/state/data)·coder·discipline-reviewer 역할을 서브에이전트로 디스패치하고, G0(요구)·G1(설계)·G2(구현) 게이트마다 사용자 승인을 받는다. multi_agent 기능 필요.",
+    "developerName": "hyun",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "채널 목록을 보고 채널에서 나갈 수 있는 화면을 DDD로 빌드해줘.",
+      "이 Flutter 프로젝트에 한 기능을 간소화 DDD 4계층 + MVVM으로 추가해줘.",
+      "주문 내역 화면을 dddart 파이프라인으로 설계하고 구현해줘."
+    ],
+    "brandColor": "#0468D7"
+  }
+}

@@ -9,7 +9,7 @@
 | exclude/handoff | 라우팅 짝의 역할·규율은 architecture-ui §6, root 동작 규율은 architecture-state §10, safeApiCall·Either 계약은 architecture-data §2·§3, 로컬 2층·어댑터 노출 규약은 architecture-data §5, @riverpod·AsyncValue는 implementation-riverpod, Dart 언어·freezed는 implementation-dart로 위임. |
 | use 기준 | go_router 16.x(HaffHaff lock — 17과 본문 표기 동일·차이는 §2 말미 메모)·dio 5.x·retrofit 4.x(generator 10.x)·hive_ce 2.x·Flutter SDK 소스 실측(2026-06-12 — 절별 URL·SDK 행 번호는 작업장 external.md). |
 | core criteria | dddart 결정 2건 반영: §10-5 ④ 탭 재탭 2단 동작(2026-06-12 사용자 확정 — 중첩이면 스택 리셋·루트면 스크롤톱, 전부 root_view 소유·BC 무관여) · hive_ce @GenerateAdapters 비채택(패키지 1파일 강제가 BC 분산 선언과 충돌 — 생성기 소스 실측)·@HiveType per-class 방식 표준(HaffHaff 실물 — 별도 Box 모델이라 엔티티 무어노테이션 보존). |
-| P1 classification | sufficient — 잔여 미확정 2건을 §3·§5에 단서로 명시: ④ 패턴 B의 실기기 스모크 미수행(공개 API·SDK 소스 정합은 전부 확인 — §10-4 골격 구현 시 1회 검증), typeId 전역 유일의 백스톱 검사는 향후 후보. |
+| P1 classification | sufficient — ④ 패턴 B 메커니즘은 widget test 검증 완료(2026-06-13 — ModalRoute 캐스트 교정 포함·실기기 시각 확인만 골격 구현 시 1회). 잔여: typeId 전역 유일의 백스톱 검사는 향후 후보(§5 단서). |
 
 > **출처:** pub.dev(go_router·dio·retrofit·hive_ce)·공식 문서 저장소·Flutter SDK 3.44.x 소스 직독·flutter/flutter#131829(셸 상태바 탭 이슈) — 2026-06-12 확인, 절별 URL은 작업장 external.md · 제1 규약 §9-11·§10-5 ④ · HaffHaff 실물(Box 모델 형태) · dddart 결정(2026-06-12): ④ 2단 동작.
 > 본문 속 `(규약 §N)`은 **출처 표기**이며 로드 대상이 아니다. 로드 가능한 위임은 "스킬명 + §번호(또는 주제)"뿐.
@@ -87,9 +87,11 @@ onTap: (index) {
   }
 },
 
-// ② — 분기 옵저버(StatefulShellBranch.observers에 등록)가 추적해 둔 top 라우트의 PSC를 구동
+// ② — 분기 옵저버(StatefulShellBranch.observers에 등록)가 추적해 둔 top 라우트의 PSC를 구동.
+//      옵저버는 topRoute를 ModalRoute<dynamic>?로 보관한다(didPush에서 `is ModalRoute`로 걸러 저장)
+//      — subtreeContext는 ModalRoute의 getter라 Route 타입으로 들면 컴파일되지 않는다.
 void _scrollCurrentBranchToTop(int index) {
-  final route = _branchObservers[index].topRoute;           // NavigatorObserver가 didPush/didPop으로 유지
+  final route = _branchObservers[index].topRoute;           // ModalRoute<dynamic>? — didPush/didPop으로 유지
   final context = route?.subtreeContext;                    // 라우트 콘텐츠 context (PSC 아래)
   if (context == null) return;
   final psc = PrimaryScrollController.maybeOf(context);
@@ -102,7 +104,7 @@ void _scrollCurrentBranchToTop(int index) {
 - **BC 화면의 전제(유일한 접점 — "아무것도 하지 않기")**: 화면 최상위 수직 스크롤뷰가 **controller·primary를 지정하지 않으면** 모바일 기본값으로 그 라우트의 PSC에 자동 부착된다 — 이 기본값을 지키는 것이 전부다. 무한스크롤 등으로 명시 ScrollController를 쓰는 화면은 그 화면만 스크롤톱이 무반응이 된다(의도된 트레이드오프 — BC에 결합을 만들지 않는 것이 우선). NestedScrollView는 자체 PSC를 내부 공급하므로 별도 검토 대상.
 - **재탭 신호 버스(과거 HaffHaff `scroll_to_top_notifier` — BC가 전역 신호를 listen)는 비채택**이다: 금지 채널의 재생산(architecture-state §8). 
 - iOS 상태바 탭도 같은 함수를 재사용해 root가 복원할 수 있다(셸 구조에서 내장 동작이 깨져 있으므로).
-- 자동 상속은 모바일 한정(데스크톱·웹 무반응)·패턴의 실기기 스모크는 골격 구현 시 1회 검증(공개 API·SDK 소스 정합은 확인 완료).
+- 자동 상속은 모바일 한정(데스크톱·웹 무반응). 메커니즘 전체(옵저버 추적→subtreeContext→PSC→animateTo·goBranch 리셋)는 widget test로 검증 완료(2026-06-13 — topRoute의 ModalRoute 캐스트 결함도 이 스모크가 발견·교정), 실기기 시각 확인은 골격 구현 시 1회.
 
 ## §4. dio·retrofit 표기 — DioException 8종·@RestApi
 
