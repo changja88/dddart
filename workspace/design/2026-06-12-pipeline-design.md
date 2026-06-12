@@ -108,7 +108,7 @@ dddart  [✓ 스코프] → [▶ 설계] → [· 구현] → [· 마무리]
 4. **리뷰어 4종 전부 병렬** — 각자 명세 + 명세가 인용하는 동결 스냅샷(`openapi-full.json`의 인용 부분은 data, `design-ref/`는 ui)을 본다. 타 노트·코드 안 봄. "해당 없음 + 근거 한 줄" 의무, 누락 자체를 발견으로.
 5. 가정 계약의 G1 배너 승격(동일).
 6. (선택) discipline-reviewer 경량 점검 — Coordinator 재량(동일).
-7. **G1 승인 직후 — `server-contract.json` 기계 절단**: 명세가 인용한 엔드포인트 paths를 입력으로 `extract-contract.py`(paths 선별 + `$ref` 전이 폐쇄 추출 — §10-2 산출물)를 Bash로 실행해 경량본을 만든다. *왜* — '관련' 판단이 명세 인용으로 치환돼 LLM 재량이 소멸하고, LLM 손절단의 dangling `$ref`(깨진 스냅샷)를 막는다. 이후 coder·G2는 경량본만 본다.
+7. **G1 승인 직후 — `server-contract.json` 기계 절단**: 명세가 인용한 엔드포인트 paths를 입력으로 `extract_contract.dart`(paths 선별 + `$ref` 전이 폐쇄 추출 — §10-2 산출물)를 Bash로 실행해 경량본을 만든다. *왜* — '관련' 판단이 명세 인용으로 치환돼 LLM 재량이 소멸하고, LLM 손절단의 dangling `$ref`(깨진 스냅샷)를 막는다. 이후 coder·G2는 경량본만 본다.
 
 ## 6. Phase 2 — 구현 (G2)
 
@@ -174,7 +174,7 @@ implementation 3종은 dddjango 5종의 대응 이식(2026-06-12 확인):
 - **17종(실질 16종 — §9) 판별 절차는 공유 reference 1파일**로 작성해 **1차 결정자와 검증자 양쪽** 에이전트가 같은 파일을 적재한다 — 스킬 귀속표와 검증자 배정표의 모순(discipline-reviewer가 코퍼스에 없는 규칙의 검증자가 되는 문제) 해소.
 - **keepAlive 경계**: 수명 *결정* = architecture-state / `@Riverpod(keepAlive:)` *표기법* = implementation-riverpod — 경계 문구를 양쪽 SKILL.md에 박는다.
 
-제1 규약 절 → 스킬 귀속(§10-3 가이드 — 기존 유지): architecture-ddd ← §3.2·§3.3 중 UseCase·판정 소유·강등·§9 결정 / architecture-ui ← §3.5·§3.1·§6 중 design_system / architecture-state ← §3.3 중 VM 3변종·state·shared_state·4채널 상태 측면·§3.6 / architecture-data ← §3.4·로컬 2층·계약 스냅샷 사용법 / discipline-houserules ← §2·§3.7·§4·§5·§7·§8 / discipline-cleancode ← dddjango 이식+§10-5 코드 규율 / implementation 3종 ← 신규.
+제1 규약 절 → 스킬 귀속(§10-3 가이드 — 기존 유지): architecture-ddd ← §3.2·§3.3 중 UseCase·판정 소유·강등·§9 결정 / architecture-ui ← §3.5·§3.1·§6 중 design_system / architecture-state ← §3.3 중 VM 3변종·state·shared_state·4채널 상태 측면·컨트롤러 View 소유(2026-06-12 보정 — §10-5 ① 운반자 공백)·§3.6 / architecture-data ← §3.4·로컬 2층·계약 스냅샷 사용법 / discipline-houserules ← §2·§3.7·§4·§5·§7·§8 + §6 중 common(입장 판별·역import — 2026-06-12 코퍼스 설계 적대 리뷰가 발견한 귀속 공백 보정) / discipline-cleancode ← dddjango 이식+§10-5 코드 규율 / implementation 3종 ← 신규.
 
 ## 9. 기계 판별 불가 판별의 에이전트 배정 (16종 + 신규 1)
 
@@ -200,7 +200,7 @@ implementation 3종은 dddjango 5종의 대응 이식(2026-06-12 확인):
 - **§10-2(백스톱)** — **설계 확정(2026-06-12): `2026-06-12-backstop-design.md`**(검사 51종·러너·extract_contract — 이 절 요구사항 전부 충족, 구현 시점만 미결):
   - touched-gate 기본 + **예외 절**(적대 리뷰 정합 B2): 순환 래칫 = 전역 검사 + 베이스라인(저장 위치 `.dddart/` 루트) / 골격 완비 = 신규 생성 BC 한정 / 구조·명명 = added 파일 기준(modified 레거시 오탐 방지).
   - **추가 백스톱 4건**: ① `application_layer/service/**`에서 `_navigator` import·`.go(` 호출 금지 ② `view_model/`·`shared_state/`·`use_case/`에서 `design_system/` import 금지(ui_extension·presentation·root scaffold만 허용) ③ `application_layer/**`에서 `BuildContext`·`package:flutter/material` import 금지 ④ repository 추상 클래스(인터페이스) 금지.
-  - **러너 스크립트 1개**(전체 실행·집계 — 커맨드 인라인 금지) + **`extract-contract.py`**(paths 선별+`$ref` 전이 폐쇄 추출)도 §10-2 산출물.
-- **§10-3(스킬)**: 절 귀속 가이드(§8) 적용. **필독 reference는 houserules 표준 트리 1개뿐**(dddjango 컨텍스트 예산 성립 조건의 명시 승계 — coder가 references 전량을 읽으면 ~140k+ 토큰으로 불가). houserules SKILL.md는 체크리스트 ≤8KB + 세부는 references. **16종 공유 reference 1파일** 작성. **§10-5 ① 선결정 완료(2026-06-12)** — State 에러 필드(`error`+`consumeError()`)·에러 2채널·전 VM freezed State·컨트롤러 View 소유·base VM 없음 확정, 제1 규약 §3.3·§3.4·§6 본문 승격(state 리뷰어 점검 기준의 미결 규약 선참조 해소됨).
+  - **러너 스크립트 1개**(전체 실행·집계 — 커맨드 인라인 금지) + **`extract_contract.dart`**(paths 선별+`$ref` 전이 폐쇄 추출)도 §10-2 산출물.
+- **§10-3(스킬)**: 절 귀속 가이드(§8) 적용. **필독 reference는 houserules 표준 트리 1개뿐**(dddjango 컨텍스트 예산 성립 조건의 명시 승계 — coder가 references 전량을 읽으면 ~140k+ 토큰으로 불가). houserules SKILL.md는 체크리스트 ≤8KB + 세부는 references. **17종(실질 16 + 신규 1 '계약 위험 행위' — §9) 공유 reference 1파일** 작성. **§10-5 ① 선결정 완료(2026-06-12)** — State 에러 필드(`error`+`consumeError()`)·에러 2채널·전 VM freezed State·컨트롤러 View 소유·base VM 없음 확정, 제1 규약 §3.3·§3.4·§6 본문 승격(state 리뷰어 점검 기준의 미결 규약 선참조 해소됨).
 - **§10-4(파일 작성)**: "dddjango 동일" 항목 용어 치환 이식 + `argument-hint` 기존 문구. 추가 — **discipline-reviewer 본문 ~15KB 상한**(판례·변종은 references로 — dddjango 실물 40KB가 경고) / **codex 미러 기능 축소표**(argument-hint 부재·MCP 감지 상이·이미지 입력 비보장 → 치수·색 토큰 텍스트 메모로 강등) 1급 산출 / `$ARGUMENTS`에서 URL 추출 규칙 명시 / `build-state.json` 스키마 정의 / openapi 취득 도구 확정(Bash curl 기본) / Coordinator 경계 문구는 §1의 "직접 쓰는 것" 목록으로(dddjango 원문 그대로 이식 금지).
 - **슬라이스 분할 2단계 실측(§6 잠정 확정의 최종화)**: §10-4 후 같은 기능을 안 1과 안 2(행위 세로+결정적 묶기)로 비교 빌드(dddjango `workspace/eval/` 방식). 지표: 토큰·호출 수 / 반송·복구 비용 / 발견 수·G2 통과율. 상세: `2026-06-12-slice-simulation.md` · 적대 리뷰 리포트는 git 이력(커밋 `6186dcc`).

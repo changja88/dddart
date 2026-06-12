@@ -19,7 +19,7 @@ workspace/reference/<스킬>/reference/
 
 ## 미러 불변식 (dddjango corpus_mirror_sync 승계)
 
-1. 소스 `final.md` 본문 ≡ 배포 `dddart/skills/<스킬>/references/final.md` 본문
+1. 소스 `final.md` 본문 ≡ 배포 `dddart/skills/<스킬>/references/final.md` 본문 — **본문 = "P1 Source Sufficiency" 절 제거 후 전체**(제목·서지 blockquote는 배포본에도 유지, P1 절만 작업장 단독 보관 — dddjango 실물 실측). 도구 포팅 시 이 절단 의미론을 반영한다(미반영 시 전 스킬 drift 오발화 또는 작업장 P1 절 오삭제).
 2. 배포(claude) ≡ 배포(codex) — `codex-dddart/`는 배포본이 생긴 뒤 동기화 도구로 기계 생성한다. 빈 미러를 먼저 만들지 않는다.
 
 drift 검사 도구 포팅(dddjango `workspace/tools/corpus_mirror_sync.py`)은 §10-4 이후.
