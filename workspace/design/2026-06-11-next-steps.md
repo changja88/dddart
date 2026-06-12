@@ -6,7 +6,7 @@
 ## 즉시 할 일
 
 1. ~~제1 규약 최종 확정~~ — 완료. 상태줄 "확정(2026-06-12)"로 변경됨.
-2. ~~에이전트 구성 브레인스토밍~~ — 완료. **`2026-06-12-pipeline-agent-composition.md` 확정**: 커맨드 1 + 에이전트 7종(architect / 리뷰어 ddd·ui·state·data **4종 전부 항상 활성** / coder / discipline-reviewer), acceptance-tester 공백 흡수(슬라이스=Coordinator, Green=analyze+빌드+백스톱+G2 행위 체크리스트 눈 확인), OpenAPI 입력 설계(`.dddart/config.json`의 `openapi_url`·인자 우선·계약 스냅샷·Coordinator만 config 읽기).
+2. ~~에이전트 구성 브레인스토밍~~ — 완료·확정. 구성 문서는 이중 근거 방지로 **본설계 §1.1~1.4·§8에 흡수 후 삭제**(git 이력 — 커밋 `6186dcc`). 적대 리뷰 리포트도 처리 완료 후 동일하게 삭제(git 이력).
 3. **§10-1 파이프라인 본설계** — `2026-06-12-pipeline-design.md` 작성 + **적대 리뷰 5렌즈 통과·반영 완료**(`2026-06-12-pipeline-adversarial-review.md` — blocker 11·사용자 결정 4건: 트리비얼 채널·수정 모드 touched-layer lens·touched 경량 감사·G2 스크린샷). 핵심 보강: 판정 소유 양성 규칙(1곳째부터 domain 기본 — 제1 규약 §3.3 개정), codegen 규약, analyze 베이스라인 green, build-state.json, openapi-full 동결→G1 후 기계 절단(extract-contract.py), 모드 삼분류(구조 단위), 정수 임계. **사용자 최종 확정 대기** → 확정 시 §10-2 백스톱 설계 착수(요구: touched-gate 예외 절·추가 백스톱 4건·러너 1개·extract-contract.py). 참고 실물: `/Users/hyun/Desktop/dddjango/`.
 
 ## 파이널 리뷰 결과 요약 (2026-06-12)
