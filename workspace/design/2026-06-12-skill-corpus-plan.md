@@ -1,6 +1,6 @@
 # 스킬 9종 코퍼스 작성 설계안 (§10-3)
 
-> **상태: v3.2 — 확정 (2026-06-12). Wave 1·2 완료**(W1: discipline-houserules + undecidable.md 17종 / W2: architecture-state·data·ui — 4렌즈 리뷰+재검·관통 테스트 2슬라이스 blocker 0건·전방 위임 8곳 백필). 적대 리뷰 3렌즈(skill-creator·plugin-dev·내부 정합, 22건) 반영 후 검증 워크플로 3렌즈까지 반영. 단일 근거: 본설계 §8(절 귀속·lens 경계)·§9(판별 배정)·§10-3(제약), 제1 규약, `workspace/reference/spec.md`(작업장 규약). 리뷰 결정 2건 채택: ① 규약 §6 common → houserules 귀속(본설계 §8 동시 개정) ② Wave별 경량 관통 테스트 도입. W2 추가 확립: 공유 reference 위임은 첫 언급에 `${CLAUDE_PLUGIN_ROOT}` 전체 경로 1회+이후 단축 / 실물(HaffHaff) 추종은 규약이 고장으로 진단한 지점에서 면책 근거가 아니다(isShow 판례).
+> **상태: v3.3 — 확정 (2026-06-12). Wave 1·2·3 완료**(W1: discipline-houserules + undecidable.md 17종 / W2: architecture-state·data·ui / W3: architecture-ddd·discipline-cleancode — §10-5 ③ 사용자 확정 안 A(루트 경유 3규칙), 80펜스 Dart 치환, 5렌즈 리뷰+재검 12/12·판정 소유 관통 blocker 0건·전방 위임 10곳 백필). 적대 리뷰 3렌즈(skill-creator·plugin-dev·내부 정합, 22건) 반영 후 검증 워크플로 3렌즈까지 반영. 단일 근거: 본설계 §8(절 귀속·lens 경계)·§9(판별 배정)·§10-3(제약), 제1 규약, `workspace/reference/spec.md`(작업장 규약). 리뷰 결정 2건 채택: ① 규약 §6 common → houserules 귀속(본설계 §8 동시 개정) ② Wave별 경량 관통 테스트 도입. W2 추가 확립: 공유 reference 위임은 첫 언급에 `${CLAUDE_PLUGIN_ROOT}` 전체 경로 1회+이후 단축 / 실물(HaffHaff) 추종은 규약이 고장으로 진단한 지점에서 면책 근거가 아니다(isShow 판례).
 
 ## 1. 완결 단위
 

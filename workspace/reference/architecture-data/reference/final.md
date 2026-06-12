@@ -98,14 +98,14 @@ class ChannelRepo {
 }
 ```
 
-- **UseCase는 Repo의 Either를 통과·조합하며 새 throw를 만들지 않는다** — 조회 실패를 AsyncValue.error로 넘기는 throw는 VM의 일이다(architecture-state §4). UseCase 자체의 규율(도메인 개념 명명·판정 소유)은 architecture-ddd 소유.
+- **UseCase는 Repo의 Either를 통과·조합하며 새 throw를 만들지 않는다** — 조회 실패를 AsyncValue.error로 넘기는 throw는 VM의 일이다(architecture-state §4). UseCase 자체의 규율(도메인 개념 명명·판정 소유)은 architecture-ddd §8 소유.
 - Either를 받아서 실패 쪽을 버리는 코드(성공만 fold하고 에러 무시)는 금지 — HaffHaff 실측 drift(좋아요류 에러 통째 폐기)의 재발이다. 에러를 표시하지 않는 결정조차 State의 error 필드를 거쳐 명시적으로 한다(architecture-state §4).
 
 ## §4. DataSource — 도메인 엔티티 직접 반환 (DTO 없음)
 
 원격 DataSource는 retrofit 추상 클래스로 엔드포인트를 정의하고 **도메인 엔티티를 직접 반환한다** — `dto/` 계층이 없다 (규약 §3.4·§9-2). 서버 JSON은 도메인 엔티티(freezed + json_annotation)가 직접 파싱한다.
 
-- 엔티티의 모델링(애그리거트 경계·entity/value_object 구분)은 architecture-ddd 소유 — 이 스킬은 "유입 경로에 변환 계층을 두지 않는다"는 계약만 소유한다.
+- 엔티티의 모델링(entity/value_object 구분은 architecture-ddd §3·애그리거트 경계는 §4)은 architecture-ddd 소유 — 이 스킬은 "유입 경로에 변환 계층을 두지 않는다"는 계약만 소유한다.
 - 도메인 엔티티에 storage 어노테이션을 붙이지 않는다 — hive 어댑터 선언은 §5의 어댑터 파일 소속이다.
 - retrofit `@RestApi`·dio 클라이언트 표기법은 implementation-flutter 소유.
 
