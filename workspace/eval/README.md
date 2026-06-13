@@ -14,6 +14,7 @@ eval/
 │   ├── EVAL-METHOD.md        # 채점 *방법* (어떻게): 빌드·blind 역할·결정∥의미 레인·항목별 결정-판정 표(백스톱 매핑)·치명 게이트·집계 (v3.1)
 │   └── rubric-metrix.md      # 채점 결과지 템플릿 (치명 게이트 + 차원 판정 + 등급 + 발견 로그)
 ├── tools/                   # 고정 입력 (채점 입력 정본)
+│   ├── TEST-ENV.md           # 실전 구동 테스트 환경 표준 — baseline 복제·폴더 규칙·민낯 불변식·라이브=사용자 드라이브 (시나리오 무관 공통)
 │   └── SCENARIO-S1.md        # S1 신규 BC 공지 — task verbatim·baseline·게이트 답·FC 골든 입력
 └── results/                 # 결과지 (<YYYYMMDD-HHMM>-<scenario>-<variant>.md) — 채점 시 생성
 ```
