@@ -14,9 +14,9 @@
 날씨 상태는 맑음·구름많음·흐림·비·눈·뇌우 6종이며, 상태마다 아이콘과 색으로 구분해 표시한다.
 ```
 
-**호출 형태**(인자 규약 — claude=named 위치 / codex=순차 해석. **디자인은 인자 아님** — 양판 다 Phase 0에서 연결된 Stitch MCP로 화면 확인):
-- **claude판**(슬래시): `/dddart "<위 기능 설명>" "<OpenAPI URL>"`
-- **codex판**(자연어 순차): `dddart로 날씨 예보 기능을 추가해줘 — 순서대로 ① 기능: <위 설명> ② OpenAPI: <URL>`
+**호출 형태**(인자 규약 — claude=named 위치 / codex=순차 해석. **디자인은 인자 아님** — 양판 다 Phase 0에서 연결된 Stitch MCP로 화면 확인). 정확한 verbatim 프롬프트는 `RUNBOOK-weather.md`에 박아둔다:
+- **claude판**(슬래시·`--plugin-dir` 로드 시 보통 `/dddart:dddart`, `/help`로 확인): `/dddart:dddart "<위 기능 설명>" "https://kingdom-h.com/api/schema/?format=json"`
+- **codex판**(자연어 순차): `dddart로 날씨 예보 기능을 추가해줘 — 순서대로 ① 기능: <위 설명> ② OpenAPI: https://kingdom-h.com/api/schema/?format=json`
 
 **인자 값**:
 - **OpenAPI URL** = `https://<배포host>/api/schema/?format=json` — kingdom-server `feat/weather-api` **배포 후 확정**(라이브=사용자 드라이브). G0 승인 후 dddart가 `curl`로 `openapi-full.json` 동결 → G1 직후 weather paths만 기계 절단. (drf-spectacular라 `?format=json` 필수 — 기본 YAML은 `extract_contract`가 거부.)
@@ -27,14 +27,14 @@
 
 ## §2 baseline (순정 민낯 — S1과 정반대)
 
-- **위치**: `~/Desktop/dddart-run/dddart-<YYYYMMDD-HHMM>-{claude,codex}` (`TEST-ENV.md` §4로 생성·git 순정 67파일·바이트 동일). 현재 세션: `dddart-20260613-2158-*`.
+- **위치**: `~/Desktop/dddart-run/dddart-<YYYYMMDD-HHMM>-{claude,codex}` (`TEST-ENV.md` §4로 생성·git 순정 67파일·바이트 동일). 현재 세션: `dddart-20260613-2310-*`(순정 커밋 abee26d).
 - **상태**: **순정 Flutter 3.44.1**. dio·flutter_riverpod·freezed·go_router·retrofit·`common/network`(dio_client·safe_api_call) **전부 미설치**. dddart가 스스로 의존성·통신 인프라·기능을 까는지가 측정 대상(코퍼스 갭이면 멈춰 점검 = 수확).
 - **diff 기준**: 순정 커밋 대비 `git diff` = dddart 산출물 전량(갭 원장 원천).
 
 ## §3 입력물·채점 경로
 
 - 디자인: **Stitch MCP** `projects/2284872291805682410` → 구동 중 `design-ref/` 동결 (사전 로컬 다운로드 불요·양판 MCP)
-- OpenAPI: args URL(배포) → dddart가 `<산출물 폴더>/openapi-full.json` 동결 (사전 JSON 동결본 불요)
+- OpenAPI: `https://kingdom-h.com/api/schema/?format=json`(배포 확인·weather 목록/상세 2 paths) → dddart가 `<산출물 폴더>/openapi-full.json` 동결
 - 채점: `rubric/RUBRIC.md`·`rubric/EVAL-METHOD.md` → 결과지 `results/<YYYYMMDD-HHMM>-weather-{claude,codex}.md`
 
 ## §4 고정 게이트 답 (claude·codex 동일)
