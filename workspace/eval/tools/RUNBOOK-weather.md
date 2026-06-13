@@ -14,23 +14,26 @@
 
 ## 1. dddart 플러그인 로드
 
-### claude — `--plugin-dir` (설치 불요 · 소스 직접 로드 = 항상 최신)
+### claude — 이미 user scope 설치 완료 (`dddart@dddart-dev`)
+플러그인을 **user scope로 설치**했다(`claude plugin list` → `dddart@dddart-dev` · enabled · 캐시 `73e75ca`). user scope라 baseline을 안 건드리고 **테스트 폴더에서 claude를 그냥 열면 자동 로드**된다:
 ```bash
 cd ~/Desktop/dddart-run/dddart-20260613-2310-claude
-claude --plugin-dir /Users/hyun/Desktop/dddart/dddart
+claude
 ```
 세션 진입 후 확인:
-- `/help` → 커맨드 이름 확인 (보통 `/dddart:dddart`, 충돌 없으면 `/dddart`)
+- `/help` → dddart 호출명 확인 (커맨드는 최신 Claude Code에서 skill로 병합 — `/dddart:dddart` 또는 `/dddart`)
 - `/mcp` → Stitch 연결 확인 (Phase 0 디자인에 필요)
 
-> `--plugin-dir`은 그 세션에서만 유효(매번 플래그). 소스를 직접 읽으므로 별도 설치·캐시·최신화가 불요 — 소스가 곧 최신이다. (정식 marketplace 설치를 원하면 별도로 marketplace.json을 만든다.)
+> 설치 절차(재현용): `claude plugin marketplace add /Users/hyun/Desktop/dddart` → `claude plugin install dddart@dddart-dev --scope user`. **소스(`~/Desktop/dddart/dddart`)를 고치면** `claude plugin update dddart@dddart-dev`로 최신화(재시작 후 적용).
 
-### codex — codex-dddart 스킬 로드
+### codex — `~/.codex/skills/`에 설치 완료 (17개 스킬)
+codex는 `~/.codex/skills/<name>/SKILL.md`를 자동 로드한다(graphify와 동일 방식 · marketplace 불요). codex-dddart의 17개 스킬(`dddart` Coordinator + 역할 7 + 지식 9)을 복사 설치했다. **codex 재시작 후** 새 세션에서 로드된다:
 ```bash
 cd ~/Desktop/dddart-run/dddart-20260613-2310-codex
-# codex 세션에서 codex-dddart 플러그인/스킬 로드 (codex CLI 메커니즘 — 환경별 확인)
+codex
 ```
-> codex 로드 절차는 codex CLI 쪽이라 claude와 다르다. **claude판을 먼저 돌리고**, codex는 그 후 로드 방법을 확정해 진행.
+세션에서 `/mcp`로 Stitch 연결 확인. `dddart`는 description 매칭으로 트리거되거나 §2 codex 프롬프트로 명시 호출.
+> 설치 절차(재현): `for s in ~/Desktop/dddart/codex-dddart/skills/*/; do rm -rf ~/.codex/skills/$(basename "$s"); cp -R "$s" ~/.codex/skills/$(basename "$s"); done` → codex 재시작. **소스 변경 시 재복사**(심볼릭이 아닌 복사라 자동 반영 안 됨). 제거: `~/.codex/skills/`의 dddart·dddart-*·architecture-*·implementation-*·discipline-* 삭제.
 
 ## 2. 실행 프롬프트 (verbatim · 복붙)
 

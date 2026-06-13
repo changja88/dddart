@@ -15,7 +15,7 @@
 ```
 
 **호출 형태**(인자 규약 — claude=named 위치 / codex=순차 해석. **디자인은 인자 아님** — 양판 다 Phase 0에서 연결된 Stitch MCP로 화면 확인). 정확한 verbatim 프롬프트는 `RUNBOOK-weather.md`에 박아둔다:
-- **claude판**(슬래시·`--plugin-dir` 로드 시 보통 `/dddart:dddart`, `/help`로 확인): `/dddart:dddart "<위 기능 설명>" "https://kingdom-h.com/api/schema/?format=json"`
+- **claude판**(슬래시·`dddart@dddart-dev` user 설치됨·`/help`로 호출명 확인): `/dddart:dddart "<위 기능 설명>" "https://kingdom-h.com/api/schema/?format=json"`
 - **codex판**(자연어 순차): `dddart로 날씨 예보 기능을 추가해줘 — 순서대로 ① 기능: <위 설명> ② OpenAPI: https://kingdom-h.com/api/schema/?format=json`
 
 **인자 값**:
