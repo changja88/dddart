@@ -1,4 +1,4 @@
 interface:
   display_name: "dddart"
   short_description: "Flutter 기능을 간소화 DDD+MVVM으로 요구→설계→구현까지 게이트로 빌드"
-  default_prompt: "dddart로 기존 Flutter 프로젝트에 한 기능을 간소화 DDD+MVVM으로 빌드한다(요구 G0 → 설계 G1 → 구현 G2). 요청은 순서대로 준다 — ① 기능 설명, ② (선택) OpenAPI 문서 URL, ③ (선택) 디자인 이미지 경로. 예: 날씨 7일 예보 기능을 만들어줘 https://api.example.com/schema?format=json ./design/weather.png"
+  default_prompt: "dddart로 기존 Flutter 프로젝트에 한 기능을 간소화 DDD+MVVM으로 빌드한다(요구 G0 → 설계 G1 → 구현 G2). 요청은 순서대로 준다 — ① 기능 설명, ② (선택) OpenAPI 문서 URL. 디자인은 인자가 아니라 G0에서 정한다(연결된 MCP·로컬 이미지·자체 설계). 예: 날씨 7일 예보 기능을 만들어줘 https://api.example.com/schema?format=json"

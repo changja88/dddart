@@ -30,8 +30,8 @@
       "Write"
     ],
     "defaultPrompt": [
-      "날씨 7일 예보 기능을 만들어줘 https://api.example.com/schema?format=json ./design/weather.png",
-      "채널 목록 화면을 DDD로 빌드해줘 — 순서대로 기능 설명, (선택) OpenAPI URL, (선택) 디자인 이미지 경로",
+      "날씨 7일 예보 기능을 만들어줘 https://api.example.com/schema?format=json",
+      "채널 목록 화면을 DDD로 빌드해줘 — 순서대로 기능 설명, (선택) OpenAPI URL (디자인은 G0에서 정함)",
       "주문 내역 화면을 dddart 파이프라인으로 설계하고 구현해줘."
     ],
     "brandColor": "#0468D7"
