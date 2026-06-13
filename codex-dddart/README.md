@@ -14,8 +14,8 @@
 
 | 기능 | Claude | Codex | 영향·완화 |
 |---|---|---|---|
-| 커맨드 인자 힌트 | `argument-hint` frontmatter | **없음** | 트리거 어휘를 스킬 description에 내장 — 기능 설명·URL은 사용자 요청 문장에서 추출 |
-| 서브에이전트 | `Agent` 도구 + `agents/*.md` 자동 등록 | `spawn_agent`/`wait_agent`/`close_agent` (**`multi_agent = true` 필수**) | 역할 정의를 `dddart-<역할>` 스킬로 분리 — 코디네이터가 명령형으로 로드 지시. multi_agent 꺼져 있으면 안내 후 정지(단일 컨텍스트 역할극 금지) |
+| 커맨드 인자 | `arguments` named + `argument-hint` | 스킬 1급 인자 **없음** | claude 위치 인자 `[feature, api_url, design]` → codex는 본문이 **순서대로 해석**(기능→API→디자인). 사용 예시는 `default_prompt`/`defaultPrompt`로 표시 |
+| 서브에이전트 | `Agent` 도구 + `agents/*.md` 자동 등록 | `spawn_agent`/`wait_agent`/`close_agent` (**`multi_agent` — 기본 on**) | 역할 정의를 `dddart-<역할>` 스킬로 분리 — 코디네이터가 명령형으로 로드 지시. (드물게) multi_agent가 꺼져 있으면 안내 후 정지(단일 컨텍스트 역할극 금지) |
 | 스킬 자동 주입 | 에이전트 frontmatter `skills:` | **없음** | 역할 스킬 본문의 "로드할 지식 스킬" 절이 대체 — 서브에이전트가 직접 로드 |
 | 게이트 승인 UI | `AskUserQuestion`(선택지·multiSelect) | binary approve/deny뿐 | **평문 질문 파싱**으로 대체 — 배너 뒤 "승인하려면 '승인', 고치려면 …" + 번호 목록 |
 | 진행 가시성 | `TodoWrite` | `update_plan` | 동등 치환 |
