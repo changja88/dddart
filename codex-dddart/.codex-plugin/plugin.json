@@ -30,8 +30,8 @@
       "Write"
     ],
     "defaultPrompt": [
-      "채널 목록을 보고 채널에서 나갈 수 있는 화면을 DDD로 빌드해줘.",
-      "이 Flutter 프로젝트에 한 기능을 간소화 DDD 4계층 + MVVM으로 추가해줘.",
+      "날씨 7일 예보 기능을 만들어줘 https://api.example.com/schema?format=json ./design/weather.png",
+      "채널 목록 화면을 DDD로 빌드해줘 — 순서대로 기능 설명, (선택) OpenAPI URL, (선택) 디자인 이미지 경로",
       "주문 내역 화면을 dddart 파이프라인으로 설계하고 구현해줘."
     ],
     "brandColor": "#0468D7"
