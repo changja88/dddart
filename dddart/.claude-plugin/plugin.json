@@ -1,6 +1,6 @@
 {
   "name": "dddart",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "기존 Flutter 프로젝트에 간소화 DDD + 철저한 MVVM으로 기능을 추가하는 파이프라인 플러그인",
   "author": {
     "name": "hyun",
