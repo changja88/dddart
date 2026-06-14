@@ -14,8 +14,12 @@ eval/
 │   ├── EVAL-METHOD.md        # 채점 *방법* (어떻게): 빌드·blind 역할·결정∥의미 레인·항목별 결정-판정 표(백스톱 매핑)·치명 게이트·집계 (v3.1)
 │   └── rubric-metrix.md      # 채점 결과지 템플릿 (치명 게이트 + 차원 판정 + 등급 + 발견 로그)
 ├── tools/                   # 고정 입력 (채점 입력 정본)
-│   ├── TEST-ENV.md           # 실전 구동 테스트 환경 표준 — baseline 복제·폴더 규칙·민낯 불변식·라이브=사용자 드라이브 (시나리오 무관 공통)
-│   └── SCENARIO-S1.md        # S1 신규 BC 공지 — task verbatim·baseline·게이트 답·FC 골든 입력
+│   ├── TEST-ENV.md           # 실전 구동 환경 표준 — baseline 복제·폴더 규칙·민낯 불변식·라이브=사용자 드라이브 (시나리오 무관)
+│   ├── SCENARIO-S1.md        # S1 신규 BC 공지 — task·baseline·게이트답·FC 골든 입력 (공지 시나리오)
+│   ├── SCENARIO-WEATHER.md   # 날씨 7일 예보 — 실전 풀스택 검증 고정 입력 (민낯 baseline·게이트답)
+│   ├── RUNBOOK-weather.md    # 날씨 라이브런 실행서 — 양판 설치·verbatim 프롬프트·게이트·채점
+│   ├── FC-GOLDEN.md          # S1 FC 사전등록 (골든 행위표·mutation)
+│   └── FC-GOLDEN-WEATHER.md  # 날씨 FC 사전등록 — G-1~G-8·mutation 5·negative-gate 7 (코드 미열람 동결)
 └── results/                 # 결과지 (<YYYYMMDD-HHMM>-<scenario>-<variant>.md) — 채점 시 생성
 ```
 
@@ -39,10 +43,20 @@ eval/
 ## 관리 규약 (채점 시)
 
 1. **채점 기준은 `rubric/`이 단일 출처.** `RUBRIC.md`(항목)로 보고 `EVAL-METHOD.md`(방법)로 채점·집계. 기준 변경은 *채점 착수 전*에만(EVAL-METHOD §0·§5 사전등록 — 미동결 채점 = 과적합 위반).
-2. **고정 입력은 `tools/SCENARIO-S1.md` verbatim.** task·baseline·게이트 답·FC 골든을 토씨까지 동일 투입.
+2. **고정 입력은 그 시나리오 `tools/SCENARIO-*.md` verbatim.** task·baseline·게이트답·FC 골든(`FC-GOLDEN[-*].md`)을 토씨까지 동일 투입 (현재 활성 = 날씨 `SCENARIO-WEATHER.md`·`FC-GOLDEN-WEATHER.md`).
 3. **레인 분리·Goodhart 차단**: 결정(grep/스크립트/백스톱)과 의미(grader)를 분리하되, **의미 레인 FAIL이면 결정 스크립트 통과여도 FAIL**(치명은 치명 FAIL).
 4. **정직 경계**: 앵커=예시(임계값 아님·순환 방지), N=1 인과 단정 금지, 거짓 FAIL 함정(정적 view·codegen 면제·수치 가이드 등) 회피.
 5. **결과지 형식**은 `rubric-metrix.md` 표준 템플릿.
+
+## 결과 관리 (dddjango 검증 실무 정합)
+
+dddjango `eval/results/`의 누적 채점지(라이브런 반복·claude/codex 페어)에서 확인한 lived 실무를 그대로 따른다:
+
+1. **1런타임 = 1파일.** `results/<YYYYMMDD-HHMM>-<scenario>-<variant>.md`. claude·codex를 한 파일에 섞지 않는다 (예: `…-weather-codex.md` / `…-weather-claude.md`). variant = 런타임(claude/codex) 또는 두 안 비교 시 plan-a/plan-b.
+2. **템플릿 복사.** `rubric-metrix.md`를 `results/`로 복사해 채운다. 8칸 표 = `ID · 항목 · §근거 · Result · 결정 · 의미 · 종합 · 치명`. **Result 칸 = 사실만**(`file:line` + 무슨 코드/구조) — 평가·이유 금지. `[결정✅ ∧ 의미❌]`(의미적 변종)도 종합 ❌ + Result 끝에 `[의미적 변종]` 표기.
+3. **섹션 순서**(EVAL-METHOD §6.1): 헤더 → 빌드게이트 → 치명17 → 차원별(S-DDD→VIEW→STATE→DATA→HR) → TIER-Q → 의미변종/백스톱-blind 메타 → 발견 로그 → 잔여흠 원장 → 한 줄 요지 (+두 안 비교 시 비교 집계지 부록).
+4. **헤더 필수단서**(§6.2): 방법(v3.1)·채점일·산출물 루트·variant·baseline 커밋·코퍼스 커밋·모델/effort·코드젠 환경(produced/env 분리)·task verbatim·게이트답·FC 골든 사전등록 시각·N_grader(<3 명시)·**런-정지 mtime**·⚠️(N=1 인과금지·앵커=예시·소급FAIL 금지·자기보고 불신).
+5. **누적·보존.** 결과지는 지우지 않고 git에 누적해 반복 라이브런의 회귀를 추적한다. 트랙 일단락 시 working tree엔 `rubric/`+`tools/` 고정 입력만 남기고 과거 결과지는 git 히스토리로 보존(dddjango 관례). `results/`는 채점 시 생성(빈 폴더 미추적).
 
 ## 슬라이스 두 안 비교 (RUBRIC 적용의 한 사례)
 
