@@ -11,7 +11,7 @@
 
 ## 헤더 (필수 단서)
 
-> **방법** EVAL-METHOD v3.1 · **채점일** YYYY-MM-DD · **환경** 모델·effort · **variant** (단일 | plan-a | plan-b) · **산출물 루트** `<절대경로>` · **baseline** `<커밋>` · **코퍼스** `<커밋>` · **코드젠 도구 환경** `dart pub deps`+dev_dependencies 핀(`(조정자 추가)` 태그) · **task** SCENARIO-S1 §1(verbatim) · **게이트 답** §4 · **FC 골든** 사전등록 여부·작성 시각 · **N_grader** `<수>`(<3이면 명시) · **런-정지** 산출물 mtime·채점 시작 시각 · **⚠️** N=1·인과 단정 금지·앵커=예시(임계값 아님)·소급 FAIL 금지·자기보고 불신
+> **방법** EVAL-METHOD v3.1 · **채점일** YYYY-MM-DD · **환경** 모델·effort · **variant** (단일 | plan-a | plan-b) · **산출물 루트** `<절대경로>` · **baseline** `<커밋>` · **코퍼스** `<커밋>` · **코드젠 도구 환경** `dart pub deps`+dev_dependencies 핀(`(조정자 추가)` 태그) · **task** SCENARIO-S1 §1(verbatim) · **게이트 답** §4 · **FC 골든** 사전등록 여부·작성 시각 · **N_grader** `<수>`(<3이면 명시)·**구성**(비-Claude 오라클 유무·A3) · **positive control** 통과 여부(A12·미통과 시 FAIL 잠정·기계결함 단서) · **런-정지** 산출물 mtime·채점 시작 시각 · **⚠️** N=1·인과 단정 금지·앵커=예시(임계값 아님)·소급 FAIL 금지·자기보고 불신·**시각/디자인 충실도 비측정(인간 오라클 — 구조·기능 PASS ≠ 시안 일치·A1)**
 
 ## 0. 빌드 게이트 (먼저 — FAIL이면 전체 FAIL)
 
@@ -57,6 +57,21 @@
 | Q-1 ~ Q-9 | | |
 
 > **등급** = PASS/WEAK/FAIL 카운트(`EVAL-METHOD.md §3.2`). 거짓 FAIL 함정(수치 하드컷·doc 강제·전면 grep) 면제 확인.
+
+## grader 패널 증거 (A3 — blind 검증가능화·`EVAL-METHOD §2.0·§2.2`)
+
+> per-grader raw blind verdict는 `results/<…>-grader-<n>.md`로 **영속·커밋**(주장 아닌 증거). **만장일치인데 아래 κ·per-grader가 비면 blind 붕괴 적신호.** 의미 레인 **최소 1명 비-Claude(또는 인간)** — 미확보 시 헤더 ⚠️ "전원 동일 계열·독립성 미확보".
+
+| grader | 계열(Claude/비-Claude/인간) | 적대 여부 | raw verdict 파일 |
+|---|---|---|---|
+
+| 차원 | grader 판정(N개·예 ✅✅❌) | κ(일치율) | split 방향·비고 |
+|---|---|---|---|
+
+> **rubric 사각 신고(A13 — 채점 미반영·다음 동결 입력)**: grader가 "현 57차원으로 안 잡히는 위반/우려"로 적은 자유서술 수집(점수 산입 0). `EVAL-METHOD §2.2`.
+
+| grader | 사각 신고 내용(미측정 동작·차원 부재·시각 충실도·시나리오 미발화 의심) |
+|---|---|
 
 ## 의미적 변종 / 백스톱-blind 메타 (측정의 주 산출물 — `EVAL-METHOD §2.4`)
 
@@ -105,6 +120,7 @@
 | 재방문(완료 슬라이스 재수정) | | | | |
 
 > architect·리뷰어 호출·tracer·미니 게이트는 두 안 공통 → 차분 0(상쇄·기록만).
+> **엔진 양판 축 일반화(A9 — `EVAL-METHOD §4.5`)**: 위 표는 *슬라이스 분할*(plan-a/b)뿐 아니라 **엔진 양판**(codex/claude·같은 SCENARIO verbatim)에도 쓴다 — 칼럼을 `codex`/`claude`로 치환해 차분 기록. **comparability 단서**: 두 엔진 파이프라인이 달라 *절대값* 비교 무의미 → 같은 사건 종류의 차분·동률 시 보조 신호로만.
 
 ## 판정 (EVAL-METHOD §4.3)
 

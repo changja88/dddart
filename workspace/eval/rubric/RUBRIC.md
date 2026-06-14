@@ -3,7 +3,7 @@
 > **상태**: v1 (2026-06-13) — 코퍼스 9종 전수 조사 + 6축 적대 검증을 거쳐 도출(아래 §출처). *사용자 "동결됨" 확인 후 채점 착수*(미동결 채점 = §과적합 위반). `EVAL-METHOD.md` v2(품질 채점)와 정합.
 > **목적**: 산출물이 ① **dddart 플러그인의 규칙(간소화 DDD·MVVM·하우스룰·Dart/Flutter 관용구)을 얼마나 잘 지키는가** + ② **요청 기능을 올바르게 구현했는가**를 측정한다. *baseline 대비 차별가치는 안 잰다 — 규칙 준수가 핵심.* 기능 정확성은 잰다(형태만 맞고 동작이 틀린 산출물을 거른다).
 > **PASS 바 = 표준 규칙(앵커 아님)**: 판정 기준은 각 항목 §근거의 *코퍼스 표준 조항*이다. "플러그인이 실제로 낸 수준"을 바로 두지 않는다(순환 방지). 새 산출물은 표준 조항으로 채점한다.
-> **명시적 비측정(과대주장 제거)**: baseline 대비 가치 · 미시 가독성·복잡도(유지보수성은 구조 대리까지) · 런타임 성능·보안(후속 트랙) · 명세 내적 품질(후순위) · 파이프라인 프로세스 규율(coder 경량본 사용·리뷰어 권한 경계 등 — `EVAL-METHOD.md` 소관). 이들은 평가지 밖/위임/후속.
+> **명시적 비측정(과대주장 제거)**: baseline 대비 가치 · 미시 가독성·복잡도(유지보수성은 구조 대리까지) · 런타임 성능·보안(후속 트랙) · 명세 내적 품질(후순위) · 파이프라인 프로세스 규율(coder 경량본 사용·리뷰어 권한 경계 등 — `EVAL-METHOD.md` 소관) · **시각/디자인 충실도**(시안↔렌더 일치 — 레이아웃·간격·아이콘 처리·실제 색·미관): AI 채점자가 렌더를 못 봐 구조적으로 못 닫음 → **인간 오라클 위임·자동 채점 비측정(A1)**. VW-4/5는 토큰 단일출처·매핑 *거주*만 보지 *시안 일치*를 안 본다(결과지 구조·기능 PASS ≠ 시안 일치). 이들은 평가지 밖/위임/후속.
 > **범위**: 이 문서 = 평가 *항목*. 채점·집계·완료 = `EVAL-METHOD.md`. 결과지 형식 = `rubric-metrix.md`. 고정 입력 = `tools/SCENARIO-*.md`.
 > **레인 표기**: **결정** = 구조-인지 grep/스크립트·백스톱 러너 exit·`flutter analyze`. **의미** = 서브에이전트 grader 판단. **치명** = 치명 게이트(이진 PASS/FAIL, WEAK 금지).
 > **Goodhart 차단(전역 규칙)**: 결정 레인 항목 다수는 텍스트만 피하면 통과한다. **의미 레인 FAIL이면 결정 스크립트 통과여도 그 항목 FAIL**(치명 항목은 치명 FAIL)이다 — dddjango status-객체 누수 교훈. 각 항목 *게이밍* 주의를 본다.
@@ -41,7 +41,7 @@
 | **VW-4** 시각 토큰 단일 출처 | foundation 토큰만·VM 시각 getter 금지 | ui §7 / HR NM10 | 색·타이포·duration이 App* 토큰(foundation 7파일) 참조, VM/State에 시각 반환 getter·design_system import 0 | 토큰 밖 시각 리터럴(`Color(0x…)`·생 TextStyle·`Colors.*`·생 Duration) 또는 VM/State 시각 매핑 | 결정+의미 | — |
 | **VW-5** ui_extension = 도메인→UI 매핑 유일 자리 | 색·아이콘·라벨 매핑 거주 | ui §5 | 도메인 enum/VO→UI 매핑이 `*_ui_extension.dart` extension에만 | 매핑이 VM·State getter·design_system에 누수 | 의미 | — |
 | **VW-6** 표시 소유·show() 금지 | 컴포넌트 자기표시 경로 차단 | ui §7 | design_system 컴포넌트가 전역키/전역 context로 자기를 띄우는 static 경로 0; 다이얼로그·시트는 View가 자기 BuildContext로 호출 | 컴포넌트가 전역키/context로 자기표시 static 메서드(이름 무관 show/present/display) 노출 | 의미 | ✅ |
-| **VW-7** 라우트 단일 출처·navigator 분업 | 리터럴 router 안만·이름 참조 | ui §6 / HR | 라우트 path/name 리터럴이 `<bc>_router.dart`의 `abstract final class <Bc>Routes`에만, navigator는 pushNamed로 상수만·view import 0, BC는 GoRoute만 export(셸 조립은 root_router) | 리터럴 산개(상수 우회·문자열 조립), navigator가 view import, BC가 StatefulShell 조립 | 결정+의미 | — |
+| **VW-7** 라우트 단일 출처·navigator 분업 | 리터럴 router 안만·이름 참조 | ui §6 / HR | 라우트 path/name 리터럴이 `<bc>_router.dart`의 `abstract final class <Bc>Routes`에만, navigator는 pushNamed로 상수만·view import 0, BC는 GoRoute만 export(셸 조립은 root_router)·**내비 인자(path-param) 도메인값 직렬화는 VO/VM 소유**(뷰 onTap은 도메인 값을 VM에 위임하거나 VO 노출 키만 navigator에 전달) | 리터럴 산개(상수 우회·문자열 조립), navigator가 view import, BC가 StatefulShell 조립, **뷰 onTap이 도메인값 인라인 직렬화**(`toIsoDate(date)` 류 path-param 가공 — VO/VM 소유 위반) | 결정+의미 | — |
 
 > **VW-7 주의**: 동일 BC 내 `navigator→router→view` import 사슬은 순환 아님(FAIL 금지). **정적 view(약관·안내)는 VM·State 없이 합법** — VW-2 삼총사 미완을 거짓 FAIL 내지 않는다.
 > **VW vs SD 이중계상 금지**: build 내 정책 위반은 표현층(VW-1)·도메인층(SD-1) 중 한 번만 감점한다.
@@ -135,7 +135,7 @@
 
 | ID | 항목 | §근거 | PASS | FAIL/WEAK | 레인 |
 |---|---|---|---|---|---|
-| **Q-1** Dart 명명 케이싱 | dart §2·§명명 | 클래스/enum/typedef/extension UpperCamel·변수/멤버/상수 lowerCamelCase(SCREAMING_CAPS 0)·3자+ 약어 단어화·2자 유지·공개 식별자 선행 _ 0·헝가리안 0·bool 긍정형 | SCREAMING_CAPS 상수·헝가리안·부정형 bool·공개 선행 _ | 결정 |
+| **Q-1** Dart 명명·타입 표기 | dart §2·§명명 | 클래스/enum/typedef/extension UpperCamel·변수/멤버/상수 lowerCamelCase(SCREAMING_CAPS 0)·3자+ 약어 단어화·2자 유지·공개 식별자 선행 _ 0·헝가리안 0·bool 긍정형·**지역 변수 타입 명시**(추론은 뷰 ref 바인딩·타입 박힌 리터럴 한정 — dart §2 일탈3) | SCREAMING_CAPS 상수·헝가리안·부정형 bool·공개 선행 _·**허용 예외 밖 지역 변수 타입 미명시** | 결정 |
 | **Q-2** freezed 표기(비컴파일부) | dart §4·§5 | 컬렉션 갱신은 새 리터럴 합성+copyWith, union 분기는 `_` 디폴트 없는 소진 switch(when/map 0) | 컬렉션 제자리 변경, 소진 switch에 `_` 삽입, when/map 사용 | 결정 |
 | **Q-3** dartz Either 표면 | dart §8 | 표면 고정(Either/Left/Right/fold/map/flatMap만)·fold Left 첫인자·map은 Right만·dartz 유지 | IList·Option·연산자·fpdart, fold 순서 오류 | 결정 |
 | **Q-4** null 안전 관용구 | dart §3 | promotion(지역변수 복사)·??·패턴 우선, `!`는 보호절/promotion 불가 자리 단일 최후수단, required(non-null 무기본 named) | `!` 연쇄(`x!.y!`), nullable 명시 null 초기화, 공개 late final(무초기화) | 결정+의미 |
