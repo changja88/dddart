@@ -1,6 +1,6 @@
 ---
 name: implementation-dart
-description: Dart 언어 표기법 — Effective Dart 선별(dddart 의도적 일탈 2건 포함), 널 안전 관용구(promotion·지역 변수 복사), freezed 3.x 표기 계약, union의 switch 패턴 매칭, json_serializable, dartz Either 최소 표면. Dart 코드의 이름·형태·모델 선언을 쓸 때 로드한다.
+description: Dart 언어 표기법 — Effective Dart 선별(dddart 의도적 일탈 3건 포함), 널 안전 관용구(promotion·지역 변수 복사), freezed 3.x 표기 계약, union의 switch 패턴 매칭, json_serializable, dartz Either 최소 표면. Dart 코드의 이름·형태·모델 선언을 쓸 때 로드한다.
 user-invocable: false
 ---
 
@@ -18,8 +18,8 @@ user-invocable: false
 ## 핵심 운영 원칙
 
 - 상수는 lowerCamelCase(SCREAMING_CAPS 금지), 3자+ 약어는 단어처럼(Http·Sms), import는 dart:→package:→상대 순 (§2)
-- **의도적 일탈 2건**: Repo·UseCase 조회 메서드의 get 접두는 dddart 방언으로 유지 / 광범위 catch는 safeApiCall 한 곳만 — 일반 코드는 에러 4규칙(on 절 의무·Error 캐치 금지·rethrow) (§2)
-- bool 인자는 named로, 공개 API는 타입 명시, 초기화된 지역 변수는 추론 (§2)
+- **의도적 일탈 3건**: Repo·UseCase 조회 메서드의 get 접두는 dddart 방언으로 유지 / 광범위 catch는 safeApiCall 한 곳만 — 일반 코드는 에러 4규칙(on 절 의무·Error 캐치 금지·rethrow) / 지역 변수도 타입 명시(추론은 뷰 ref 바인딩·타입 박힌 리터럴 한정) (§2)
+- bool 인자는 named로, 공개 API·지역 변수 모두 타입 명시 (§2)
 - freezed 프로퍼티는 public getter라 promotion 불가 — **지역 변수 복사가 표준 관용구**, `!` 연쇄는 열화 형태 (§3)
 - freezed 3: 단일 생성자 모델은 `abstract`, union은 `sealed` 키워드 의무 — 커스텀 getter·메서드엔 `const X._()` 필수 (§4)
 - freezed 컬렉션은 unmodifiable — 갱신은 `copyWith(lines: [...lines, item])` 리터럴 합성으로 (§4·§6)

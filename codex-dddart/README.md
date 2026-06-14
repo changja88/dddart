@@ -19,7 +19,7 @@
 | 스킬 자동 주입 | 에이전트 frontmatter `skills:` | **없음** | 역할 스킬 본문의 "로드할 지식 스킬" 절이 대체 — 서브에이전트가 직접 로드 |
 | 게이트 승인 UI | `AskUserQuestion`(선택지·multiSelect) | binary approve/deny뿐 | **평문 질문 파싱**으로 대체 — 배너 뒤 "승인하려면 '승인', 고치려면 …" + 번호 목록 |
 | 진행 가시성 | `TodoWrite` | `update_plan` | 동등 치환 |
-| 이미지 입력 | `design-ref/` 이미지를 에이전트가 판독 | 판독 **비보장** | 함께 받은 HTML 시안·텍스트 메모(`design-ref/notes.md`)를 시각 근거로 우선(이미지는 보조) |
+| 이미지 입력 | `design-ref/` 이미지를 에이전트가 판독 | 이미지 판독 **비보장**(HTML 시안은 텍스트라 가능) | HTML 시안 있으면 그 텍스트에서 토큰·레이아웃 직접 추출(우선)·이미지만이면 메모(`notes.md`) 보조 |
 | 디자인 MCP | 세션 MCP 감지 | 연결/감지 절차 상이 | 연결돼 있으면 claude와 **동일하게** 화면 받아 동결(MCP가 URL/HTML 반환 시 Coordinator가 받음) |
 | 플러그인 경로 변수 | `${CLAUDE_PLUGIN_ROOT}` | **미해석** | 커맨드·역할 스킬에서는 "이 스킬 디렉터리의 scripts/"·"로드한 스킬 폴더의 references/"로 환언 완료. **코퍼스 references/final.md 안에 남은 `${CLAUDE_PLUGIN_ROOT}`는 byte-exact 불변식 때문에 의도된 잔존** — "이 스킬들이 설치된 플러그인 루트"로 읽는다(공유 reference는 `discipline-houserules/references/undecidable.md`) |
 | 커맨드 호출 제어 | `disable-model-invocation: true` (`/dddart` 명시 호출 전용) | description 매칭으로 자가 트리거 가능 | description의 음성 트리거("단순 단일 파일 수정…에는 쓰지 않는다")로 오발동 완화 |
