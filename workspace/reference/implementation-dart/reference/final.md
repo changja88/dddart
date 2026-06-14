@@ -4,10 +4,10 @@
 
 | field | value |
 |---|---|
-| purpose | dddart가 생성하는 Dart 코드의 언어 표기 단일 출처 — Effective Dart 선별(의도적 일탈 3건 명문화 포함), 널 안전 관용구, freezed 3.x 표기 계약, when/map의 패턴 매칭 대체, Dart 3 문법 가용분·상한, json_serializable, dartz Either 최소 표면. |
+| purpose | dddart가 생성하는 Dart 코드의 언어 표기 단일 출처 — Effective Dart 선별(의도적 일탈 2건 명문화 포함), 널 안전 관용구, freezed 3.x 표기 계약, when/map의 패턴 매칭 대체, Dart 3 문법 가용분·상한, json_serializable, dartz Either 최소 표면. |
 | use when | 클래스·함수·상수의 이름과 형태를 정할 때, nullable을 다룰 때, freezed 모델·State를 선언할 때, union을 분기할 때, JSON 매핑을 쓸 때, Either를 다룰 때. |
 | exclude/handoff | 어느 위치에 어떤 파일·클래스가 오는가는 discipline-houserules, 도메인 모델 규율은 architecture-ddd, State 계약은 architecture-state, Either의 계약 의미(Right=성공·실패 운반)는 architecture-data, @riverpod·go_router·retrofit·hive 표기는 implementation-riverpod·implementation-flutter로 위임. |
-| core criteria | Dart SDK ^3.9(=3.0~3.8 언어 기능 누적 — 3.9 자체는 신규 기능 없음)·freezed 3.2·json_serializable 6.x·dartz 0.10.1, 전 항목 공식 문서 원문 확인(2026-06-12 — 절별 URL은 작업장 external.md). 기존 배포본 예제(state·data·ddd) 전수 검증 — 표기 충돌 0, Effective Dart와의 의도적 일탈 3건만 §2에 명문화. |
+| core criteria | Dart SDK ^3.9(=3.0~3.8 언어 기능 누적 — 3.9 자체는 신규 기능 없음)·freezed 3.2·json_serializable 6.x·dartz 0.10.1, 전 항목 공식 문서 원문 확인(2026-06-12 — 절별 URL은 작업장 external.md). 기존 배포본 예제(state·data·ddd) 전수 검증 — 표기 충돌 0, Effective Dart와의 의도적 일탈 2건만 §2에 명문화. |
 | source priority | 1 공식(dart.dev·pub.dev·GitHub changelog/migration guide 원문) 2 dddart 결정(HaffHaff 방언 우선 지점·비채택) 3 HaffHaff 실물(BadRequestResponse 철자 등). |
 | P1 classification | sufficient — dartz 휴면 사실과 대안(fpdart)은 §8에 기록(교체는 기준점 변경이라 비채택). freezed 3.1의 when/map 재추가 옵션의 기본값은 공식 미명시이나 dddart가 패턴 매칭 표준이라 무영향. |
 
@@ -19,7 +19,7 @@
 ## 목차
 
 - §1. 버전·전제 — SDK ^3.9의 정확한 의미·상한
-- §2. Effective Dart 선별 — 명명·문서·API 형태·에러 처리 (의도적 일탈 3건)
+- §2. Effective Dart 선별 — 명명·문서·API 형태·에러 처리 (의도적 일탈 2건)
 - §3. 널 안전 실전 — required·연산자·promotion 관용구
 - §4. freezed 3.x — 표준 표기 계약
 - §5. union 분기 — when/map 대신 switch 패턴 매칭
@@ -36,7 +36,7 @@
 - **상한 주의**: 최신 Dart(3.12)의 dot shorthands(`.enumValue` 축약 — 3.10)·private named parameters(3.12)는 **^3.9 프로젝트에서 컴파일 불가** — 생성 코드에 쓰지 않는다. 언어 버전은 pubspec의 min SDK가 정한다.
 - 패키지 기준: freezed 3.2·freezed_annotation 3.x / json_serializable 6.x·json_annotation 4.9 / dartz 0.10.1.
 
-## §2. Effective Dart 선별 — 명명·문서·API 형태·에러 처리 (의도적 일탈 3건)
+## §2. Effective Dart 선별 — 명명·문서·API 형태·에러 처리 (의도적 일탈 2건)
 
 **명명(케이싱)** — 파일·클래스 명명의 *무엇*은 discipline-houserules §4 소유, 여기는 언어 케이싱 규칙:
 
@@ -52,13 +52,12 @@
 
 **문서 주석**: `///`(블록 주석 금지) · 첫 문장 요약 후 빈 줄 · 스코프 내 식별자는 `[Order]` 대괄호 참조 · bool 프로퍼티는 "~인지 여부(Whether)"로 · 공개 API에 우선 작성. 주석의 *언제·왜*는 discipline-cleancode §4 소유 — 여기는 표기.
 
-**API 형태**: 개념상 속성 접근이면 getter(무인자·멱등·부작용 없음 — `Money get totalAmount` 정합) · bool 이름은 긍정형(`isConnected`) · **bool 인자는 named로**(positional bool 금지) · 공개 API·지역 변수 모두 타입 명시(↓의도적 일탈 3 — HaffHaff 방언, 추론은 뷰 `ref.watch`/`ref.read` 바인딩·타입 박힌 리터럴에 한정) · setter만 단독 정의 금지 · await 없이 Future를 그대로 반환하면 `async` 생략(`getChannels() => safeApiCall(...)` 화살표 위임이 이 형태).
+**API 형태**: 개념상 속성 접근이면 getter(무인자·멱등·부작용 없음 — `Money get totalAmount` 정합) · bool 이름은 긍정형(`isConnected`) · **bool 인자는 named로**(positional bool 금지) · 공개 API는 타입 명시, 초기화된 지역 변수는 추론(`final result = await ...`) · setter만 단독 정의 금지 · await 없이 Future를 그대로 반환하면 `async` 생략(`getChannels() => safeApiCall(...)` 화살표 위임이 이 형태).
 
-**의도적 일탈 3건 (dddart 결정 — 공식 AVOID보다 방언·정책 우선)**:
+**의도적 일탈 2건 (dddart 결정 — 공식 AVOID보다 방언·정책 우선)**:
 
 1. **조회 메서드의 `get` 접두**: 공식은 "AVOID starting a function or method name with get"이지만, **dddart의 Repo·UseCase 조회 메서드는 `getChannels()` 형태를 쓴다** — HaffHaff 방언이 기준점이고 기존 코드와의 일관이 우선이다(규약 §1 원칙 1). 그 외 일반 메서드는 공식대로 일을 말하는 동사로.
 2. **safeApiCall의 광범위 catch**: 공식은 "AVOID catches without on clauses"·"DON'T explicitly catch Error"지만, **safeApiCall 한 곳만 예외**다 — 전 실패를 Either로 정규화하는 의도적 단일 경계(architecture-data §2의 *왜*가 근거). **일반 코드에서는 4규칙을 지킨다**: on 절 없는 catch 금지 · Error 캐치 금지(버그는 전파되어 스택트레이스를 남겨야 한다) · 재던질 땐 `rethrow`(원 스택 보존 — `throw e`는 리셋) · Error 구현체는 프로그래밍 오류에만 던진다.
-3. **지역 변수 타입 명시**: 공식은 "AVOID type annotating initialized local variables"(추론 권장)이지만, **dddart는 지역 변수도 타입을 적는다**(`final List<DailyForecast> forecasts = ...`) — HaffHaff 방언이 기준점이다(규약 §1 원칙 1·일탈1과 동근거: HaffHaff는 view_model·infra·domain에서 지역 변수를 ~96% 명시). 추론 용인은 **뷰의 `ref.watch`/`ref.read` 바인딩**(`final state = ref.watch(...)`)과 **RHS에 타입이 박힌 리터럴**(`final ids = <int>{}`)에 한정한다.
 
 ## §3. 널 안전 실전 — required·연산자·promotion 관용구
 

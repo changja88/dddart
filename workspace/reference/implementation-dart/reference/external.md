@@ -45,7 +45,7 @@
 - "AVOID positional boolean parameters" — bool 인자는 named로(`copyWith(isShow: true)` 형태가 정합).
 - "PREFER making fields and top-level variables final" — freezed `addImplicitFinal`(기본 true)이 모델 쪽을 자동 충족(§3.4).
 - "DON'T define a setter without a corresponding getter".
-- 타입 표기: "DO type annotate public APIs"(필드·최상위 변수·파라미터·반환 타입) / "DON'T redundantly type annotate initialized local variables"(공식은 초기화 지역 변수 추론 권장 — **단 dddart는 의도적 일탈3으로 지역 변수도 타입 명시**: HaffHaff 방언 기준점, final.md §2; 추론 용인은 뷰 `ref.watch`/`ref.read` 바인딩·RHS 타입 박힌 리터럴 한정).
+- 타입 표기: "DO type annotate public APIs"(필드·최상위 변수·파라미터·반환 타입) / "DON'T redundantly type annotate initialized local variables"(초기화된 지역 변수는 추론에 맡김 — `final result = await ...` 형태 정합).
 - "PREFER making declarations private" — 공개는 의도 신호다.
 - "AVOID defining a one-member abstract class when a simple function will do" — 메서드 1개짜리 추상 클래스 대신 함수 타입. (dddart는 어차피 Repo 인터페이스 비채택 — 정합.)
 - "DO use class modifiers to control if your class can be extended" — §4.5.
