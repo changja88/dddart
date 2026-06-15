@@ -187,7 +187,12 @@ P="$T/f9"; BASE=$(mkproj "$P")
 mkdir -p "$P/lib/application/coupon/domain_layer/coupon"
 echo "class Coupon {}" > "$P/lib/application/coupon/domain_layer/coupon/coupon.dart"
 OUT=$(run_backstop "$P" --diff-base "$BASE" --only st4); E=$?
-assert "F9 ST4 신규 BC 골격 미완비" 2 "ST4" - "$E" "$OUT"
+# ST4 발동 + 새 BC에 analysis_options.yaml 누락도 골격 미완비로 잡혀야 함(타입 전면강제 생성 게이트)
+if [ "$E" = 2 ] && grep -q "ST4" <<<"$OUT" && grep -q "analysis_options.yaml" <<<"$OUT"; then
+  PASS=$((PASS+1)); echo "PASS F9 ST4 신규 BC 골격 미완비(analysis_options.yaml 생성 게이트 포함)"
+else
+  FAIL=$((FAIL+1)); echo "FAIL F9 (exit=$E)"; echo "$OUT" | head -20 | sed 's/^/    /'
+fi
 
 # ---------- F10: extract_design — config JS→JSON 정규화·아이콘(data-icon+FILL/텍스트폴백)·임의값·icon_map
 P="$T/f10"; mkdir -p "$P/design-ref"
@@ -236,6 +241,50 @@ grep -q 'shadow-\[0_4px_20px' <<<"$C" || ok=0                 # 임의값(shadow
 grep -q '"-mt-6"' <<<"$C" || ok=0                             # 음수마진
 if [ $ok = 1 ]; then PASS=$((PASS+1)); echo "PASS F10 extract_design 정규화·아이콘·임의값·매핑"; else
   FAIL=$((FAIL+1)); echo "FAIL F10 (exit=$E)"; echo "$C" | head -40 | sed 's/^/    /'
+fi
+
+# ---------- F11: NM17 view-fat 우회 차단 — 멀티라인 extends·위젯 반환 함수(List<Widget>·Widget?·구체위젯)·순수 helper 통과
+P="$T/f11"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/application/board/presentation_layer/view"
+cat > "$P/lib/application/board/presentation_layer/view/board_list_view.dart" <<'EOF'
+import 'package:flutter/material.dart';
+
+class BoardListView extends StatelessWidget {
+  const BoardListView({super.key});
+  @override
+  Widget build(BuildContext context) => _rows(context).first;
+}
+
+class _FatBody extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => const SizedBox();
+}
+
+class _MultiBody
+    extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => const SizedBox();
+}
+
+List<Widget> _rows(BuildContext context) => <Widget>[const SizedBox()];
+
+Widget? _header(BuildContext context) => null;
+
+Column _col() => Column(children: <Widget>[]);
+
+String _label(int n) => '$n';
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only nm); E=$?
+N=$(grep -c "NM17" <<<"$OUT" || true)
+# 기대: _FatBody·_MultiBody(멀티라인)·_rows(List<Widget>)·_header(Widget?)·_col(구체위젯) = NM17 발동.
+#       주 view(BoardListView)·순수 helper(_label: String 반환)는 미발동.
+if [ "$E" = 2 ] \
+   && grep -q "_FatBody" <<<"$OUT" && grep -q "_MultiBody" <<<"$OUT" \
+   && grep -q "_rows" <<<"$OUT" && grep -q "_header" <<<"$OUT" && grep -q "_col" <<<"$OUT" \
+   && ! grep -q "_label" <<<"$OUT" && ! grep -q "BoardListView" <<<"$OUT"; then
+  PASS=$((PASS+1)); echo "PASS F11 NM17 우회 차단(멀티라인 extends·위젯반환 함수·구체위젯·helper 통과·주view 면제) [NM17=$N]"
+else
+  FAIL=$((FAIL+1)); echo "FAIL F11 (exit=$E, NM17=$N)"; echo "$OUT" | head -30 | sed 's/^/    /'
 fi
 
 echo ""

@@ -59,6 +59,17 @@ List<(String kind, String name, int line)> topLevelDecls(MaskedSource ms) {
   return out;
 }
 
+/// NM17 — view 파일에서 위젯을 빌드해 반환하는 top-level 함수의 흔한 반환형(이름에 Widget이
+/// 없는 구체 위젯). 반환형에 `Widget`이 포함되면(Widget·Widget?·List<Widget>·PreferredSizeWidget…)
+/// 이 집합과 무관하게 잡는다 — 이 집합은 Widget 토큰이 없는 구체 위젯 반환을 보완한다.
+const _widgetReturnTypes = {
+  'Column', 'Row', 'Stack', 'Scaffold', 'Padding', 'Container', 'SizedBox',
+  'Center', 'Align', 'Expanded', 'Flexible', 'ListView', 'GridView', 'Wrap',
+  'Card', 'Material', 'AppBar', 'SingleChildScrollView', 'CustomScrollView',
+  'SliverList', 'SliverToBoxAdapter', 'Positioned', 'ConstrainedBox',
+  'ColoredBox', 'DecoratedBox', 'FittedBox', 'AspectRatio', 'Form', 'Table', 'Flex',
+};
+
 List<Finding> runNaming(BackstopContext ctx) {
   final out = <Finding>[];
   final added = ctx.dartFiles.where(ctx.isAdded).toList();
@@ -296,14 +307,16 @@ List<Finding> runNaming(BackstopContext ctx) {
       }
     }
 
-    // ---- NM17: view 위젯 직접 빌드 차단 (주 view 외 위젯 클래스·top-level Widget 함수 금지)
+    // ---- NM17: view 위젯 직접 빌드 차단 (주 view 외 위젯 클래스·위젯 빌드 top-level 함수 금지)
     // view는 State를 그리고 section/widget을 조립할 뿐 — 위젯 트리를 직접 빌드하지 않는다(제1 규약 §3.5).
-    // private 위젯 클래스(NM3가 public만 보아 스킵하는 빈틈)·언더스코어 없는 추가 위젯 클래스·
-    // top-level Widget 반환 함수의 3중 우회를 모두 막는다.
+    // 막는 우회: private·언더스코어 없는 추가 위젯 클래스(멀티라인 `extends` 포함)와, 위젯을 반환하는
+    // top-level 함수(반환형에 `Widget` 포함 — Widget·Widget?·List<Widget>·PreferredSizeWidget… —
+    // 또는 흔한 구체 위젯 _widgetReturnTypes). 반환형이 위젯이 아닌 순수 helper(String·Color 등)는
+    // view-fat이 아니므로 통과시킨다.
     if (parent == 'view' && base.endsWith('_view.dart')) {
       final mainName = casefold(base.substring(0, base.length - 5));
       for (final m in RegExp(
-              r'(?:^|\n)[ \t]*(?:(?:abstract|final|base)[ \t]+)*class[ \t]+([A-Za-z_$][\w$]*)[ \t]+extends[ \t]+[\w$]*Widget\b')
+              r'(?:^|\n)[ \t]*(?:(?:abstract|sealed|final|base|interface)[ \t]+)*class[ \t]+([A-Za-z_$][\w$]*)(?:<[^>]*>)?\s+extends\s+[\w$]*Widget\b')
           .allMatches(ms.tokensView)) {
         final name = m.group(1)!;
         if (casefold(name) == mainName) continue; // 주 view 클래스 1개만 합법
@@ -312,9 +325,13 @@ List<Finding> runNaming(BackstopContext ctx) {
             '제1 규약 §3.5',
             'error/loading은 design_system 컴포넌트를 직접 반환하고, 목록·상세 조립은 section으로 분리한다.'));
       }
-      for (final m in RegExp(r'(?:^|\n)Widget[ \t]+([A-Za-z_$][\w$]*)[ \t]*\(').allMatches(ms.tokensView)) {
+      for (final m in RegExp(r'(?:^|\n)([A-Z][\w$]*(?:<[^>]*>)?\??)[ \t]+([A-Za-z_$][\w$]*)[ \t]*\(')
+          .allMatches(ms.tokensView)) {
+        final ret = m.group(1)!;
+        final bare = ret.replaceAll(RegExp(r'[<?].*'), '');
+        if (!ret.contains('Widget') && !_widgetReturnTypes.contains(bare)) continue;
         out.add(Finding('NM17', f, ms.lineOf(m.start),
-            'view 파일에 top-level Widget 반환 함수 `${m.group(1)}` — 위젯 빌드는 section/widget으로',
+            'view 파일에 위젯 빌드 top-level 함수 `${m.group(2)}` (반환 `$ret`) — 위젯 빌드는 section/widget으로',
             '제1 규약 §3.5', '함수로 위젯 트리를 빌드하지 않는다 — section/widget 위젯으로 분리한다.'));
       }
     }

@@ -75,7 +75,7 @@ view는 VM과 1:1로 바인딩되는 루트다 — `ConsumerWidget`으로 `ref.w
 - 시각 토큰 매핑이 VM·State getter로 새면 이 "유일한 자리" 규칙이 무너진다 — application_layer의 design_system import 금지(사실은 discipline-houserules §5)와 한 몸.
 - HaffHaff에는 이 자리가 없어 매핑이 산재했다 — dddart 신설 종류.
 - **아이콘 매핑**은 이 extension의 switch다 — 도메인 enum→`IconData`. Flutter 내장 `Icons.*`를 쓴다(HaffHaff 방언 — `material_symbols_icons` 같은 패키지 도입은 방언 이탈). `const` 클래스·별도 enum으로 빼지 않는다(plain extension만 — NM14). 시안이 FILL축을 쓰면 채움(FILL 1)→`Icons.<name>`·윤곽(FILL 0)→가능하면 `Icons.<name>_outlined`.
-- **design-tokens.json 소비**(Stitch HTML 동결 시 Coordinator가 `extract_design`로 생성): 아이콘 항목의 `name`=시안의 정확한 Material Symbol·`fill`=채움축·`flutter`=`Icons.*` 후보다. 후보가 있으면 그대로 쓰고, `unmappedIcons`(Flutter에 정확 대응 부재)는 가장 가까운 `Icons.*`로 매핑한 뒤 design-ref 이미지로 충실도를 확인한다 — 완전 1:1은 방언 한계라 design-review-ui·인간 오라클이 판정한다. 색 매핑도 여기서 `app_color` foundation 토큰으로 한다(생 `Color(0x…)` 금지 §7) — design-tokens.json `colors`의 신규 색은 architect가 foundation 토큰 추가로 결정한다.
+- **design-tokens.json 소비**(Stitch HTML 동결 시 Coordinator가 `extract_design`로 생성): 아이콘 항목의 `name`=시안의 정확한 Material Symbol·`fill`=채움축·`flutter`=`Icons.*` 후보다. **`flutter`는 채움형 후보**이므로 `fill:0`이면 코더가 `_outlined` 변형을 적용한다 — extract_design은 채움/윤곽을 합치지 않고 `fill`을 별도 필드로 넘기고, 최종 선택은 이 §5 규칙으로 코더·review-ui가 정한다(기계→인간 핸드오프 명시). 후보가 있으면 그대로 쓰고, `unmappedIcons`(Flutter에 정확 대응 부재)는 가장 가까운 `Icons.*`로 매핑한 뒤 design-ref 이미지로 충실도를 확인한다 — 완전 1:1은 방언 한계라 design-review-ui·인간 오라클이 판정한다. 색 매핑도 여기서 `app_color` foundation 토큰으로 한다(생 `Color(0x…)` 금지 §7) — design-tokens.json `colors`의 신규 색은 architect가 foundation 토큰 추가로 결정한다.
 
 ## §6. BC 루트 라우팅 짝 — router·navigator 작성·사용
 

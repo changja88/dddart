@@ -274,7 +274,7 @@ List<Finding> _skeleton(BackstopContext ctx) {
         'infra_layer': infraKinds,
         'presentation_layer': presKinds,
         'domain_layer': {},
-      });
+      }, requiredFiles: const ['analysis_options.yaml']); // 타입 전면강제 국소 lint(houserules §3·decision A)
       // domain: 애그리거트 ≥1 + 각 애그리거트 완비
       final domDir = Directory('$lib/$bcDir/domain_layer');
       if (domDir.existsSync()) {
@@ -312,13 +312,14 @@ List<Finding> _skeleton(BackstopContext ctx) {
     requireUnit('root', '신규 합성 루트', {
       '': {'router', 'scaffold', 'handler', 'initializer'},
       'scaffold': {'view', 'view_model', 'state'},
-    });
+    }, requiredFiles: const ['analysis_options.yaml']); // 타입 전면강제 국소 lint(houserules §3·decision A)
   }
   // design_system 신설
   if (ctx.allDirs.contains('design_system') && ctx.isAddedDir('design_system')) {
     requireUnit('design_system', '신규 design_system', {
       '': {'foundation', 'theme', 'component', 'util'},
     }, requiredFiles: [
+      'analysis_options.yaml', // 타입 전면강제 국소 lint(houserules §3·decision A)
       for (final t in ['color', 'typography', 'spacing', 'radius', 'shadow', 'duration', 'asset'])
         'foundation/app_$t.dart'
     ]);

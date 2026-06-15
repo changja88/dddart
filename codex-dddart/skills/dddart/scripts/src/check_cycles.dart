@@ -45,7 +45,7 @@ List<Finding> runCycles(BackstopContext ctx, {required bool updateBaseline}) {
     baselineFile.parent.createSync(recursive: true);
     _write(baselineFile, current);
     ctx.notices.add('[info] CY1 베이스라인 생성 — 현재 순환 쌍 ${current.length}개 동결 '
-        '(.dddart/backstop-baseline.json — 커밋하고 G0 배너에 표면화할 것)');
+        '(.dddart/backstop-baseline.json — 커밋하고 다음 게이트 배너에 표면화할 것)');
     return out;
   }
   if (updateBaseline) {

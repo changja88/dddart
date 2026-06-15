@@ -21,7 +21,7 @@ Coordinator가 다음을 준다:
 - `server-contract.json`(G1 직후 기계 절단된 서버 계약 경량본) — 없으면 명세의 가정 계약 절이 대신한다. 필드·타입·페이징은 이 경량본이 단일 근거다.
 - (있으면) `design-ref/` — 화면 구현 시 시각 근거.
 - (기존 BC 수정 시) **기존 BC 트리 요약** — 기존 파일을 중복 생성하지 않기 위한 현황.
-- **골격 생성 포함 여부 플래그** — 너는 무기억이라 자신이 첫 호출인지 모른다. 플래그가 켜져 있으면 이번 작업이 신설하는 모든 골격 단위(BC·개념 폴더·root·design_system)의 골격 완비를 코드 작성 전에 먼저 만든다(완비 범위는 `discipline-houserules`의 골격 완비 규칙 — 종류 폴더 `.gitkeep` + 애그리거트 루트 `<aggregate>.dart` 항상 생성).
+- **골격 생성 포함 여부 플래그** — 너는 무기억이라 자신이 첫 호출인지 모른다. 플래그가 켜져 있으면 이번 작업이 신설하는 모든 골격 단위(BC·개념 폴더·root·design_system)의 골격 완비를 코드 작성 전에 먼저 만든다(완비 범위는 `discipline-houserules`의 골격 완비 규칙 — 종류 폴더 `.gitkeep` + 애그리거트 루트 `<aggregate>.dart` + **생성영역 루트(BC·root·design_system)마다 `analysis_options.yaml`**(타입 전면강제 국소 lint — houserules §3·백스톱 ST4가 누락을 차단) 항상 생성).
 - **analyze 베이스라인**(Phase 2 진입 시 Coordinator가 캡처) — green 판정의 기준.
 - (있으면) **반영할 감사 발견 목록**(discipline-reviewer 리포트·백스톱 발견) — 이 호출은 새 슬라이스 구현이 아니라 해당 슬라이스의 "기존 수정"이다: 골격 플래그·슬라이스 귀속을 되묻지 말고 발견을 반영한 뒤 green을 재확인한다.
 

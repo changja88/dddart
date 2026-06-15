@@ -145,7 +145,7 @@ BC를 만들면 **4계층 폴더와 모든 표준 종류 폴더를 항상 생성
 - **타입 강제 국소 lint** — 골격을 만들 때 dddart 생성 영역 루트(BC `application/<bc>/`·`common/`·`design_system/`·`root/`)마다 `analysis_options.yaml`을 생성해 타입 전면 명시(implementation-dart §2 일탈3)를 *그 폴더에 국소* 강제한다. **호스트 루트 `analysis_options.yaml`은 절대 수정하지 않는다** — analyzer는 가장 가까운 상위 옵션을 쓰고 하위가 부모를 *대체*하므로(병합 아님) 템플릿에 `include`·`exclude`·rules를 전부 명시한다(plugin 경계 — 호스트 기존 lint 정책 무파괴). codegen(`*.g.dart`·`*.freezed.dart`)은 `exclude`:
 
 ```yaml
-# dddart 생성 폴더 국소 — 호스트 루트 미수정. 호스트가 flutter_lints 의존이고 omit_local_variable_types류와 충돌하면 include를 빼고 아래 rules만 둔다(라이브런서 analyze로 확인).
+# dddart 생성 폴더 국소 — 호스트 루트 미수정. flutter_lints와 always_specify_types는 충돌하지 않으니 include 유지(실측 — flutter_lints는 omit류 비활성·국소가 부모 룰셋 대체). 주의: 호스트 루트가 이 폴더를 analyzer: exclude:로 덮으면 루트 analyze에서 국소 lint가 침묵 무력화된다(G0 전제조건 검사에서 확인).
 include: package:flutter_lints/flutter.yaml
 analyzer:
   language:

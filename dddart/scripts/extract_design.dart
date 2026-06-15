@@ -89,6 +89,14 @@ void main(List<String> argv) {
     _collectClassTokens(html, arbitrary, negativeMargins);
   }
 
+  // fail-loud: tailwind-config 토큰이 0이면(블록 부재·빈 config) 시안 색·spacing·타이포를 기계 추출
+  // 못 한 것 — 빈 토큰으로 충실도 게이트가 헛발동하지 않게 exit 1(command가 has_stitch_html=false로 처리).
+  if (colors.isEmpty && spacing.isEmpty && typography.isEmpty) {
+    stderr.writeln('[extract-design] tailwind-config 토큰 0 — 동결 HTML에 <script id="tailwind-config">가 '
+        '없거나 비었다. 색·spacing·타이포를 기계 추출할 수 없다(has_stitch_html=false·이미지+인간 오라클 보조로 진행).');
+    exit(1);
+  }
+
   final unmapped = icons.values.where((_IconAgg a) => a.flutter == null).map((_IconAgg a) => a.name).toSet().toList()..sort();
 
   final out = <String, dynamic>{
@@ -147,15 +155,52 @@ Map<String, dynamic>? _parseConfig(String block) {
   if (braceStart < 0) return null;
   final objText = _balanced(block, braceStart);
   if (objText == null) return null;
-  final json = objText
-      .replaceAllMapped(RegExp(r'([{,]\s*)([A-Za-z_$][A-Za-z0-9_$]*)\s*:'), (Match m) => '${m[1]}"${m[2]}":')
-      .replaceAllMapped(RegExp(r',(\s*[}\]])'), (Match m) => '${m[1]}');
   try {
-    final decoded = jsonDecode(json);
+    final decoded = jsonDecode(_jsToJson(objText));
     return decoded is Map<String, dynamic> ? decoded : null;
   } catch (_) {
     return null;
   }
+}
+
+/// JS 객체 리터럴 → JSON. **문자열 리터럴 안은 보존**하고 그 밖에서만 무인용 키 인용 + trailing
+/// comma 제거 — 따옴표 무인지 정규화가 값 안의 `,ident:`·`{ident:`를 손상시키는 것을 막는다(따옴표·
+/// 이스케이프 추적). 단일따옴표 문자열은 보존돼 jsonDecode가 fail-loud(현 Stitch 출력은 큰따옴표만).
+String _jsToJson(String src) {
+  final out = StringBuffer();
+  final seg = StringBuffer(); // 비문자열 구간 누적
+  void flushSeg() {
+    if (seg.isEmpty) return;
+    out.write(seg
+        .toString()
+        .replaceAllMapped(RegExp(r'([{,]\s*)([A-Za-z_$][A-Za-z0-9_$]*)\s*:'), (Match m) => '${m[1]}"${m[2]}":')
+        .replaceAllMapped(RegExp(r',(\s*[}\]])'), (Match m) => '${m[1]}'));
+    seg.clear();
+  }
+
+  String? quote;
+  for (var i = 0; i < src.length; i++) {
+    final c = src[i];
+    if (quote != null) {
+      out.write(c);
+      if (c == r'\' && i + 1 < src.length) {
+        out.write(src[i + 1]);
+        i++; // 이스케이프 다음 문자 보존
+      } else if (c == quote) {
+        quote = null;
+      }
+      continue;
+    }
+    if (c == '"' || c == "'") {
+      flushSeg();
+      quote = c;
+      out.write(c);
+      continue;
+    }
+    seg.write(c);
+  }
+  flushSeg();
+  return out.toString();
 }
 
 /// braceStart의 `{`부터 짝 맞는 `}`까지 부분 문자열(따옴표 안 중괄호는 무시).
