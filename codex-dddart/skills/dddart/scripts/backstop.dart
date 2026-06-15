@@ -19,7 +19,7 @@ import 'src/check_naming.dart';
 import 'src/check_structure.dart';
 import 'src/common.dart';
 
-const _totalChecks = 51; // ST12 + IM22 + NM16 + CY1
+const _totalChecks = 52; // ST12 + IM22 + NM17 + CY1
 
 void main(List<String> argv) {
   String? targetPath;

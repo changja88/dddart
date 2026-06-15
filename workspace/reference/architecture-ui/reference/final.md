@@ -51,6 +51,7 @@ view는 VM과 1:1로 바인딩되는 루트다 — `ConsumerWidget`으로 `ref.w
 - 조회 실패의 error 빌더 처리·액션 에러의 `ref.listen` 소비 패턴(consumeError)은 architecture-state §4 소유 — view 작성 시 그 정식 예제를 그대로 쓴다.
 - TextEditingController·FocusNode 등 UI 컨트롤러는 view가 보유한다 — 값은 VM 메서드 인자로(architecture-state §2).
 - VM 없는 정적 view(약관·안내)는 VM·State 없이 허용된다 — 삼총사 대응 검사는 VM 기준이다(사실은 discipline-houserules §4).
+- **view body가 직접 반환하는 것은 section·widget·임베드 view 인스턴스의 조립과, error/loading 분기의 표준 컴포넌트(§4·design_system)뿐이다** — view 파일 안에 위젯 클래스를 새로 정의하거나(`_ErrorBody`·`_DetailBody` 류 private 포함) top-level `Widget` 함수로 트리를 빌드하지 않는다. 분기 화면(목록·상세·빈 상태)은 section으로, 재사용 조각은 widget으로 분리한다 — backstop **NM17**이 view 내 추가 위젯 클래스·top-level `Widget` 함수를 기계 차단한다.
 
 ## §3. section·widget 작성 규율 — dumb 표현 조각
 

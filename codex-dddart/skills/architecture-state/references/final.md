@@ -69,6 +69,8 @@ VM은 화면 1개의 상태 주인이다 (규약 §3.3): `build()`가 `FutureOr<
 | ① 조회(빌드) | `build()` | BadRequestResponse를 **throw** → `AsyncValue.error` | view의 error 빌더 — 화면 단위 에러·재시도 (riverpod 내장 메커니즘. **자동 재시도는 전역 OFF**가 dddart 확정 — 표기는 implementation-riverpod §8) |
 | ② 액션 | 버튼·제출 등 메서드 | State의 표준 필드 `BadRequestResponse? error`에 담는다 | View가 `ref.listen`으로 감지·표시(`isShow` 존중) 후 **`consumeError()`로 명시 소비** |
 
+> view의 `.when` error·loading 빌더는 design_system 컴포넌트(`ErrorFeedback`·`Loading`)를 **직접 반환**한다 — 에러·로딩·빈 상태 UI를 view 파일 안에 위젯 클래스(`_ErrorBody` 류)로 정의하지 않는다(backstop **NM17**·architecture-ui §2). 본문(목록·상세)은 section으로 분리한다.
+
 UseCase는 Repo의 Either를 통과·조합하며 새 throw를 만들지 않는다 — 조회 실패를 AsyncValue.error로 넘기는 throw는 **VM의 일**이다 (규약 §3.4).
 
 **정식 예제** — base VM·공용 헬퍼 없이 이 패턴을 그대로 반복한다 (HaffHaff "플래그→listen→표시→리셋" 33파일 관례의 에러 확장). freezed·@riverpod 표기법 상세는 implementation-dart §4·implementation-riverpod §2 소유:
@@ -88,19 +90,19 @@ abstract class ChannelSummaryState with _$ChannelSummaryState {
 class ChannelSummaryVM extends _$ChannelSummaryVM {
   @override
   FutureOr<ChannelSummaryState> build() async {
-    final result = await ChannelUseCase().getChannels(); // 직접 생성 — DI 없음
+    final Either<BadRequestResponse, List<Channel>> result = await ChannelUseCase().getChannels(); // 직접 생성 — DI 없음
     return result.fold(
-      (error) => throw error, // ① 조회 실패 — AsyncValue.error로
-      (channels) => ChannelSummaryState(channels: channels),
+      (BadRequestResponse error) => throw error, // ① 조회 실패 — AsyncValue.error로
+      (List<Channel> channels) => ChannelSummaryState(channels: channels),
     );
   }
 
   Future<void> leaveChannel(String channelId) async {
-    final result = await ChannelUseCase().leaveChannel(channelId);
+    final Either<BadRequestResponse, Unit> result = await ChannelUseCase().leaveChannel(channelId);
     if (!ref.mounted) return; // 액션 중 화면 이탈 — dispose 후 state 접근은 riverpod 3에서 throw
     result.fold(
-      (error) => state = AsyncData(state.requireValue.copyWith(error: error)), // ② 액션 실패
-      (_) => ref.invalidateSelf(), // 성공 — 목록 재조회
+      (BadRequestResponse error) => state = AsyncData(state.requireValue.copyWith(error: error)), // ② 액션 실패
+      (Unit _) => ref.invalidateSelf(), // 성공 — 목록 재조회
     );
   }
 
@@ -110,8 +112,8 @@ class ChannelSummaryVM extends _$ChannelSummaryVM {
 }
 
 // presentation_layer/view/channel_summary_view.dart — View 쪽 소비 (build 안)
-ref.listen(channelSummaryVMProvider, (previous, next) {
-  final error = next.value?.error; // riverpod 3: value는 무throw — valueOrNull은 3.0에서 제거됨
+ref.listen(channelSummaryVMProvider, (AsyncValue<ChannelSummaryState>? previous, AsyncValue<ChannelSummaryState> next) {
+  final BadRequestResponse? error = next.value?.error; // riverpod 3: value는 무throw — valueOrNull은 3.0에서 제거됨
   if (error == null) return;
   if (error.isShow) {
     // 표시 — design_system 컴포넌트를 View가 context로 호출 (architecture-ui §7, 호출 표기는 implementation-flutter §6)

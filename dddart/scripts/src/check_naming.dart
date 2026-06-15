@@ -1,4 +1,4 @@
-/// NM — 식별자·명명 16종 (설계 §5). 게이트: added 파일.
+/// NM — 식별자·명명 17종 (설계 §5 + NM17 view fat). 게이트: added 파일.
 ///
 /// *왜 결정적 백스톱인가*: 종류 폴더↔접미사↔클래스명의 3중 일치(제1 규약 §7)는
 /// casefold 문자열 비교로 환원된다. 본문 검사(NM9·NM10·NM13)는 주석·문자열 마스킹
@@ -293,6 +293,29 @@ List<Finding> runNaming(BackstopContext ctx) {
         out.add(Finding('NM16', f, ms.lineOf(m.start),
             'repository에 추상(abstract·sealed) 클래스 — 간소화 DDD는 인터페이스 없음',
             '제1 규약 §9-1', 'Repo는 구체 클래스 하나 — 원격+로컬 DataSource를 조합하는 단일 진실 원천.'));
+      }
+    }
+
+    // ---- NM17: view 위젯 직접 빌드 차단 (주 view 외 위젯 클래스·top-level Widget 함수 금지)
+    // view는 State를 그리고 section/widget을 조립할 뿐 — 위젯 트리를 직접 빌드하지 않는다(제1 규약 §3.5).
+    // private 위젯 클래스(NM3가 public만 보아 스킵하는 빈틈)·언더스코어 없는 추가 위젯 클래스·
+    // top-level Widget 반환 함수의 3중 우회를 모두 막는다.
+    if (parent == 'view' && base.endsWith('_view.dart')) {
+      final mainName = casefold(base.substring(0, base.length - 5));
+      for (final m in RegExp(
+              r'(?:^|\n)[ \t]*(?:(?:abstract|final|base)[ \t]+)*class[ \t]+([A-Za-z_$][\w$]*)[ \t]+extends[ \t]+[\w$]*Widget\b')
+          .allMatches(ms.tokensView)) {
+        final name = m.group(1)!;
+        if (casefold(name) == mainName) continue; // 주 view 클래스 1개만 합법
+        out.add(Finding('NM17', f, ms.lineOf(m.start),
+            'view 파일에 추가 위젯 클래스 `$name` — view는 위젯 트리를 직접 빌드하지 않는다',
+            '제1 규약 §3.5',
+            'error/loading은 design_system 컴포넌트를 직접 반환하고, 목록·상세 조립은 section으로 분리한다.'));
+      }
+      for (final m in RegExp(r'(?:^|\n)Widget[ \t]+([A-Za-z_$][\w$]*)[ \t]*\(').allMatches(ms.tokensView)) {
+        out.add(Finding('NM17', f, ms.lineOf(m.start),
+            'view 파일에 top-level Widget 반환 함수 `${m.group(1)}` — 위젯 빌드는 section/widget으로',
+            '제1 규약 §3.5', '함수로 위젯 트리를 빌드하지 않는다 — section/widget 위젯으로 분리한다.'));
       }
     }
   }

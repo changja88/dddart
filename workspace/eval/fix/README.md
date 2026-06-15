@@ -20,6 +20,7 @@
 |---|---|---|---|---|
 | [003](feedback-003-typehint-navvo-designfidelity.md) | 1차 양판 | `7717607` → 롤백 `17100a9` | ↩️롤백됨 | 3영역 전부 효과 입증 0(디자인게이트 design-ref부재로 비발동·타입 dim0·내비 선-FAIL)·회귀4는 피드백3와 무관(비결정성) |
 | [004](feedback-004-test-backstop-label-gates.md) | 2차 양판 | (미적용·제안) | 제안 | 테스트 게이트·백스톱 실행 강제·ST-2 명세일치·G-8 한글 보존 등 7건 사전등록 |
+| [005](feedback-005-stitch-typeforce-viewfat.md) | 사용자 3목표 | (E 수정 대기) | 🔧설계 v2 | Stitch 스크립트 추출·타입 전면강제(BC 국소 lint)·view 위젯클래스 차단(NM17)·적대리뷰 4개 반영 |
 
 ## 규약
 

@@ -19,7 +19,7 @@
 ## 목차
 
 - §1. 버전·전제 — SDK ^3.9의 정확한 의미·상한
-- §2. Effective Dart 선별 — 명명·문서·API 형태·에러 처리 (의도적 일탈 2건)
+- §2. Effective Dart 선별 — 명명·문서·API 형태·에러 처리 (의도적 일탈 3건)
 - §3. 널 안전 실전 — required·연산자·promotion 관용구
 - §4. freezed 3.x — 표준 표기 계약
 - §5. union 분기 — when/map 대신 switch 패턴 매칭
@@ -36,7 +36,7 @@
 - **상한 주의**: 최신 Dart(3.12)의 dot shorthands(`.enumValue` 축약 — 3.10)·private named parameters(3.12)는 **^3.9 프로젝트에서 컴파일 불가** — 생성 코드에 쓰지 않는다. 언어 버전은 pubspec의 min SDK가 정한다.
 - 패키지 기준: freezed 3.2·freezed_annotation 3.x / json_serializable 6.x·json_annotation 4.9 / dartz 0.10.1.
 
-## §2. Effective Dart 선별 — 명명·문서·API 형태·에러 처리 (의도적 일탈 2건)
+## §2. Effective Dart 선별 — 명명·문서·API 형태·에러 처리 (의도적 일탈 3건)
 
 **명명(케이싱)** — 파일·클래스 명명의 *무엇*은 discipline-houserules §4 소유, 여기는 언어 케이싱 규칙:
 
@@ -52,12 +52,13 @@
 
 **문서 주석**: `///`(블록 주석 금지) · 첫 문장 요약 후 빈 줄 · 스코프 내 식별자는 `[Order]` 대괄호 참조 · bool 프로퍼티는 "~인지 여부(Whether)"로 · 공개 API에 우선 작성. 주석의 *언제·왜*는 discipline-cleancode §4 소유 — 여기는 표기.
 
-**API 형태**: 개념상 속성 접근이면 getter(무인자·멱등·부작용 없음 — `Money get totalAmount` 정합) · bool 이름은 긍정형(`isConnected`) · **bool 인자는 named로**(positional bool 금지) · 공개 API는 타입 명시, 초기화된 지역 변수는 추론(`final result = await ...`) · setter만 단독 정의 금지 · await 없이 Future를 그대로 반환하면 `async` 생략(`getChannels() => safeApiCall(...)` 화살표 위임이 이 형태).
+**API 형태**: 개념상 속성 접근이면 getter(무인자·멱등·부작용 없음 — `Money get totalAmount` 정합) · bool 이름은 긍정형(`isConnected`) · **bool 인자는 named로**(positional bool 금지) · **공개 API·지역 변수·클로저 파라미터 모두 타입 명시**(`final List<Channel> channels = await ...`·`(BuildContext c, int i) => ...` — 일탈3·`always_specify_types` 강제) · setter만 단독 정의 금지 · await 없이 Future를 그대로 반환하면 `async` 생략(`getChannels() => safeApiCall(...)` 화살표 위임이 이 형태).
 
-**의도적 일탈 2건 (dddart 결정 — 공식 AVOID보다 방언·정책 우선)**:
+**의도적 일탈 3건 (dddart 결정 — 공식 AVOID보다 방언·정책 우선)**:
 
 1. **조회 메서드의 `get` 접두**: 공식은 "AVOID starting a function or method name with get"이지만, **dddart의 Repo·UseCase 조회 메서드는 `getChannels()` 형태를 쓴다** — HaffHaff 방언이 기준점이고 기존 코드와의 일관이 우선이다(규약 §1 원칙 1). 그 외 일반 메서드는 공식대로 일을 말하는 동사로.
 2. **safeApiCall의 광범위 catch**: 공식은 "AVOID catches without on clauses"·"DON'T explicitly catch Error"지만, **safeApiCall 한 곳만 예외**다 — 전 실패를 Either로 정규화하는 의도적 단일 경계(architecture-data §2의 *왜*가 근거). **일반 코드에서는 4규칙을 지킨다**: on 절 없는 catch 금지 · Error 캐치 금지(버그는 전파되어 스택트레이스를 남겨야 한다) · 재던질 땐 `rethrow`(원 스택 보존 — `throw e`는 리셋) · Error 구현체는 프로그래밍 오류에만 던진다.
+3. **지역 변수·클로저 파라미터 타입 명시**: 공식은 "AVOID type annotating initialized local variables"(추론 권장)이지만, **dddart는 지역 변수·클로저 파라미터까지 타입을 적는다**(`final List<DailyForecast> forecasts = ...`·`(BuildContext context, int index) => ...`) — HaffHaff 방언(지역 변수 ~96% 명시)이 기준점이고, 생성 BC 폴더의 `analysis_options.yaml`에 `always_specify_types`+`always_declare_return_types`로 **기계 강제**한다(codegen `*.g.dart`·`*.freezed.dart`는 `exclude`). Flutter `itemBuilder`·`AsyncValue.when`·`GoRoute` builder 콜백도 타입 명시 — 표준 콜백과의 마찰은 감수한다(dddart 확정).
 
 ## §3. 널 안전 실전 — required·연산자·promotion 관용구
 
@@ -69,7 +70,7 @@
 - **promotion 정밀 규칙**: 지역 변수는 항상 promotion / **private final 필드는 Dart 3.2부터** / public 필드·getter는 불가. **freezed 프로퍼티는 public getter라 절대 promotion 되지 않는다** — **지역 변수 복사가 표준 관용구**다:
 
 ```dart
-final error = next.value?.error; // freezed State의 getter → 지역 변수로
+final BadRequestResponse? error = next.value?.error; // freezed State getter → 지역 변수 복사(타입 명시·일탈3)
 if (error == null) return;
 error.isShow;                    // 여기서 error는 non-null로 promotion 완료
 ```
@@ -128,7 +129,7 @@ final message = switch (result) {
 
 ## §6. Dart 3 문법 — 레코드·패턴·modifier·컬렉션 합성
 
-- **레코드·구조분해**: `var (name, age) = userInfo(json);` / named는 `final (:name, :age) = ...`. **공개 계약(Repo·UseCase 반환)은 명명된 freezed 모델·Either가 표준** — 레코드는 지역적·사적 묶음에 한정한다(타입 명시·의도 공개 원칙).
+- **레코드·구조분해**: `final (String name, int age) = userInfo(json);` / named는 `final (:name, :age) = ...`(named 패턴 바인딩은 추론 허용). **공개 계약(Repo·UseCase 반환)은 명명된 freezed 모델·Either가 표준** — 레코드는 지역적·사적 묶음에 한정한다(타입 명시·의도 공개 원칙).
 - **객체 패턴**: `if (order case Order(status: OrderStatus.canceled)) ...` / `Order(:final status)` 축약. freezed getter를 패턴 바인딩으로 추출하면 promotion 불가(§3)를 우회하는 효과.
 - **switch 표현식·guard**: `switch (x) { Pattern when cond => ..., _ => ... }` — `||` 패턴·if-case(`if (data case {'user': [String name, _]}) ...`) 가용.
 - **class modifier**: `sealed`(같은 라이브러리 하위형 한정 → 소진 switch — freezed union의 짝) · `final`(외부 상속·구현 금지) · `interface`(구현만) · `base`(상속만). 어순: `abstract` → modifier → `class`. 확장을 통제할 의도가 있을 때만 쓴다.
