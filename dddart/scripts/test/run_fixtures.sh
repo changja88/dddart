@@ -273,16 +273,18 @@ Widget? _header(BuildContext context) => null;
 Column _col() => Column(children: <Widget>[]);
 
 String _label(int n) => '$n';
+
+WidgetRef? _grabRef() => null;
 EOF
 OUT=$(run_backstop "$P" --diff-base "$BASE" --only nm); E=$?
 N=$(grep -c "NM17" <<<"$OUT" || true)
 # 기대: _FatBody·_MultiBody(멀티라인)·_rows(List<Widget>)·_header(Widget?)·_col(구체위젯) = NM17 발동.
-#       주 view(BoardListView)·순수 helper(_label: String 반환)는 미발동.
+#       주 view(BoardListView)·순수 helper(_label: String)·WidgetRef 반환(_grabRef: 비위젯 프레임워크 타입)은 미발동.
 if [ "$E" = 2 ] \
    && grep -q "_FatBody" <<<"$OUT" && grep -q "_MultiBody" <<<"$OUT" \
    && grep -q "_rows" <<<"$OUT" && grep -q "_header" <<<"$OUT" && grep -q "_col" <<<"$OUT" \
-   && ! grep -q "_label" <<<"$OUT" && ! grep -q "BoardListView" <<<"$OUT"; then
-  PASS=$((PASS+1)); echo "PASS F11 NM17 우회 차단(멀티라인 extends·위젯반환 함수·구체위젯·helper 통과·주view 면제) [NM17=$N]"
+   && ! grep -q "_label" <<<"$OUT" && ! grep -q "BoardListView" <<<"$OUT" && ! grep -q "_grabRef" <<<"$OUT"; then
+  PASS=$((PASS+1)); echo "PASS F11 NM17 우회 차단(멀티라인 extends·위젯반환 함수·구체위젯·helper·WidgetRef 면제·주view 면제) [NM17=$N]"
 else
   FAIL=$((FAIL+1)); echo "FAIL F11 (exit=$E, NM17=$N)"; echo "$OUT" | head -30 | sed 's/^/    /'
 fi

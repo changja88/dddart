@@ -70,6 +70,12 @@ const _widgetReturnTypes = {
   'ColoredBox', 'DecoratedBox', 'FittedBox', 'AspectRatio', 'Form', 'Table', 'Flex',
 };
 
+/// 이름에 `Widget`을 포함하지만 렌더링 위젯이 아닌 프레임워크 타입 — NM17 함수 검사의 거짓양성 방지.
+const _nonWidgetReturnTypes = {
+  'WidgetRef', 'WidgetsBinding', 'WidgetState', 'WidgetStateProperty',
+  'WidgetStatesController', 'WidgetTester',
+};
+
 List<Finding> runNaming(BackstopContext ctx) {
   final out = <Finding>[];
   final added = ctx.dartFiles.where(ctx.isAdded).toList();
@@ -329,6 +335,7 @@ List<Finding> runNaming(BackstopContext ctx) {
           .allMatches(ms.tokensView)) {
         final ret = m.group(1)!;
         final bare = ret.replaceAll(RegExp(r'[<?].*'), '');
+        if (_nonWidgetReturnTypes.contains(bare)) continue; // WidgetRef 등 비위젯 프레임워크 타입
         if (!ret.contains('Widget') && !_widgetReturnTypes.contains(bare)) continue;
         out.add(Finding('NM17', f, ms.lineOf(m.start),
             'view 파일에 위젯 빌드 top-level 함수 `${m.group(2)}` (반환 `$ret`) — 위젯 빌드는 section/widget으로',
