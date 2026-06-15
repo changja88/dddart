@@ -24,39 +24,111 @@
 
 ## 1. 치명 게이트 (17 — 하나라도 ❌이면 픽스처 FAIL)
 
-| 축 | 치명 항목 | 종합 | 수확 근거 (레인·인용) |
-|---|---|---|---|
-| S-DDD | SD-1 판정 소유 / SD-2 루트 경유 / SD-7 UI호출 금지 | | |
-| S-VIEW | VW-1 Fat Widget / VW-6 show() 금지 | | |
-| S-STATE | ST-1 직행 / ST-2 2채널 / ST-4 mounted | | |
-| S-DATA | DT-1 Either / DT-2 단일 출구 | | |
-| S-HR | HR-1 컨테이너 / HR-4 역류 / HR-5 4채널 | | |
-| BUILD | BG-1 / BG-2 (위 0절) | | |
-| FC | FC-1 골든 / FC-2 비-vacuous / FC-3 도메인 정합 | | |
+| 축 | ID | 항목 | 종합 | 수확 근거 (레인·인용) |
+|---|---|---|---|---|
+| S-DDD | SD-1 | 판정 소유·빈혈 차단 | | |
+| S-DDD | SD-2 | 루트 경유 변경 | | |
+| S-DDD | SD-7 | UseCase 관문(UI호출 금지) | | |
+| S-VIEW | VW-1 | Fat Widget 금지 | | |
+| S-VIEW | VW-6 | 표시 소유·show() 금지 | | |
+| S-STATE | ST-1 | VM 책임 경계(직행 금지) | | |
+| S-STATE | ST-2 | 에러 2채널 | | |
+| S-STATE | ST-4 | ref 규율(mounted 가드) | | |
+| S-DATA | DT-1 | Either 실패 계약 | | |
+| S-DATA | DT-2 | 단일 출구·throw 금지 | | |
+| S-HR | HR-1 | 4계층·BC 컨테이너 | | |
+| S-HR | HR-4 | 계층 import 역류 금지 | | |
+| S-HR | HR-5 | 교차 BC 4채널만 | | |
+| BUILD | BG-1 | 컴파일 가능 | | |
+| BUILD | BG-2 | analyze green 래칫 | | |
+| FC | FC-1 | 골든 오라클 | | |
+| FC | FC-2 | 테스트·메커니즘 비-vacuous | | |
+| FC | FC-3 | 도메인 정합(negative gate) | | |
 
 > 의미 레인 FAIL이면 결정 스크립트 통과여도 치명 FAIL(Goodhart 차단). **종합 칼럼 = 결정∥의미 종합** — 레인별 분리·`[결정PASS∧의미FAIL]` 변종은 §2 차원표·아래 의미적 변종 메타에 기록(EVAL `§6.1` 정합).
 
 ## 2. 차원별 판정 (TIER-S 척추 + 비치명)
 
-> 각 축 표: ID·판정(✅❌🟡➖)·근거. 치명은 위 §1과 교차 표기.
+> 각 축 표: **ID·항목(RUBRIC 표 일치)**·판정(✅❌🟡➖)·근거. 치명은 위 §1과 교차 표기. **모든 행을 RUBRIC ID 순서대로 유지**(생략·압축 금지·미발화는 ➖N/A로 표기).
 
 ### A. S-DDD (SD-1~9)
-| ID | 판정 | 근거 |
-|---|---|---|
-| SD-1 ~ SD-9 | | |
+| ID | 항목 | 판정 | 근거 |
+|---|---|---|---|
+| SD-1 | 판정 소유·빈혈 차단 | | |
+| SD-2 | 루트 경유 변경 | | |
+| SD-3 | 불변식 도메인 예외 검증 | | |
+| SD-4 | VO·엔티티 도메인 형태 | | |
+| SD-5 | 애그리거트 경계·참조 | | |
+| SD-6 | 도메인서비스·specification 귀속 | | |
+| SD-7 | UseCase 관문 | | |
+| SD-8 | 비채택 패턴 미도입 | | |
+| SD-9 | 유비쿼터스 언어 — 계층 관통 철자 | | |
 
-### B. S-VIEW (VW-1~7) / C. S-STATE (ST-1~9) / D. S-DATA (DT-1~9) / E. S-HR (HR-1~9)
-| ID | 판정 | 근거 |
-|---|---|---|
-| (축별 행) | | |
+### B. S-VIEW (VW-1~7)
+| ID | 항목 | 판정 | 근거 |
+|---|---|---|---|
+| VW-1 | Fat Widget 금지 | | |
+| VW-2 | 3단 판별·과승격 금지 | | |
+| VW-3 | dumb 조각 계약 | | |
+| VW-4 | 시각 토큰 단일 출처 | | |
+| VW-5 | ui_extension = 도메인→UI 매핑 유일 자리 | | |
+| VW-6 | 표시 소유·show() 금지 | | |
+| VW-7 | 라우트 단일 출처·navigator 분업 | | |
+
+### C. S-STATE (ST-1~9)
+| ID | 항목 | 판정 | 근거 |
+|---|---|---|---|
+| ST-1 | VM 책임 경계 | | |
+| ST-2 | 에러 2채널 | | |
+| ST-3 | State 형태·노출 계약 | | |
+| ST-4 | ref 규율 | | |
+| ST-5 | provider 형태·표기 | | |
+| ST-6 | SharedState·교차 BC | | |
+| ST-7 | root 합성 구조 | | |
+| ST-8 | 비채택 (retry OFF·hooks·valueOrNull 등) | | |
+| ST-9 | base VM·공용 헬퍼 금지 | | |
+
+### D. S-DATA (DT-1~9)
+| ID | 항목 | 판정 | 근거 |
+|---|---|---|---|
+| DT-1 | Either 실패 계약 | | |
+| DT-2 | 단일 출구·throw 금지 | | |
+| DT-3 | BadRequestResponse 계약 | | |
+| DT-4 | DTO 없음·엔티티 직반환 | | |
+| DT-5 | Repo/DataSource 형태 | | |
+| DT-6 | retrofit DataSource 표기 | | |
+| DT-7 | hive 로컬 캐시 | | |
+| DT-8 | 계약 스냅샷 운용 | | |
+| DT-9 | infra service = 수동 어댑터 | | |
+
+### E. S-HR (HR-1~9)
+| ID | 항목 | 판정 | 근거 |
+|---|---|---|---|
+| HR-1 | 4계층·BC 컨테이너 | | |
+| HR-2 | 종류 폴더·접미사 | | |
+| HR-3 | 신규 골격 완비 | | |
+| HR-4 | 계층 import 역류 금지 | | |
+| HR-5 | 교차 BC 4채널만 | | |
+| HR-6 | 파일·클래스 명명 | | |
+| HR-7 | root/common/design_system 경계 | | |
+| HR-8 | 화면 삼총사·section/widget 접두 | | |
+| HR-9 | 개념 1차·종류 2차 성장 | | |
 
 ## 3. TIER-Q 등급 (카운트 기반)
 
-| ID | 판정 | 근거 |
-|---|---|---|
-| Q-1 ~ Q-9 | | |
+| ID | 항목 | 판정 | 근거 |
+|---|---|---|---|
+| Q-1 | Dart 명명·타입 표기 | | |
+| Q-2 | freezed 표기(비컴파일부) | | |
+| Q-3 | dartz Either 표면 | | |
+| Q-4 | null 안전 관용구 | | |
+| Q-5 | 직렬화 표기 | | |
+| Q-6 | catch 위생 | | |
+| Q-7 | 잔여 구조 스멜 | | |
+| Q-8 | import 정렬·주석 형식 | | |
+| Q-9 | flutter 내비 표기 | | |
 
-> **등급** = PASS/WEAK/FAIL 카운트(`EVAL-METHOD.md §3.2`). 거짓 FAIL 함정(수치 하드컷·doc 강제·전면 grep) 면제 확인.
+> **등급** = PASS/WEAK/FAIL 카운트(`EVAL-METHOD.md §3.2`·치명 게이트 통과 시에만 산정). 거짓 FAIL 함정(수치 하드컷·doc 강제·전면 grep) 면제 확인.
 
 ## grader 패널 증거 (A3 — blind 검증가능화·`EVAL-METHOD §2.0·§2.2`)
 

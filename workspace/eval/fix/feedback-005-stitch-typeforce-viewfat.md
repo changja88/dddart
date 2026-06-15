@@ -59,5 +59,17 @@
 - **타입**: BC 국소 lint `dart analyze`가 클로저 포함 전 생략 차단(측정 dim).
 - **view**: backstop NM17이 위젯 클래스·top-level Widget 함수 차단(우회 포함).
 
+## 검증런 실측 (3차 라이브런 `dddart-20260615-1938`·채점 `20260615-2319`·결과지 `results/20260615-2319-weather-*`)
+
+> **예상효과 대조** (사전등록 dim vs 3차 실측·grader 6명 만장일치+조정자 결정 레인):
+> - **타입(E2)** ✅ **적중** — 양판 `flutter analyze` "No issues found!"·always_specify_types 켜진 BC국소 `analysis_options.yaml` 하 green(클로저·컬렉션 전면 타입 명시). 생략 0.
+> - **view(목표3)** ✅ **적중** — 양판 backstop NM17 0 발화·view=section/컴포넌트 조립만.
+> - **Stitch(E3)** ❌ **미발동** — 양판 design-ref 0파일·`design-tokens.json` 없음·Stitch MCP 미연결(자체 설계). **4개 런 연속 미연결로 E3 메커니즘 검증 불가**. `extract_design.dart`·`icon_map.json`은 설치됐으나 런이 미실행.
+> - 부수: 백스톱 52종·BC국소 analysis_options 생성(ST4) 양판 정상. F-fix 강화분(NM17·extract_design fail-loud)은 런이 안 건드려 직접 미검증(회귀 0).
+>
+> **종합**: 양판 둘 다 ❌ FAIL. 단 **겨냥한 축(타입·view) 검증** + 직전 치명 다수 해소(claude ST-2 격하 교정·codex 백스톱 5→0·G-8 영문라벨→한글). **그러나 feedback-005가 *안 겨냥한* 치명이 종합 PASS를 막음**: claude=**FC-2 골든 두드리는 테스트 부재**(더미 스모크 1개·1·2·3차 지속), codex=**날짜 오름차순 정렬 전면 누락**(FC-1·2·3 근원)+수동 riverpod 2.x(ST-5).
+>
+> **교훈**: feedback-005는 *기계 강제 가능한 축(타입·view)에서 성공*했으나, 라이브런 종합 PASS를 막은 건 **그 3목표 밖의 치명**(테스트 산출·정렬 정확성)이었다 — **겨냥점이 실제 실패 지점과 어긋남**. 다음(006 후보): ①coder 골든-두드림 테스트 게이트(claude FC-2 근본·feedback-004 미구현) ②정렬/핵심행위 책임 명시+FC 순서 단언(codex FC-1·N2) ③codex `@riverpod` 코드젠 강제(ST-5) ④E3는 **코퍼스 아니라 *런 절차*(Stitch 연결)가 막음** → 4차 라이브런 Stitch 연결 선결.
+
 ## F 적대리뷰 (E 후)
 수정이 v2 계획대로인가·우회 잔존·양판 대칭·fixture green·backstop self-check를 서브에이전트로 검증.

@@ -1,0 +1,1101 @@
+[
+  {
+    "run": "X",
+    "lens": "n1",
+    "adversarial": false,
+    "verdict": {
+      "critical": [
+        {
+          "id": "SD-1",
+          "verdict": "PASS",
+          "cite": "weather_condition.dart:8-21 / forecast_list_vm.dart:50-56",
+          "reason": "새 도메인 어휘 판정·계산('~할 수 있는가'·'~은 얼마인가' 류)이 사실상 없는 순수 조회 기능. condition은 분류 게이트·토글이 없는 순수 enum(주석대로 분류 메서드·spec 미보유 — 빈혈 아님, 판정 자체가 부재). VM에 거주한 것은 날짜 오름차순 정렬(_sortedByDate)·날짜 포맷·record 묶음뿐 — 도메인 판정이 아니라 표시 정렬/변환이라 SD-1 양면게이트(누락/과잉) 어디에도 안 걸림. VM이 specification import·평가 0."
+        },
+        {
+          "id": "SD-2",
+          "verdict": "NA",
+          "cite": "forecast.dart:8-26 / forecast_summary.dart:12-23",
+          "reason": "조건·계산·전이 갱신이 발생하지 않는 읽기전용 조회 도메인. 애그리거트(Forecast/ForecastSummary) 모두 상태전이 메서드 없음(주석 명시), Model 밖 copyWith에 분기·전이 0. 발화 조건 미충족."
+        },
+        {
+          "id": "SD-7",
+          "verdict": "PASS",
+          "cite": "forecast_use_case.dart:11-23",
+          "reason": "ForecastUseCase 무상태 plain·Repo Either를 그대로 통과(새 throw 0·실패 침묵 폐기 0). import는 dartz/bad_request_response/domain entity/forecast_repo뿐 — flutter material·presentation·design_system import 0(UI 호출 없음). 도메인 개념(forecast)으로 명명, 화면명 아님."
+        },
+        {
+          "id": "VW-1",
+          "verdict": "PASS",
+          "cite": "forecast_list_view.dart:27-45 / forecast_detail_body_section.dart:22-68",
+          "reason": "build/콜백이 분기(loading/error/data)·조립·표시 위임만. 권한·전이·가격·정렬 등 정책 0(정렬은 VM, 매핑은 ui_extension). onTap은 ref.read(...).openDetail 위임뿐."
+        },
+        {
+          "id": "VW-6",
+          "verdict": "PASS",
+          "cite": "weather_navigator.dart:9-18 / forecast_detail_body_section.dart:71-106",
+          "reason": "design_system 컴포넌트(Loading·ErrorFeedback)에 전역키/context 자기표시 static 경로 0. 다이얼로그·시트 자체가 없음. WeatherNavigator는 design_system 컴포넌트가 아니라 BC navigator로 show/present/display류 미노출."
+        },
+        {
+          "id": "ST-1",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:18-19 / forecast_detail_vm.dart:16-17",
+          "reason": "VM의 Model 방향 호출이 ForecastUseCase 인스턴스 단독. Repo·DataSource·box·Dio·SDK import/생성 0(Repo는 UseCase 뒤에 숨음). BuildContext·TextEditingController 등 미보유(전환은 WeatherNavigator). 자기 freezed State(ForecastListState/ForecastDetailState)만 노출."
+        },
+        {
+          "id": "ST-2",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:25-30 / forecast_detail_vm.dart:23-30",
+          "reason": "순수 조회 전용 기능(액션 없음) — 조회 실패는 build()가 fold Left에서 BadRequestResponse(plain Exception/문자열 아님) throw → AsyncValue.error로 흐르고 view error 빌더가 표시(채널①). 액션 채널(State.error+listen+consumeError)은 발화 조건(상태변경 액션) 부재로 N/A — 거짓 FAIL 아님. valueOrNull 미사용(when 사용)."
+        },
+        {
+          "id": "ST-4",
+          "verdict": "PASS",
+          "cite": "forecast_list_view.dart:22 / forecast_list_vm.dart:35-37",
+          "reason": "watch=build 안만(view build), read=onTap 핸들러 1회(openDetail). VM build의 await 직후 state(this.state) 재접근·기록 경로 없음 — fold 결과를 곧장 return하므로 await 경계 뒤 state 접근이 없어 mounted 가드 불요(누락 아님). 무전제 requireValue 0, listen 내 상태변경 0."
+        },
+        {
+          "id": "DT-1",
+          "verdict": "PASS",
+          "cite": "forecast_repo.dart:18-24 / forecast_use_case.dart:16-22",
+          "reason": "Repo 공개 시그니처 Future<Either<BadRequestResponse,T>>(Right=성공 방향). UseCase·VM 소비처 모두 Left를 폐기 않고 상위 전달(UseCase는 통과, VM build는 fold Left에서 throw로 에러채널 진입 — no-op 폐기 아님)."
+        },
+        {
+          "id": "DT-2",
+          "verdict": "PASS",
+          "cite": "forecast_repo.dart:18-24 / safe_api_call.dart:13-47",
+          "reason": "Repo throw/rethrow/Future.error 0 — 외부 호출을 safeApiCall로 감싸 Either. safeApiCall이 DioException·FormatException·TypeError 개별 + catch-all 보유, 전부 BadRequestResponse Left로 정규화. dio_client 인터셉터는 정규화 안 함(통과). 단일 출구 유지."
+        },
+        {
+          "id": "HR-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/(트리) / weather_router.dart / weather_navigator.dart",
+          "reason": "신규 BC가 application/weather/ 하위, BC 1뎁스 = domain_layer·application_layer·infra_layer·presentation_layer 4계층. BC 직속 2파일(weather_router.dart·weather_navigator.dart)만. application/ 직속은 weather/ BC 폴더."
+        },
+        {
+          "id": "HR-4",
+          "verdict": "PASS",
+          "cite": "domain_layer/* imports(grep 결과 공백) / forecast.dart:1-3",
+          "reason": "domain_layer 전 파일 import에 flutter·material·common·presentation·infra·application_layer 0(grep 무매치) — 순수 Dart(freezed_annotation·json_annotation만). application은 presentation import 0, presentation은 infra import 0(view는 vm/state/section만), infra는 상위 import 0(repo/data_source는 domain·common만)."
+        },
+        {
+          "id": "HR-5",
+          "verdict": "NA",
+          "cite": "weather BC import 전수",
+          "reason": "단일 신규 BC(weather)뿐 — 타 BC를 import하는 지점이 없다(root_router가 weather_router를 조립하나 이는 root→BC 합성으로 교차 BC 4채널 규율 대상 아님). 발화 조건 미충족, 신규 순환 0."
+        },
+        {
+          "id": "BG-1",
+          "verdict": "PASS",
+          "cite": "forecast.dart:13 / forecast_summary.dart:13 / bad_request_response.dart:11",
+          "reason": "freezed 단일생성자 abstract 키워드 사용, codegen part 지시문(.freezed.dart·.g.dart) 완비, GoRoute builder 필수 인자 충족(weather_router.dart:25·31). valueOrNull 0, 3.10+ dot-shorthand/private named params 미관측. 본문 멤버 없는 데이터 freezed라 const X._() 불요. (실행 결과는 조정자 봉인 — 코드 형태상 컴파일 가능 형태.)"
+        },
+        {
+          "id": "BG-2",
+          "verdict": "PASS",
+          "cite": "analysis_options.yaml / 전 added .dart",
+          "reason": "added 코드에서 명시적 타입·import 정렬·미사용 import 미관측 등 정적 위반 신호 없음 — 새 analyzer error/warning 도입 흔적 코드상 부재. (analyze green 실행 결과는 조정자 봉인 — 코드 형태만 판정.)"
+        },
+        {
+          "id": "FC-1",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:50-56 / weather_condition_ui_extension.dart:10-37 / weather_navigator.dart:10-17",
+          "reason": "G-1: _sortedByDate가 a.date.compareTo(b.date) 오름차순 정렬 보유 — 역순 데이터셋 D에도 D0→D6. G-3/G-4: 타일 trailing '${tempMax}° / ${tempMin}°'(forecast_summary_tile_widget.dart:35) 최고=tempMax·최저=tempMin 정순, 문자열 보간이라 음수 부호 유지(절댓값화 없음). G-5: openDetail이 _formatDate(forecast.date)를 navigator→route pathParameter로 전달 → 상세가 그 date로 조회, 탭↔상세 일치. G-7: 아이콘 6종 distinct(wb_sunny·wb_cloudy·cloud·water_drop·ac_unit·thunderstorm), 색 6종 distinct(app_color.dart:13-18), cloudy(wb_cloudy)≠overcast(cloud) 구별. G-8: 라벨 §0 대응표 정확 일치(맑음·구름많음·흐림·비·눈·뇌우)."
+        },
+        {
+          "id": "FC-2",
+          "verdict": "FAIL",
+          "cite": "test/widget_test.dart:11-29",
+          "reason": "치명 FAIL. test/ 전체에 widget_test.dart 1개뿐이고 그 내용은 빈 Scaffold만 펌프하는 스모크 테스트 — weather 위젯(ForecastListView/타일/상세)을 일절 펌프하지 않고, 데이터셋 D를 fake/override로 주입하지 않으며, 단언은 expect(find.byType(MaterialApp), findsOneWidget) 하나뿐. G-1~G-8 골든을 두드리는 widget test 0. M1(정렬 역전)·M3(최고/최저 swap)·M4(날짜 인자 오류) 어떤 mutation을 주입해도 red가 안 남(헛 테스트). 골든 두드리는 비-vacuous 테스트 부재 = FC-2 vacuous."
+        },
+        {
+          "id": "FC-3",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:53-54 / forecast_detail_body_section.dart:54-64 / weather_condition_ui_extension.dart:11-36",
+          "reason": "명백한 도메인 오류 부재. N1: itemCount=state.items.length 절단 없음(7건 그대로). N2: 오름차순 정렬 보유. N3: 타일에 날짜·아이콘·최고·최저 전부, 상세에 습도·풍속·강수확률 3지표 모두 표시. N4: 6종 전부 distinct 매핑(미매핑·기본아이콘 fallthrough 없음 — 소진 switch). N5: 최고/최저 정순·음수 부호 유지·정수 ℃(화씨변환 없음). N6: 탭 날짜=상세 날짜. N7: 한글 라벨만 노출(enum 영문 미노출)·대응표 일치."
+        }
+      ],
+      "fc": {
+        "g1": "PASS — forecast_list_vm.dart:50-56 _sortedByDate가 date.compareTo 오름차순. 역순 데이터셋 D에도 첫 항목 D0·마지막 D6. 산출물이 정렬코드 보유(서버순서 의존 아님).",
+        "g3g4": "PASS — forecast_summary_tile_widget.dart:35 trailing '${tempMax}° / ${tempMin}°' 최고=tempMax·최저=tempMin 정순. 문자열 보간이라 D5 최저 -4 부호 유지(절댓값화·부호탈락 없음).",
+        "g5": "PASS — forecast_list_vm.dart:35-37 openDetail(forecast)이 _formatDate(forecast.date)를 WeatherNavigator.toDetail→pathParameter forecastDate로 전달, 상세 VM이 그 date로 조회. 탭한 항목 date=상세 date 일치(인접/고정날짜 아님).",
+        "g7": "PASS — weather_condition_ui_extension.dart:11-27 아이콘 6종 distinct(wb_sunny·wb_cloudy·cloud·water_drop·ac_unit·thunderstorm)·색 6종 distinct(app_color.dart:13-18 F9A825/7E8C9A/546069/1E88E5/4FC3F7/5E35B1). cloudy(wb_cloudy,7E8C9A)≠overcast(cloud,546069) 아이콘·색 모두 구별.",
+        "g8": "PASS — weather_condition_ui_extension.dart:29-36 라벨 §0 대응표 정확 일치: clear=맑음·cloudy=구름많음·overcast=흐림·rain=비·snow=눈·thunderstorm=뇌우.",
+        "overall": "PASS"
+      },
+      "nonCritical": [
+        {
+          "id": "SD-9",
+          "verdict": "PASS",
+          "reason": "유비쿼터스 언어 철자 계층 관통 일관: forecast/forecast_summary/weather_condition 개념이 domain·application·presentation에서 동일 철자·어순. forecast_list/forecast_detail 어순 drift 없음. (영문 도메인 어휘 일관성만 봄 — 한글 라벨은 G-8 소관.)"
+        },
+        {
+          "id": "ST-5",
+          "verdict": "PASS",
+          "reason": "provider 형태 = @riverpod 코드젠 클래스형. forecast_list_vm.dart:17-18 @riverpod class ForecastListVM extends _$ForecastListVM, forecast_detail_vm.dart:15-16 동형(family build 인자 String forecastDate). 수동 NotifierProvider·StateProvider·legacy·함수형 위장 0. root_vm도 동형(.g.dart 존재)."
+        },
+        {
+          "id": "VW-5",
+          "verdict": "PASS",
+          "reason": "도메인 enum→UI 매핑(아이콘·색·라벨)이 weather_condition_ui_extension.dart extension 단일 거주. VM·State getter·design_system·위젯에 매핑 누수 0(ConditionIconWidget도 condition.icon/.color extension 호출만)."
+        },
+        {
+          "id": "VW-4",
+          "verdict": "WEAK",
+          "reason": "색·타이포·spacing 토큰은 AppColor·AppTypography·AppSpacing foundation 참조(VM/State 시각 getter 0). 다만 ConditionIconWidget size·타일 leading size:36/상세 56(forecast_summary_tile_widget.dart:32, forecast_detail_body_section.dart:34) 등 size 매직 더블이 토큰 밖 리터럴 — 색/duration 위반은 아니나 치수 토큰화는 누락. 시각 리터럴 경미."
+        },
+        {
+          "id": "SD-3",
+          "verdict": "NA",
+          "reason": "전이 조건·불변식 위반이 없는 읽기전용 조회 도메인(상태전이 메서드 자체 부재). 생성시점 검증으로 직파싱 막는 위반도 없음(freezed fromJson 직파싱·서버 데이터 정상 유입). 발화 조건 미충족."
+        },
+        {
+          "id": "DT-4",
+          "verdict": "PASS",
+          "reason": "DataSource(forecast_data_source.dart) 반환이 도메인 엔티티 Future<List<ForecastSummary>>/Future<Forecast> 직반환. dto/·DTO·Mapper·Response 변환계층 0(이름 바꾼 변환계층도 없음). 서버 JSON은 엔티티 freezed fromJson 직파싱."
+        },
+        {
+          "id": "ST-2-action",
+          "verdict": "NA",
+          "reason": "액션(상태변경) VM 부재 — 순수 조회 2VM뿐이라 consumeError·ref.listen·State.error 소비 채널이 발화 안 함. 조회 채널(build throw→AsyncError)만 적용되며 정상. error 필드는 표준 State 형태 유지용으로 존재(미사용 주석 명시)."
+        }
+      ],
+      "rubricBlindSpot": "57차원은 '정렬코드 존재(G-1)'는 잡지만 '정렬 거주처가 표시변환인지 도메인판정인지'의 경계가 SD-1과 FC-1 사이에서 미끄러진다 — 날짜 오름차순은 표시정렬로 합법이나, 만약 condition별 우선순위·위험도 같은 '도메인 순위'가 들어왔다면 같은 VM 정렬이 SD-1 빈혈이 됐을 것. 이 산출물은 안전쪽이나 차원이 그 구분을 자동으로 못 가른다.",
+      "summary": "치명 FAIL 1건: FC-2(테스트 비-vacuous). test/widget_test.dart가 빈 Scaffold만 펌프하는 스모크 테스트 단 1개로, 데이터셋 D 주입·골든(정렬·매핑·내비·기온바인딩) 두드림·mutation red가 전무 — 헛 테스트. 나머지 치명 16(SD/VW/ST/DT/HR/BG/FC-1/FC-3)은 전부 PASS이며 코드 형태·기능 정확성은 견고: 정렬은 VM 오름차순, 6종 아이콘·색 distinct(cloudy≠overcast), 한글 라벨 대응표 정확, 탭↔상세 날짜 일치, Either 단일출구·safeApiCall 정규화, domain 순수성·계층 import 방향 청결. 즉 '형태·동작은 맞으나 그것을 지키는 실효 테스트가 없는' 산출물."
+    }
+  },
+  {
+    "run": "X",
+    "lens": "n2",
+    "adversarial": false,
+    "verdict": {
+      "critical": [
+        {
+          "id": "SD-1",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:50-56 / weather_condition.dart:8-21",
+          "reason": "이 기능은 읽기전용 조회라 '~할 수 있는가/얼마인가' 도메인 판정 자체가 거의 없다. 유일한 후보인 날짜 정렬은 DDD 표준 §5(ref final.md:134 '포맷·정렬·표시여부 조립=변환')이 VM 소유 변환으로 명시 — VM _sortedByDate(date.compareTo 오름차순)는 적법. condition 분류 판정·토글 없음(enum은 순수 분류, isXxx 메서드 없음). VM/view/state/ui_extension에 산수·도메인 분기 누수 0."
+        },
+        {
+          "id": "SD-2",
+          "verdict": "NA",
+          "cite": "forecast.dart:8-26 (전이/불변식 메서드 없음); grep copyWith=0건",
+          "reason": "읽기전용 조회 기능 — 애그리거트 상태 전이·갱신이 없다. Model 안팎 어디에도 copyWith 호출 0건(전 코드 grep). 조건·계산·전이 갱신 자체가 미발화 → NA(거짓 FAIL 금지)."
+        },
+        {
+          "id": "SD-7",
+          "verdict": "PASS",
+          "cite": "forecast_use_case.dart:16-23",
+          "reason": "ForecastUseCase 무상태 plain·Repo의 Either를 끝까지 통과(getForecasts/getForecastDetail 위임 1줄). 새 throw 0·실패 침묵 폐기 0·도메인 개념(forecast) 명명. UI import 0(grep: flutter material/widgets·presentation·design_system 0건). 치명(UI호출) 위반 없음."
+        },
+        {
+          "id": "VW-1",
+          "verdict": "PASS",
+          "cite": "forecast_list_view.dart:33-44 / forecast_detail_body_section.dart:22-68",
+          "reason": "build는 표시·위임만. view는 loading/error/data 분기+조립, onTap은 VM.openDetail 위임. section은 state.items를 가공 없이 ListView.builder로 렌더. 권한·전이·가격 등 정책 build에 0. 유일 분기 data.items.isEmpty는 빈상태 표시 분기(ui 표준상 view 소유)·error is BadRequestResponse는 메시지 추출(도메인 판정 아님)."
+        },
+        {
+          "id": "VW-6",
+          "verdict": "PASS",
+          "cite": "error_feedback.dart:8-49 / loading.dart:4-11",
+          "reason": "design_system 컴포넌트(ErrorFeedback·Loading)에 전역키/전역context 자기표시 static 경로 0. 에러는 view가 error 빌더에서 직접 ErrorFeedback 위젯 반환(자기 BuildContext). show/present/display static 메서드 노출 없음. grep으로 design_system 내 GlobalKey/showDialog/showModal 0건."
+        },
+        {
+          "id": "ST-1",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:18-19 / forecast_detail_vm.dart:16-17",
+          "reason": "VM의 Model 방향 호출은 ForecastUseCase 인스턴스뿐(Repo/DataSource/box/Dio import·생성 0 — grep 0건). BuildContext·TextEditingController·ScrollController 미보유(grep 0건). 전환은 WeatherNavigator(navigator 패턴). 자기 freezed State만 노출. 치명(직행) 위반 없음."
+        },
+        {
+          "id": "ST-2",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:25-31 / forecast_detail_vm.dart:23-31",
+          "reason": "조회 실패는 build()가 result.fold((BadRequestResponse error)=>throw error,...)로 BadRequestResponse를 throw→AsyncValue.error. view는 state.when error 빌더로 표시(forecast_list_view.dart:29). 액션 메서드가 없는 조회전용 기능이라 채널②(consumeError)는 미발화 — 표준 '조회 실패=채널① throw' 정확 준수. valueOrNull 0건. 채널 혼선·plain Exception throw 없음."
+        },
+        {
+          "id": "ST-4",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:22-31 / forecast_detail_vm.dart:20-31",
+          "reason": "build() 안 await _useCase 직후 곧바로 result.fold로 State를 return — await 경계 뒤 state 접근·ref 사용이 0이라 mounted 가드 요구가 미발화(가드 누락 아님). build 밖 watch 0·리빌드회피 read 0·listen 내 상태변경 0·무전제 requireValue 0. ref.read는 view에서 핸들러 1회(openDetail 위임)·재조회는 ref.invalidate. 치명(mounted) 위반 없음."
+        },
+        {
+          "id": "DT-1",
+          "verdict": "PASS",
+          "cite": "forecast_repo.dart:18-24 / safe_api_call.dart:10-12",
+          "reason": "Repo 공개 시그니처 Future<Either<BadRequestResponse,List<ForecastSummary>>> / Future<Either<BadRequestResponse,Forecast>> (Right=성공). 소비처 VM이 fold로 Left를 throw error로 상위(AsyncError) 전달 — 폐기·no-op 0. UseCase도 Either 그대로 통과. Left 침묵 삼킴 없음."
+        },
+        {
+          "id": "DT-2",
+          "verdict": "PASS",
+          "cite": "safe_api_call.dart:13-48 / dio_client.dart:24-28",
+          "reason": "외부 호출은 safeApiCall로 감싸 Either 반환. safeApiCall이 DioException·FormatException·TypeError 개별 on절 + catch-all 보유, 전 경로 Left/Right. Repo·infra에 throw/rethrow/Future.error 0(grep). 인터셉터는 LogInterceptor(로깅만)로 에러 정규화 안 함(단일 출구 유지). 치명 위반 없음."
+        },
+        {
+          "id": "HR-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/ 트리 (domain_layer/application_layer/infra_layer/presentation_layer + weather_router.dart·weather_navigator.dart)",
+          "reason": "신규 BC가 application/weather/ 하위. BC 1뎁스={domain,application,infra,presentation}_layer 4계층 완비. BC 직속 2파일(weather_router.dart·weather_navigator.dart)만. application/ 직속은 weather BC 폴더만. 루트 평면·잡파일 없음."
+        },
+        {
+          "id": "HR-4",
+          "verdict": "PASS",
+          "cite": "grep: domain_layer import flutter/common/presentation/infra/application=0건; presentation→infra=0건; application→presentation=0건",
+          "reason": "domain_layer는 순수 Dart만(freezed_annotation·json_annotation·자체 enum import뿐, flutter·common 비순수 0). application은 presentation import 0. presentation은 infra import 0. infra는 상위 import 0. §5 매트릭스 ✗셀 위반 0. 치명 위반 없음."
+        },
+        {
+          "id": "HR-5",
+          "verdict": "NA",
+          "cite": "단일 BC(application/weather/ 외 BC 없음); 타 BC import grep 0건",
+          "reason": "산출물이 단일 weather BC뿐이라 교차 BC import 자체가 미발화. weather가 참조하는 외부는 common(network/util)·design_system·root뿐(BC 아님). 신규 순환 0. 4채널 규율 발화 조건 미충족 → NA(거짓 FAIL 금지)."
+        },
+        {
+          "id": "BG-1",
+          "verdict": "PASS",
+          "cite": "forecast.dart:12-13 (@freezed abstract class) / forecast_data_source.dart:10-12 / 전 codegen 파일 part 지시문 완비",
+          "reason": "freezed 단일생성자 전부 'abstract class X with _$X', 본문 멤버 없어 const X._() 불요. part 지시문 완비(.freezed.dart·.g.dart 규칙대로 — State는 fromJson 없어 .freezed만, VM/DataSource는 .g만). GoRoute builder 필수 충족(weather_router.dart:25,31). valueOrNull 0·3.10+ dot shorthand/private named params 0(grep). 형태상 컴파일 가능. ※실행결과는 조정자 봉인."
+        },
+        {
+          "id": "BG-2",
+          "verdict": "NA",
+          "cite": "실행 결과(flutter analyze)는 조정자 봉인 — 코드 존재/형태만 판정 가능",
+          "reason": "analyze green 래칫은 added 코드의 *실행* analyzer 이슈 0을 요구하나, 본 채점은 blind·실행결과 미수령(조정자 봉인). 코드 형태상 명백한 analyzer 위반 징후(미사용 import·dead null 분기 등)는 grep상 미발견이나, green 여부 자체는 추정 금지 → NA(존재/형태 레인 밖)."
+        },
+        {
+          "id": "FC-1",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:50-56(G-1 정렬) / forecast_summary_tile_widget.dart:34-37(G-3·G-4) / weather_navigator.dart:10-17(G-5) / weather_condition_ui_extension.dart:11-37(G-7·G-8)",
+          "reason": "G-1: VM이 date.compareTo 오름차순 정렬코드 보유(서버순서 비의존·골든 역순데이터에 강건)→PASS. G-3·G-4: tile '${tempMax}°/${tempMin}°'(max선두)·detail 최고/최저 라벨 정순·음수 부호 문자열보존→PASS. G-5: tap→openDetail(_formatDate(date))→pushNamed forecastDate pathParam→detail이 동일 forecastDate watch, 날짜 일치→PASS. G-7: 6 distinct 아이콘(wb_sunny/wb_cloudy/cloud/water_drop/ac_unit/thunderstorm)·6 distinct 색·cloudy(구름많음/weatherCloudy)≠overcast(흐림/weatherOvercast)→PASS. G-8: 한글라벨 §0 대응표 정확 일치→PASS. overall PASS."
+        },
+        {
+          "id": "FC-2",
+          "verdict": "FAIL",
+          "cite": "test/widget_test.dart:11-29",
+          "reason": "유일 테스트가 vacuous 스모크 — 합성 GoRoute('/' → Scaffold(SizedBox.shrink()))를 ProviderScope로 펌프하고 find.byType(MaterialApp) 단언만. weather 위젯·provider·VM·정렬·매핑·기온바인딩·내비를 일절 두드리지 않음(G-1~G-8 미검증). M1(정렬역전)·M2(매핑swap)·M3(기온swap)·M4(날짜인자오류)·M5(지표누락) 주입해도 이 테스트는 green 유지 — 비-vacuous 입증 불가. integration_test/ 없음·다른 _test.dart 없음. 치명 FAIL."
+        },
+        {
+          "id": "FC-3",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:50-56 / forecast_summary_tile_widget.dart:34-37 / weather_condition_ui_extension.dart:11-37 / forecast_detail_body_section.dart:54-64",
+          "reason": "명백한 도메인 오류(N1~N7) 부재: N1 개수=서버 7건 그대로 렌더(절단·중복 로직 없음). N2 날짜 오름차순 정렬코드 보유. N3 목록 4필드·상세 습도/풍속/강수확률 3지표 전부 표시. N4 6종 전부 distinct 아이콘·색 매핑(미매핑·중복 0, cloudy≠overcast). N5 최고/최저 정순·음수 보존·정수 그대로(℃). N6 탭↔상세 날짜 동일 키. N7 한글라벨 정확·영문 enum 노출 없음. 명백 오류 0."
+        }
+      ],
+      "fc": {
+        "g1": "PASS — forecast_list_vm.dart:50-56 _sortedByDate가 a.date.compareTo(b.date) 오름차순 정렬코드 보유. 산출물이 정렬 책임을 지므로 골든 D의 역순 배열(D2,D0,D5,...)을 D0→D6으로 교정. 서버순서 의존 아님.",
+        "g3g4": "PASS — tile(forecast_summary_tile_widget.dart:34-37) '${tempMax}° / ${tempMin}°' max선두·min후행. detail(forecast_detail_body_section.dart:42-50) 최고기온=tempMax·최저기온=tempMin 정순. 음수(-4)는 문자열 보간으로 부호 보존, abs/절댓값화 없음.",
+        "g5": "PASS — onTap→openDetail(forecast)→WeatherNavigator.toDetail(_formatDate(date))→pushNamed(detail, {forecastDate: date})→ForecastDetailView가 동일 forecastDate로 forecastDetailVMProvider(forecastDate) watch. 탭한 날짜=상세 날짜, N±1 오프셋 없음.",
+        "g7": "PASS — weather_condition_ui_extension.dart:11-27. 6종 아이콘 distinct(wb_sunny·wb_cloudy·cloud·water_drop·ac_unit·thunderstorm), 6색 distinct(AppColor.weather* 6개 서로 다른 0xFF값). cloudy=wb_cloudy/weatherCloudy(0xFF7E8C9A) ↔ overcast=cloud/weatherOvercast(0xFF546069) 아이콘·색 모두 구별. 미매핑 fallback 없음(소진 switch).",
+        "g8": "PASS — weather_condition_ui_extension.dart:29-36. clear=맑음·cloudy=구름많음·overcast=흐림·rain=비·snow=눈·thunderstorm=뇌우 — §0 대응표 6종 정확 일치. 영문 enum 화면 노출 없음(label getter만 표시).",
+        "overall": "PASS"
+      },
+      "nonCritical": [
+        {
+          "id": "SD-9",
+          "verdict": "PASS",
+          "reason": "유비쿼터스 언어 일관: forecast 개념이 domain(forecast/·forecast_summary)·application(forecast_use_case·forecast_list_vm·forecast_detail_vm·forecast_*_state)·presentation(forecast_list_view·forecast_detail_view·forecast_summary_tile)에서 동일 철자·어순. weather_condition·WeatherCondition 일관. 어순 drift(manage_x↔x_manage 류) 없음."
+        },
+        {
+          "id": "ST-5",
+          "verdict": "PASS",
+          "reason": "provider 형태 = @riverpod 클래스형 코드젠 정확. ForecastListVM/ForecastDetailVM/RootVM 모두 'class extends _$X' (forecast_list_vm.dart:18 class ForecastListVM extends _$ForecastListVM). 수동 NotifierProvider·legacy·함수형 위장 0(grep). family는 build 인자(build(String forecastDate)). top-level codegen final(.g.dart). keepAlive 미사용은 표준 VM(화면 수명 autoDispose)이라 적법."
+        },
+        {
+          "id": "VW-5",
+          "verdict": "PASS",
+          "reason": "도메인 enum→UI 매핑(아이콘·색·라벨)이 weather_condition_ui_extension.dart의 extension 단일 자리에만 거주. VM·State·design_system·widget에 색/아이콘/라벨 매핑 누수 0. ConditionIconWidget은 extension getter(condition.icon·condition.color)를 소비만."
+        },
+        {
+          "id": "VW-4",
+          "verdict": "PASS",
+          "reason": "시각 토큰 단일 출처: 색=AppColor(foundation), 타이포=AppTypography(foundation). application/root에 Color(0x…)·Colors.*·생 TextStyle·생 Duration 리터럴 0(grep). VM/State에 시각 반환 getter·design_system import 0. 색 리터럴은 foundation(app_color.dart·app_typography.dart) 안에만."
+        },
+        {
+          "id": "SD-3",
+          "verdict": "NA",
+          "reason": "불변식·전이 조건이 있는 변경 메서드가 없는 읽기전용 조회 기능. 생성시점 검증으로 서버 데이터 직파싱을 막는 행위도 없음(엔티티는 freezed+json_serializable 무검증 직파싱, required 필드만). 도메인 예외 검증 발화 조건 미충족 → NA."
+        },
+        {
+          "id": "DT-4",
+          "verdict": "PASS",
+          "reason": "DataSource(forecast_data_source.dart:16,20)가 도메인 엔티티 Future<List<ForecastSummary>>·Future<Forecast> 직반환. dto/·DTO·Model·Response·Mapper·변환 extension 0(grep). 서버 JSON은 엔티티 freezed fromJson 직파싱. 이름 바꾼 변환계층 우회 없음."
+        },
+        {
+          "id": "DT-6",
+          "verdict": "PASS",
+          "reason": "retrofit 표기 정확: @RestApi() abstract class + factory(Dio dio,{String? baseUrl}) + part 'forecast_data_source.g.dart'. @GET·@Path 어노테이션 부착. 반환 Future<엔티티>/Future<List<엔티티>>(HttpResponse<T> 원시반환 아님)."
+        },
+        {
+          "id": "ST-7",
+          "verdict": "PASS",
+          "reason": "root 합성: rootRouter=plain 전역 GoRouter 변수(provider 아님, root_router.dart:14). root_vm=거의 빈 VM(전역 표시상태 0, root_vm.dart:11-16). root_initializer=부수효과만·반환 void(root_initializer.dart:10-15). handler 0종(수요 없음). 표준 준수."
+        },
+        {
+          "id": "ST-8",
+          "verdict": "PASS",
+          "reason": "main.dart:17 ProviderScope retry:(int,Object)=>null 전역 OFF 1줄. hooks_riverpod·copyWithPrevious·valueOrNull·Mutations·신호버스 0(grep). 비채택 표면 사용 없음."
+        },
+        {
+          "id": "HR-2",
+          "verdict": "PASS",
+          "reason": "종류 폴더·접미사 일치: view_model/→_vm, repository/→_repo, shared_state 없음, state/→_state, data_source/→_data_source, use_case/→_use_case, ui_extension/→_ui_extension, BC직속→_navigator·_router. 화이트리스트 밖 폴더(provider/·viewmodel/) 0. 폴더-지정접미사 불일치 0."
+        },
+        {
+          "id": "VW-7",
+          "verdict": "PASS",
+          "reason": "라우트 단일출처: path/name/param 리터럴이 weather_router.dart의 abstract final class WeatherRoutes에만. navigator(weather_navigator.dart)는 pushNamed로 WeatherRoutes 상수만 참조·view import 0. BC는 GoRoute 리스트(weatherRouter)만 export, 셸 조립은 root_router. 단 내비 인자(date 직렬화) _formatDate가 VM(forecast_list_vm.dart:35-37·59)에 거주 — 뷰 onTap 인라인 직렬화 아님(VM 소유 위반 없음)."
+        },
+        {
+          "id": "HR-6",
+          "verdict": "PASS",
+          "reason": "파일명=주 public 클래스 snake_case(forecast_list_vm.dart→ForecastListVM 등). 구접미사(_app·_bridge·_view_state·_spec·_btn) 0. foundation 토큰 App 접두(AppColor·AppTypography·AppSpacing 등). 복수 public·철자불일치 미발견. (_App은 main.dart private 위젯 — 파일명 규칙 대상인 public 1선언 아님)."
+        }
+      ],
+      "rubricBlindSpot": "DioClient baseUrl이 'https://kingdom-h.com'으로 하드코딩(dio_client.dart:12) — FC 골든 서버 계약(openapi)이 가리키는 실호스트와 일치하는지는 57차원이 코드만 보면 검증 불가(라이브 호출 봉인). 호스트 오타·환경 불일치 시 전 골든이 런타임에 무력화되나 정적 채점은 PASS로 통과시킨다.",
+      "summary": "규칙 준수는 전반 모범적 — 단일 weather BC가 4계층·import방향·VM변환경계·Either단일출구·ui_extension매핑·foundation토큰·@riverpod클래스형·정렬 VM귀속(표준 §5 명시)까지 치명 16개(FC-2 제외) 전부 PASS, FC-1/G-1~G-8 골든도 코드 본문상 전부 일치. 치명 FAIL 1건: FC-2 — 유일 테스트(test/widget_test.dart)가 합성 빈 라우터를 펌프하는 vacuous 스모크라 M1~M5 mutation에 red가 안 나고 어떤 골든도 행위검증하지 않음(헛 테스트). BG-2(analyze green)는 실행봉인이라 NA, SD-2/SD-3/HR-5는 조회전용·단일BC라 미발화 NA."
+    }
+  },
+  {
+    "run": "X",
+    "lens": "adv",
+    "adversarial": true,
+    "verdict": {
+      "critical": [
+        {
+          "id": "SD-1",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:50-56 / weather_condition.dart:8-21",
+          "reason": "이 기능엔 도메인 어휘 판정(~할 수 있는가/~은 얼마인가)이 실재하지 않는다(읽기 전용 조회). VM의 _sortedByDate(날짜 오름차순)·_formatDate는 표시·전달 변환이며 도메인 게이트가 아니다. WeatherCondition은 분기 게이트 0인 순수 분류 enum으로 분류 판정(isStormy 류)이 VM/extension으로 흩어진 흔적 없음. 빈 wrapper 위장도 없음 — domain에 억지 투입한 변환도 없음. 적대적 의심점은 '정렬이 도메인 판정이냐'이나 read-only 목록 정렬은 표시 변환으로 귀속 가능."
+        },
+        {
+          "id": "SD-2",
+          "verdict": "NA",
+          "cite": "forecast.dart:8-26 / forecast_summary.dart:8-23",
+          "reason": "조건·계산·전이가 걸린 상태 갱신 자체가 없는 읽기 전용 조회 기능. Model 밖 copyWith 호출 0(grep 결과 application/root에 분기 붙은 copyWith 없음). 루트 경유 변경이 발화하지 않으므로 NA(미발화를 거짓 FAIL 내지 않음)."
+        },
+        {
+          "id": "SD-7",
+          "verdict": "PASS",
+          "cite": "forecast_use_case.dart:11-23",
+          "reason": "ForecastUseCase는 무상태 plain 클래스로 Repo의 Either를 새 throw·침묵 폐기 없이 그대로 통과(getForecasts/getForecastDetail). UI import 0 — grep 'material|presentation|design_system|flutter' in use_case/ = empty. 도메인 개념(forecast)으로 명명, 화면명 아님. UI 호출(치명) 없음."
+        },
+        {
+          "id": "VW-1",
+          "verdict": "PASS",
+          "cite": "forecast_list_view.dart:21-47 / forecast_detail_view.dart:18-35",
+          "reason": "build는 watch + loading/error/data 분기 + section 조립·onTap 위임만. 권한·전이·가격 등 정책 0. 항목 탭은 ref.read(...).openDetail로 VM 위임. 빈 판정 items.isEmpty는 단순 표시 분기."
+        },
+        {
+          "id": "VW-6",
+          "verdict": "PASS",
+          "cite": "error_feedback.dart:9-49 / loading.dart:4-11",
+          "reason": "design_system 컴포넌트(ErrorFeedback/Loading)에 전역키/전역context static show/present/display 경로 0(grep 확인 — error_feedback의 매치는 '없음'을 명시한 주석뿐). 다이얼로그·시트 자기표시 없음. view가 .when error/loading 빌더에서 직접 반환."
+        },
+        {
+          "id": "ST-1",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:18-19 / forecast_detail_vm.dart:16",
+          "reason": "VM의 Model 방향 호출이 ForecastUseCase 인스턴스뿐. Repo/DataSource/box/SDK import·생성 0(forecast_repo·data_source는 UseCase 뒤에만). BuildContext·TextEditingController 등 미보유(전환은 WeatherNavigator). 자기 freezed State만 노출. 직행 없음."
+        },
+        {
+          "id": "ST-2",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:25-30 / forecast_list_view.dart:27-32",
+          "reason": "조회 실패는 build()의 result.fold((error)=>throw error)로 BadRequestResponse를 throw→AsyncValue.error→view .when error 빌더로 흐름(채널 ①). 액션 없는 조회 전용이라 채널 ②(consumeError·isShow)는 미발화(State.error는 표준형 유지용). throw 대상이 plain Exception/문자열 아님. valueOrNull 미사용."
+        },
+        {
+          "id": "ST-4",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:22-31 / forecast_list_view.dart:22 / forecast_list_view.dart:42",
+          "reason": "watch=view build 안만(ref.watch(forecastListVMProvider)), read=onTap 핸들러 1회(ref.read(...).openDetail). build()는 await 후 곧장 State 반환(await 직후 기존 state 재접근 없음 — mounted 가드 필요 지점 부재). listen 내 상태변경 없음. 무전제 requireValue 없음. mounted 누락 위반 해당 없음."
+        },
+        {
+          "id": "DT-1",
+          "verdict": "PASS",
+          "cite": "forecast_repo.dart:18-24 / forecast_list_vm.dart:25-26",
+          "reason": "Repo 공개 시그니처 Future<Either<BadRequestResponse,T>>(Right=성공). 소비처 VM이 fold의 Left를 폐기 않고 throw로 상위(AsyncError) 전달 — Left no-op 디코이 없음. UseCase도 Either 그대로 통과. 성공만 반환하는 침묵 폐기 없음."
+        },
+        {
+          "id": "DT-2",
+          "verdict": "PASS",
+          "cite": "safe_api_call.dart:10-48 / dio_client.dart:24-27 / forecast_repo.dart:18-24",
+          "reason": "Repo·infra throw/rethrow 0(safeApiCall로 감쌈). safeApiCall이 DioException·FormatException·TypeError 개별 + catch-all로 BadRequestResponse 정규화, 단일 출구. dio 인터셉터는 LogInterceptor뿐 — onError 에러 정규화 없음(단일 출구 보존). Future.error 우회 없음."
+        },
+        {
+          "id": "HR-1",
+          "verdict": "PASS",
+          "cite": "design-spec.md(파일트리) / weather_router.dart:1 / weather_navigator.dart:1",
+          "reason": "신규 BC가 lib/application/weather/ 하위, 1뎁스 4계층(domain_layer·application_layer·infra_layer·presentation_layer) 완비, BC 직속 2파일(weather_router.dart·weather_navigator.dart)만. application/ 직속은 weather 폴더만. 루트 평면화·직속 잡파일 없음."
+        },
+        {
+          "id": "HR-4",
+          "verdict": "PASS",
+          "cite": "weather_condition.dart:1 / forecast_summary.dart:1-3 / forecast_use_case.dart:1-6",
+          "reason": "grep 매트릭스 4방향 전부 empty: domain_layer는 freezed/json_annotation만(flutter·common·design_system·presentation·infra 0), application_layer는 presentation/design_system import 0, presentation은 infra_layer import 0, infra는 presentation/application_layer/view_model/state import 0. 역류 위반 없음."
+        },
+        {
+          "id": "HR-5",
+          "verdict": "NA",
+          "cite": "(grep) cross-BC import 검색 = empty",
+          "reason": "단일 BC(weather) 신규 산출물 — 타 BC import 자체가 0(grep으로 weather 외 application/* import 없음 확인). 교차 BC 채널·신규 순환이 발화하지 않으므로 NA(미발화를 위반으로 보지 않음)."
+        },
+        {
+          "id": "BG-1",
+          "verdict": "PASS",
+          "cite": "forecast.dart:12-13 / forecast.dart:5-6 / weather_router.dart:24-26",
+          "reason": "실행 결과는 조정자 봉인 — 코드 형태만 판정. freezed 단일생성자 abstract class X with _$X 키워드 정상(전 모델), 본문 멤버 없어 const X._() 불요(정상 부재), part '*.freezed.dart'/'*.g.dart' 지시문 완비, GoRoute builder 필수 인자 존재. 3.10+ dot-shorthand·private named params·valueOrNull grep 0. 형태상 컴파일 차단 요소 미발견(pubspec sdk ^3.12.1이나 사용 문법은 3.9 상한 내)."
+        },
+        {
+          "id": "BG-2",
+          "verdict": "NA",
+          "cite": "analysis_options.yaml(4개 신설 확인)",
+          "reason": "analyze green 래칫 실행 결과는 조정자 봉인 — 추정 불가. 생성영역 4루트 국소 analysis_options.yaml 존재만 확인. 정적 형태로는 신규 이슈 유발 패턴 미발견이나 실측 결과 미수령이므로 PASS 단정 불가 — NA(실행 미수령)."
+        },
+        {
+          "id": "FC-1",
+          "verdict": "PASS",
+          "cite": "forecast_list_vm.dart:50-56 / weather_condition_ui_extension.dart:11-37 / weather_navigator.dart:10-17",
+          "reason": "골든 8케이스 코드 대조 일치: G-1 _sortedByDate가 a.date.compareTo(b.date) 오름차순 정렬코드 보유(서버순서 의존 아님 — 역순 데이터셋 D에서도 D0→D6) / G-3·G-4 tile·detail에서 tempMax=최고·tempMin=최저 정순 바인딩, 음수는 int 그대로 '-4°' 부호 유지 / G-5 openDetail이 탭 항목 date를 path-param으로 전달→detail VM이 그 date로 조회(탭↔상세 일치) / G-7 6종 distinct 아이콘(wb_sunny/wb_cloudy/cloud/water_drop/ac_unit/thunderstorm)·6종 distinct 색, cloudy=wb_cloudy↔overcast=cloud 구별 / G-8 한글 라벨 §0 대응표 정확 일치. overall PASS."
+        },
+        {
+          "id": "FC-2",
+          "verdict": "FAIL",
+          "cite": "test/widget_test.dart:11-29",
+          "reason": "치명 FAIL. 유일 테스트가 vacuous 스모크뿐 — 자체 생성한 throwaway GoRouter('/'→SizedBox.shrink())로 ProviderScope+MaterialApp.router를 펌프하고 find.byType(MaterialApp)만 단언. weather BC·정렬(_sortedByDate)·기온 바인딩·내비·condition 매핑을 일절 import/펌프하지 않음. M1(정렬 역전)·M2(아이콘 swap)·M3(기온 swap)·M4(내비 날짜) 어느 mutation을 주입해도 이 테스트는 그 심볼을 건드리지 않아 영원히 green. 골든 G-1/G-5/G-7을 두드리는 widget test 부재 = 헛 테스트. rubric '스모크/빈 테스트뿐' 정확 해당."
+        },
+        {
+          "id": "FC-3",
+          "verdict": "PASS",
+          "cite": "forecast_data_source.dart:15-22 / forecast_detail_body_section.dart:54-64 / weather_condition_ui_extension.dart:11-37",
+          "reason": "명백 도메인 오류 0: N1 개수=DataSource가 List 전건 반환·절단 없음(7건) / N2 오름차순 정렬코드 존재 / N3 목록 4필드·상세 습도·풍속·강수확률 3지표 모두 렌더 / N4 6종 전부 distinct 매핑(미매핑·공유 없음, cloudy↔overcast 구별) / N5 최고·최저 정순·음수 부호 유지·int(℃) / N6 탭 날짜=상세 날짜 / N7 한글 라벨 정확·영문 enum 노출 없음. negative-gate 7항 전부 미위반."
+        }
+      ],
+      "fc": {
+        "g1": "PASS — _sortedByDate가 a.date.compareTo(b.date) 오름차순 정렬코드 실보유(forecast_list_vm.dart:53-54). 서버순서 의존 아님 — 역순 데이터셋 D에서도 표시순 D0→D6. section은 state.items를 무가공 렌더.",
+        "g3g4": "PASS — tile trailing '${tempMax}° / ${tempMin}°'(최고 먼저), detail _MetricTile 최고기온=tempMax·최저기온=tempMin 정순 바인딩(forecast_detail_body_section.dart:42-50). tempMin은 int 직보간이라 -4가 '-4°'로 부호·자리 유지(G-4).",
+        "g5": "PASS — openDetail(forecast)→WeatherNavigator.toDetail(_formatDate(forecast.date))→pushNamed(detail, {forecastDate: 그 날짜})→detail VM이 동일 forecastDate로 재조회·표시(forecast_list_vm.dart:35-37, forecast_detail_vm.dart:20). 탭 항목 날짜=상세 날짜, ±1 오프셋 없음.",
+        "g7": "PASS — 6종 distinct 아이콘(wb_sunny·wb_cloudy·cloud·water_drop·ac_unit·thunderstorm) ∧ 6종 distinct 색 토큰(weatherClear..weatherThunderstorm, hex 전부 상이). cloudy=wb_cloudy/0xFF7E8C9A ↔ overcast=cloud/0xFF546069 아이콘·색 모두 구별(weather_condition_ui_extension.dart:11-27, app_color.dart:13-18). 미매핑 fallthrough 없음(소진 switch).",
+        "g8": "PASS — clear=맑음·cloudy=구름많음·overcast=흐림·rain=비·snow=눈·thunderstorm=뇌우, §0 대응표 정확 일치(weather_condition_ui_extension.dart:29-36). 영문 enum 화면 노출 없음(label getter 경유).",
+        "overall": "PASS"
+      },
+      "nonCritical": [
+        {
+          "id": "SD-9",
+          "verdict": "PASS",
+          "reason": "유비쿼터스 언어 계층 관통 일치: forecast(애그루트·UseCase·Repo·DataSource), forecast_list/forecast_detail(삼총사 접두 1:1:1), forecast_summary(종속엔티티), weather_condition(enum)이 domain/application/presentation 가로질러 동일 철자·어순. lounge_post_manage↔manage_lounge_post 류 drift 없음. enum 어휘 계약(clear/cloudy/overcast/rain/snow/thunderstorm)이 @JsonValue·라벨·색·아이콘 전부에서 동일 철자."
+        },
+        {
+          "id": "ST-5",
+          "verdict": "PASS",
+          "reason": "provider 형태 정상 — 3개 @riverpod 전부 클래스형 'class X extends _$X'(ForecastListVM·ForecastDetailVM·RootVM, grep 확인). 함수형/읽기전용 파생값 위장 0, family는 build(String forecastDate) 인자형(동적 생성 아님), legacy provider·legacy.dart import 0, NotifierProvider 수동 선언 0. top-level codegen final(_$X). 위장/수동 provider 없음."
+        },
+        {
+          "id": "VW-5",
+          "verdict": "PASS",
+          "reason": "도메인 enum→UI 매핑(icon/color/label)이 weather_condition_ui_extension.dart extension에만 거주. VM·State getter·design_system으로 누수 0(grep: application_layer·domain_layer에서 .icon/.color/.label 호출 없음 — 도메인 enum 파일의 매치는 '소유는 ui_extension'이라는 주석뿐). ConditionIconWidget이 presentation에서만 condition.icon/color 사용."
+        },
+        {
+          "id": "VW-4",
+          "verdict": "PASS",
+          "reason": "시각 토큰 단일 출처 — application·root 계층에서 Color(0x·Colors.·생 TextStyle(·생 Duration( grep 0. 색=AppColor, 타이포=AppTypography 참조만. VM/State에 시각 반환 getter·design_system import 0(VM은 design_system import 없음). 6종 색은 app_color.dart foundation 토큰으로 거주."
+        },
+        {
+          "id": "SD-3",
+          "verdict": "NA",
+          "reason": "전이 조건·불변식 검증이 발화하지 않는 읽기 전용 조회(상태 변경 메서드 0). 생성 시점 검증으로 직파싱을 막는 위반도 없음 — Forecast/ForecastSummary는 freezed+json 직파싱이라 서버 데이터 정상 유입(생성자 검증 throw 없음). 불변식 도메인 예외 게이트 미발화로 NA."
+        },
+        {
+          "id": "ST-3",
+          "verdict": "PASS",
+          "reason": "*State가 application_layer/state/의 @freezed, build()가 자기 freezed State만 반환(ForecastListState/ForecastDetailState). 엔티티는 필드로 래핑(items record의 summary, detail의 forecast 필드) — 직노출 아님. 조회 VM도 error 필드(BadRequestResponse?) 보유한 표준형. 패키지 타입 직노출 없음."
+        },
+        {
+          "id": "DT-4",
+          "verdict": "PASS",
+          "reason": "DataSource 반환이 도메인 엔티티 직반환(Future<List<ForecastSummary>>·Future<Forecast>). dto/·DTO·Mapper·Response 변환계층·이름 바꾼 변환 우회 0. 서버 JSON은 엔티티 freezed @JsonKey 직파싱(temp_max→tempMax 등). 유입 변환 계층 부재 정합."
+        },
+        {
+          "id": "DT-5",
+          "verdict": "PASS",
+          "reason": "ForecastRepo가 인터페이스 없는 단일 구체 클래스(원격 DataSource 조합), Repo·DataSource 무상태 plain·직접 생성(ForecastRepo()→ForecastDataSource(DioClient.instance)). 추상 인터페이스·가변 상태 필드·DI 컨테이너 0."
+        },
+        {
+          "id": "DT-6",
+          "verdict": "PASS",
+          "reason": "@RestApi() abstract + factory(Dio,{String? baseUrl}) + part 완비, @GET·@Path 어노테이션, 반환 Future<List<ForecastSummary>>/Future<Forecast>(엔티티 직반환). HttpResponse<T> 원시 반환 없음(forecast_data_source.dart:10-23)."
+        },
+        {
+          "id": "ST-7",
+          "verdict": "PASS",
+          "reason": "root 합성 구조 정상: root_vm=거의 빈 VM(전역 표시 상태 0·handler 0), rootRouter=plain 전역 변수 GoRoute(provider 아님, root_router.dart:14), root_initializer=부수효과만 반환 없음(Future<void>, dio 부트). root_vm에 BC 도메인 어휘 0. 단일 기능이라 handler 미발화(거짓 FAIL 안 냄)."
+        },
+        {
+          "id": "ST-8",
+          "verdict": "PASS",
+          "reason": "main.dart ProviderScope retry:(_,__)=>null 1줄 존재(전역 retry OFF, main.dart:18). hooks_riverpod·copyWithPrevious·valueOrNull·Mutations·신호버스 grep 0. 비채택 표면 미사용."
+        },
+        {
+          "id": "VW-7",
+          "verdict": "PASS",
+          "reason": "라우트 path/name/param-key 리터럴이 WeatherRoutes(abstract final class)에만, navigator는 pushNamed로 상수만 참조·view import 0(weather_navigator.dart). BC는 weatherRouter(GoRoute 리스트)만 노출, StatefulShell 조립은 root_router 소유. 단 내비 날짜 직렬화 _formatDate가 VM(openDetail) 소유라 '뷰 onTap 인라인 직렬화' 위반 아님 — 뷰는 forecast 객체만 VM에 위임."
+        },
+        {
+          "id": "VW-2",
+          "verdict": "PASS",
+          "reason": "view 삼총사(List/Detail)는 자기 VM·조회 상태 분기(ref 사유) 실재. section(BodySection)은 ref·자기VM 없이 State prop+콜백으로 성립, widget(Tile/ConditionIcon)은 화면 State 미수신(엔티티+원시값+콜백). 과승격·widget의 화면 State 수신 없음."
+        },
+        {
+          "id": "DT-3",
+          "verdict": "PASS",
+          "reason": "BadRequestResponse 신규 도입 — freezed 3필드 errorType(error_type)/msg/isShow(is_show), 어휘 timeout·parse·unknown(safe_api_call.dart), 클라 생성 isShow:true·서버 바디 fromJson isShow 보존(safe_api_call.dart:19 vs 24-27). 무음 재생산 없음."
+        },
+        {
+          "id": "Q-4",
+          "verdict": "PASS",
+          "reason": "null 안전 관용구 — '!' 연쇄 없음. forecastDate path-param의 state.pathParameters[...]!·appNavigatorKey.currentContext!는 보호 불가 자리 단일 최후수단(라우트 매칭 보장·전역키). nullable 명시 null 초기화·무초기화 public late final 없음. required(non-null named) 일관 사용."
+        }
+      ],
+      "rubricBlindSpot": "DioClient baseUrl이 'https://kingdom-h.com'으로 하드코딩(dio_client.dart:12)이고 데이터셋 D 같은 fake 주입 없이 라이브 서버에 의존 — FC 골든은 widget test fake로 검증하라 했으나 그 테스트가 부재하므로, 실제 라이브 응답이 '오늘부터 7일'을 어떤 시각대/날짜경계로 주는지(D0=오늘 판정의 타임존 의존성), DateTime.parse된 date.toIso8601String().substring(0,10)이 서버 forecast_date 문자열과 왕복 일치하는지는 57차원 어디서도 실증되지 않는다(정적 형태는 통과). 단위(m/s·%) 가정도 design-spec D5 계약위험으로만 표기될 뿐 코드/테스트로는 닫히지 않음.",
+      "summary": "치명 FAIL 1건(FC-2): 산출물은 구조·규칙·기능정확성(FC-1 골든 8/8 PASS) 모두 견고하나, 유일 테스트가 weather BC를 일절 건드리지 않는 vacuous 스모크(throwaway '/'→SizedBox + find.byType(MaterialApp))라 M1~M4 어느 mutation에도 영원히 green — 핵심 로직 비-vacuous 검증 부재로 FC-2 치명 FAIL. 나머지 치명 16(SD/VW/ST/DT/HR/BG·FC-1·FC-3)은 PASS 또는 미발화 NA(SD-2·HR-5·SD-3·BG-2 실행봉인). 정렬·날짜포맷의 VM 거주는 read-only 표시변환으로 SD-1 통과(도메인 판정 누수 없음). 코드 본문은 dddart 규약 준수도가 높으나 테스트 백스톱이 비어 기능 회귀를 못 막는다."
+    }
+  },
+  {
+    "run": "Y",
+    "lens": "n1",
+    "adversarial": false,
+    "verdict": {
+      "critical": [
+        {
+          "id": "SD-1",
+          "verdict": "PASS",
+          "cite": "weather_forecast.dart:22-33 (isForDate/requireDetailMetrics in aggregate); weather_condition.dart:11-21 (enum mapping); weather_forecast_date.dart:16-31 (parse/validate in VO)",
+          "reason": "존재하는 도메인 판정·계산(isForDate, requireDetailMetrics, condition 매핑, date 정규화)이 모두 domain(애그리거트/VO/enum)에 거주. VM(weather_forecast_list_vm.dart:32-38, detail_vm.dart:36-42)은 Either.fold→State 변환만. view/State에 도메인 분기 누수 없음. (날짜 오름차순 정렬의 '부재'는 판정 misplacement가 아니라 기능 누락 → FC-1에서 채점)."
+        },
+        {
+          "id": "SD-2",
+          "verdict": "NA",
+          "cite": "lib/application/weather/domain_layer/weather_forecast/* (전 파일 — 전이/copyWith 갱신 없음)",
+          "reason": "읽기 전용 조회 기능. 조건·계산·전이 갱신 자체가 없어 루트 경유 변경 규율이 미발화. Model 밖 copyWith 호출 0(grep: copyWith는 전부 AppTypography 시각 복제뿐). 위반 불가 → NA."
+        },
+        {
+          "id": "SD-7",
+          "verdict": "PASS",
+          "cite": "weather_forecast_use_case.dart:1-24",
+          "reason": "UseCase 무상태 plain, _repo.getSevenDayForecasts()/getForecastDetail() Either 그대로 통과(새 throw 0·침묵 폐기 0). import = dartz/common.network/domain/infra.repo뿐 — flutter material·presentation·design_system import 0. UI 호출 없음."
+        },
+        {
+          "id": "VW-1",
+          "verdict": "PASS",
+          "cite": "weather_forecast_card_widget.dart:27-55; weather_forecast_list_view.dart:30-44",
+          "reason": "build/콜백이 표시·이벤트 위임만. onTap→callback 위임, state.when→section 분기. 권한·전이·가격 등 정책 build 부재. view의 _errorMessage(list_view.dart:48-56)는 isShow/msg 표시 포맷뿐(도메인 정책 아님)."
+        },
+        {
+          "id": "VW-6",
+          "verdict": "PASS",
+          "cite": "weather_navigator.dart:4-23; design_system/component/* (전부 .gitkeep 빈 폴더)",
+          "reason": "전역키/전역 context 자기표시 static(show/present/display) 경로 0. 내비는 context.goNamed/pushNamed로 View의 BuildContext 경유. design_system 컴포넌트 미구현(빈 폴더)이라 self-show 표면 자체가 없음."
+        },
+        {
+          "id": "ST-1",
+          "verdict": "PASS",
+          "cite": "weather_forecast_list_vm.dart:21-39; weather_forecast_detail_vm.dart:24-43",
+          "reason": "VM의 Model 방향 호출이 WeatherForecastUseCase 인스턴스뿐. Repo/DataSource/box/SDK 직접 import·생성 0(import는 dartz/riverpod/common.network/domain/state/use_case). BuildContext·TextEditingController 등 미보유. 자기 freezed State만 노출. (provider 형태 문제는 ST-5 소관, 직행 아님)."
+        },
+        {
+          "id": "ST-2",
+          "verdict": "PASS",
+          "cite": "weather_forecast_list_vm.dart:32-37; weather_forecast_detail_vm.dart:36-41,45-55",
+          "reason": "조회 실패는 build()가 BadRequestResponse를 throw→AsyncValue.error(plain Exception/문자열 아님). detail은 route date 파싱 실패도 BadRequestResponse(parse,isShow:true)로 throw. 이 기능은 액션(쓰기) 채널 미발화(읽기 전용)이므로 consumeError/isShow:false 경로 N/A. valueOrNull 미사용. 2채널 혼선 없음."
+        },
+        {
+          "id": "ST-4",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/application_layer/view_model/* (grep ref./mounted/invalidateSelf = 0 매치)",
+          "reason": "VM에 ref.watch/read/listen·invalidateSelf 사용 0. build()는 await 후 this.state/ref를 건드리지 않고 계산된 State를 반환만 함(await-경계 후 상태 접근 없음) → mounted 가드 불요. 무전제 requireValue 없음. 위반 자리 자체가 미발화."
+        },
+        {
+          "id": "DT-1",
+          "verdict": "PASS",
+          "cite": "weather_forecast_repo.dart:15-26; weather_forecast_list_vm.dart:30-37; weather_forecast_detail_vm.dart:34-41",
+          "reason": "Repo 공개 시그니처 Future<Either<BadRequestResponse,T>>(Right=성공). 소비처(VM)가 fold로 Left(BadRequestResponse)를 폐기 않고 throw로 상위(AsyncError) 전달. Left 분기 no-op 아님."
+        },
+        {
+          "id": "DT-2",
+          "verdict": "PASS",
+          "cite": "safe_api_call.dart:6-39; weather_forecast_data_source.dart:15-37; dio_client.dart:4-13",
+          "reason": "safeApiCall이 DioException·FormatException·TypeError 개별 + catch-all로 전부 Left 반환. Repo·DataSource throw/rethrow/Future.error 우회 없음(DataSource 내부 FormatException은 safeApiCall이 흡수). dio_client에 onError 정규화 인터셉터 없음(단일 출구 유지)."
+        },
+        {
+          "id": "HR-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/ (weather_router.dart·weather_navigator.dart 직속 2파일 + domain_layer/application_layer/infra_layer/presentation_layer)",
+          "reason": "신규 BC가 application/weather/ 하위. BC 1뎁스 = {domain,application,infra,presentation}_layer 4계층 완비. BC 직속은 weather_router.dart·weather_navigator.dart 2파일만. application/ 직속은 weather/ BC 폴더만."
+        },
+        {
+          "id": "HR-4",
+          "verdict": "PASS",
+          "cite": "weather_forecast.dart:1-9 (domain=freezed_annotation/domain만); weather_forecast_use_case.dart:1-6 (application→infra.repo, presentation import 0); weather_forecast_list_view.dart:1-10 (presentation→application/domain/design_system, infra import 0)",
+          "reason": "domain은 freezed_annotation+자기 domain만(flutter/common import 0). application은 presentation import 0(infra.repo 참조는 합법). presentation은 infra import 0. infra(repo/data_source)는 상위(application/presentation) import 0. §5 매트릭스 위반 셀 없음."
+        },
+        {
+          "id": "HR-5",
+          "verdict": "NA",
+          "cite": "lib/application/weather/** (타 BC import grep 0 — 단일 BC 산출물)",
+          "reason": "weather 단일 BC만 신규 생성. 타 BC import 자체가 없어 4채널 규율 미발화. 신규 순환 없음(navigator→router→view 동일 BC 사슬은 순환 아님). 위반 불가 → NA."
+        },
+        {
+          "id": "BG-1",
+          "verdict": "PASS",
+          "cite": "weather_forecast.dart:11-13 (@freezed abstract+const X._()+part); bad_request_response.dart:1-16 (part .freezed/.g); weather_forecast_list_vm.dart:11-22 (riverpod 2.x 수동 API)",
+          "reason": "코드 형태 기준(실행 봉인): freezed 단일생성자 abstract·본문 멤버 시 const X._()·part 지시문 완비. union 없어 sealed 불요. GoRoute builder 존재(weather_router.dart:20,36). 3.10+ dot-shorthand·private named params·valueOrNull 0(grep). riverpod는 2.6.1 수동 AsyncNotifierProvider라 VM에 .g part 불요 — 내부 정합(코드젠 미사용이 자기일관). 형태상 컴파일 저해 요소 없음. (실제 컴파일/analyze 결과는 조정자 봉인)."
+        },
+        {
+          "id": "BG-2",
+          "verdict": "NA",
+          "cite": "analysis_options.yaml:10 (flutter_lints) — 실행 결과 조정자 봉인",
+          "reason": "analyze green 래칫은 *실행 결과* 항목으로 조정자 봉인. 코드만으로 추정 금지(지시). 정적 형태에 명백한 analyzer-error 패턴(미정의 심볼·문법오류)은 안 보이나 added-코드 신규 이슈 0 여부는 실측 미수령 → NA."
+        },
+        {
+          "id": "FC-1",
+          "verdict": "FAIL",
+          "cite": "weather_forecast_list_vm.dart:32-37 (정렬 없이 forecasts 그대로 State); weather_forecast_list_content_section.dart:21,33-34 (forecasts[index] 배열순 직표시); grep sort/compareTo/isBefore = 0 매치",
+          "reason": "치명. G-1(날짜 오름차순) FAIL: 산출물에 정렬 코드가 lib 전역 0개(broad grep exit 1) — DataSource→Repo→UseCase→VM→view 전 구간 서버 배열 순서 그대로 노출. 골든 데이터셋 D(배열순 D2,D0,D5,D1,D6,D3,D4 — 의도적 비오름차순)에선 첫 카드가 D2(2번째 날), 마지막이 D4가 되어 날짜 오름차순 단언 위반. g3g4(최고/최저 바인딩·음수): PASS(ui_extension.dart:14-20 tempMax→최고/tempMin→최저 정순, 부호 보존). g5(탭→상세 일치): PASS(card onTap→forecastDate.value→path param→detail VM 동일 date fetch). g7(6종 distinct): PASS(weather_condition_ui_extension.dart:18-38 아이콘 6 distinct·색 6 distinct·cloudy=cloud_queue↔overcast=cloud_outlined 구별). g8(한글 라벨): PASS(server cloudy→구름많음, overcast→흐림 등 §0 대응표 일치). 그러나 핵심 골든 G-1 1건 불일치만으로 FC-1 FAIL."
+        },
+        {
+          "id": "FC-2",
+          "verdict": "FAIL",
+          "cite": "weather_forecast_list_view_test.dart:70-106 (이미 오름차순 2건 주입·findsOneWidget만, 순서 단언 0); test/ 전역 indexOf/elementAt/순서 finder = 0",
+          "reason": "치명. 가장 중요한 메커니즘(날짜 오름차순 표시)을 두드리는 테스트가 부재. 목록 widget test는 이미 오름차순 정렬된 입력(2026-06-15,06-16)을 넣고 각 항목 findsOneWidget만 확인 — 표시 *순서*를 단언하지 않음. M1(정렬 역전/정렬키 제거)을 주입해도 red가 날 테스트가 없음(정렬 코드도, 순서 단언도 0). 골든 §2가 'M1~M4 필수 red 100%'를 요구하나 M1 사이트(정렬 비교자) 자체가 산출물에 부재하여 red 입증 불가 → vacuous. (에러채널·parse·nav콜백·상세지표 테스트는 실효적이나 헤드라인 행위인 정렬이 무백스톱). 실제 red/green 실행은 조정자 봉인이나 *테스트 존재·형태* 기준으로 핵심 메커니즘 미검증."
+        },
+        {
+          "id": "FC-3",
+          "verdict": "FAIL",
+          "cite": "weather_forecast_list_content_section.dart:33-34 (forecasts[index] 배열순); grep sort = 0",
+          "reason": "치명. N2(날짜 순서 깨짐) 관측: 목록이 날짜 오름차순이 아니라 서버 배열 순서 그대로 표시 — 정렬 코드 부재로 '오늘이 맨 위·단조 증가' 보장 없음(골든 D 같은 비정렬 응답에서 임의 순서). 명백한 도메인 오류 1+ 존재. (N1 개수=7: 절단/페이지네이션 없음 OK / N3 필드: 목록 4필드·상세 3지표 모두 표시 OK / N4 6종 매핑 distinct OK / N5 기온 바인딩·부호 OK / N6 상세 날짜 일치 OK / N7 enum 라벨 영문노출 없음 OK — 그러나 N2 단독으로 FC-3 FAIL)."
+        }
+      ],
+      "nonCritical": [
+        {
+          "id": "SD-9",
+          "verdict": "WEAK",
+          "reason": "유비쿼터스 언어 철자: 도메인 enum WeatherCondition.cloudy가 서버 enum 'overcast'(흐림)에 배정되고, 서버 'cloudy'(구름많음)는 mostlyCloudy에 배정됨(weather_condition.dart:13-15). 계층 관통 철자(domain enum명↔ui_extension 라벨)는 일관되고 end-to-end 라벨 매핑은 정확(G-8 PASS)하나, 도메인 식별자 'cloudy'가 서버 어휘 'cloudy'와 의미 충돌(같은 철자가 다른 개념)하여 가독·유지보수 혼동 위험. scope.md:25-31도 같은 재해석 채택. 철자 drift는 아니나 어휘 충돌 소지."
+        },
+        {
+          "id": "ST-5",
+          "verdict": "FAIL",
+          "reason": "provider 형태: @riverpod 코드젠(class extends _$X) 아님. 수동 riverpod 2.x API — weather_forecast_list_vm.dart:11-22는 top-level AutoDisposeAsyncNotifierProvider(WeatherForecastListVM.new) + class extends AutoDisposeAsyncNotifier, detail은 .family(detail_vm.dart:12-25). pubspec.yaml:42 riverpod ^2.6.1(3.x 아님), riverpod_annotation/generator 의존 0(grep), @riverpod 0개. 표준(implementation-riverpod §1·§2: 'class extends _$Foo'+part .g.dart, notifier_extends/notifier_build lint)·RUBRIC ST-5 PASS('모든 @riverpod이 클래스형 class extends _$X·codegen final')에 불일치. §9 legacy 명시목록(State/StateNotifier/ChangeNotifierProvider)엔 미해당하나 codegen 변종 미사용으로 ST-5 PASS 바 미달. family도 build 인자 아닌 manual family."
+        },
+        {
+          "id": "VW-5",
+          "verdict": "PASS",
+          "reason": "도메인→UI 매핑(아이콘·색·한글라벨)이 weather_condition_ui_extension.dart의 extension에만 거주(koreanLabel/icon/color). 기온·날짜 표기 포맷도 weather_forecast_ui_extension.dart extension. VM·State getter·design_system에 매핑 누수 0. ui_extension이 유일 자리."
+        },
+        {
+          "id": "VW-4",
+          "verdict": "PASS",
+          "reason": "시각 토큰 단일 출처: 색=AppColor 토큰, 타이포=AppTypography(.copyWith는 토큰 복제), 간격=AppSpacing, 라운드=AppRadius. feature lib에 Color(0x·Colors.·생 TextStyle·생 Duration 0(grep — dio_client의 Duration(seconds:5)는 네트워크 타임아웃·시각 아님). VM/State에 시각 반환 getter·design_system import 0."
+        },
+        {
+          "id": "SD-3",
+          "verdict": "PASS",
+          "reason": "불변식 도메인 예외: requireDetailMetrics()가 애그리거트 메서드 안에서 WeatherDetailMetricsRequiredException(도메인 예외) throw(weather_forecast.dart:26-33). WeatherForecastDate.fromServerValue 생성 검증은 InvalidWeatherForecastDateException(FormatException) throw하나, 서버 계약상 YYYY-MM-DD padded 포맷은 통과(정상 유입 비차단)하고 malformed만 거부. 전이/갱신 자체가 없는 읽기 기능이라 메서드밖 검증·일반Exception 위반 자리 미발화."
+        },
+        {
+          "id": "DT-4",
+          "verdict": "PASS",
+          "reason": "DTO 없음·엔티티 직반환: DataSource(weather_forecast_data_source.dart:15-37)가 도메인 엔티티 WeatherForecast(List)를 직반환. dto/·DTO·Mapper·Response 클래스 0. 서버 JSON은 _parseSummaryForecast/_parseDetailForecast로 도메인 VO 직조립(이름 바꾼 변환계층 아님 — 수동 파싱이나 산출은 도메인 엔티티)."
+        },
+        {
+          "id": "DT-6",
+          "verdict": "WEAK",
+          "reason": "retrofit DataSource 표기 미채택: DataSource가 @RestApi/@GET/factory/part 대신 수동 dio.get<Object?> + 수동 JSON 파싱(weather_forecast_data_source.dart:10-37). 표준 DT-6 PASS는 @RestApi abstract+factory(Dio)+part·@GET/@Path/@Query 형태를 기대. 동작은 정상이나 retrofit 표기 규약 일탈(결정 레인·비치명). pubspec에 retrofit 의존도 없음."
+        },
+        {
+          "id": "ST-3",
+          "verdict": "PASS",
+          "reason": "State 형태: WeatherForecastListState/DetailState가 application_layer/state/의 @freezed(list_state.dart:8-14, detail_state.dart:8-14), build()가 자기 freezed State 반환. 도메인 엔티티(WeatherForecast)는 State 필드로 래핑(직노출 아님). error 필드(BadRequestResponse?) 보유."
+        },
+        {
+          "id": "VW-7",
+          "verdict": "PASS",
+          "reason": "라우트 단일 출처: path/name 리터럴이 weather_router.dart의 abstract final class WeatherRoutes에만(listPath/detailPath/listName 등). navigator는 pushNamed/goNamed로 상수만 전달, view import 0(weather_navigator.dart). 뷰 onTap은 forecastDate.value(VO 노출 키)를 navigator에 위임 — 인라인 직렬화(toIsoDate 류) 없음(VO가 canonical value 소유). BC는 GoRoute만 export, 셸 조립은 root_router."
+        },
+        {
+          "id": "HR-2",
+          "verdict": "PASS",
+          "reason": "종류 폴더·접미사: view_model→_vm, repository→_repo, view→_view, state→_state, section→_section, widget→_widget, ui_extension→_ui_extension, data_source→_data_source 전부 지정 접미사 일치. 화이트리스트 밖 폴더(provider/·viewmodel/) 없음."
+        },
+        {
+          "id": "HR-8",
+          "verdict": "PASS",
+          "reason": "화면 삼총사: weather_forecast_list_vm↔_list_view↔_list_state 동거, detail 동일. section은 화면 접두(weather_forecast_list_/detail_) 보유. widget(weather_forecast_card_widget·weather_metric_tile_widget)은 화면명 미보유(BC명 weather와 겹침은 예외)."
+        }
+      ],
+      "fc": {
+        "g1": "FAIL — 정렬 코드 lib 전역 0개(grep sort/compareTo/isBefore exit 1). DataSource→VM→view 서버 배열순 그대로(list_content_section.dart:33-34 forecasts[index]). 골든 D(D2,D0,D5,D1,D6,D3,D4 비오름차순)에서 첫 카드=D2≠D0 → 날짜 오름차순 위반.",
+        "g3g4": "PASS — ui_extension.dart:14-20 highTemperatureLabel=tempMax(최고)/lowTemperatureLabel=tempMin(최저) 정순 바인딩, 음수 부호 문자열보간 그대로 보존(-4 표기 유지). card_widget.dart:123,131 high/low 슬롯 순서 정상.",
+        "g5": "PASS — card_widget.dart:33-35 onTap(forecast.forecastDate)→list_content_section.dart:37-39 forecastDate.value→navigator pushNamed path param→detail_vm.dart:32-35 동일 rawForecastDate fetch. 탭한 날짜=상세 날짜 일치(인접/고정 날짜 아님).",
+        "g7": "PASS — weather_condition_ui_extension.dart:18-38 6종 아이콘 distinct(wb_sunny/cloud_queue/cloud/water_drop/ac_unit/thunderstorm), 색 6 distinct(accentYellow/neutralMuted/statusInfo/accentSky/accentViolet/statusDanger). cloudy(mostlyCloudy=구름많음)=cloud_queue ↔ overcast(cloudy=흐림)=cloud_outlined 구별. 미매핑·기본아이콘 fallthrough 없음(소진 switch).",
+        "g8": "PASS — koreanLabel(ui_extension.dart:7-16)+fromServerValue(weather_condition.dart:11-21) 합성: server clear→맑음·cloudy→구름많음·overcast→흐림·rain→비·snow→눈·thunderstorm→뇌우. §0 대응표 일치. 영문 enum 화면 노출 없음(koreanLabel만 표시).",
+        "overall": "FAIL"
+      },
+      "rubricBlindSpot": "57차원이 '정렬 코드 존재/거주처'는 잡지만, 정렬이 *완전히 누락*된 경우(서버 순서 의존)를 잡는 책임이 FC-1·FC-3에만 집중돼 있어, 만약 라이브 서버가 우연히 오름차순으로 응답하면 골든 D 같은 적대 입력 없이는 결함이 가려질 수 있다(테스트도 오름차순 입력만 주입). 구조·규칙 레인(SD/ST/HR)은 '미구현 기능'에 대해 전부 PASS로 통과시키는 맹점 — 즉 규칙은 완벽히 지키나 핵심 요구 행위 1개가 누락된 산출물을 의미 레인이 FC 외엔 잡지 못함.\"",
+      "summary": "치명 FAIL 3건(FC-1·FC-2·FC-3) — 모두 동일 근원: 날짜 오름차순 정렬 코드가 lib 전역 완전 부재(grep 0), 서버 배열순 그대로 표시. task 명시 요구('날짜 오름차순 표시')를 미구현해 골든 G-1/N2 위반, 정렬 메커니즘을 두드리는 테스트도 부재(목록 widget test가 이미 정렬된 입력만 주입·순서 단언 0)라 M1 red 입증 불가(vacuous). 그 외 구조·규칙·데이터·에러채널·나머지 골든(G-3~G-8)·import 방향·캡슐화는 견고하게 PASS. 비치명 ST-5 FAIL(riverpod 2.x 수동 AsyncNotifierProvider — @riverpod 코드젠 class extends _\\$X 미사용), DT-6/SD-9 WEAK(retrofit 미채택·enum 어휘충돌). 정렬 단 한 줄 누락이 치명 게이트 3개를 무너뜨린 사례."
+    }
+  },
+  {
+    "run": "Y",
+    "lens": "n2",
+    "adversarial": false,
+    "verdict": {
+      "critical": [
+        {
+          "id": "SD-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/domain_layer/weather_forecast/weather_forecast.dart:22-33",
+          "reason": "도메인 판정/계산이 domain에 거주: WeatherForecast.isForDate(날짜 동일성 판정)·requireDetailMetrics(불변식). enum 분류는 WeatherCondition.fromServerValue가 domain enum에. VM은 변환만(fold→State). 판정이 VM/view/extension으로 샌 곳 없음. 단 정렬 판정은 아예 부재(SD-1 빈혈 아님—FC 문제)."
+        },
+        {
+          "id": "SD-2",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/domain_layer/weather_forecast/weather_forecast.dart:11-34",
+          "reason": "Model 밖 copyWith에 분기·전이·계산이 붙은 호출 0건(grep으로 application/presentation 전수—copyWith 도메인 분기 없음). 읽기 전용 조회 기능이라 전이 갱신 자체가 없음. 위반 없음."
+        },
+        {
+          "id": "SD-7",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/application_layer/use_case/weather_forecast_use_case.dart:8-24",
+          "reason": "UseCase 무상태 plain·Repo Either를 _repo.getX()로 그대로 통과(새 throw 0·침묵 폐기 0)·도메인 명명. UI import 0 확인(grep flutter/presentation/material/design_system exit 1). 치명 UI호출 항목 PASS."
+        },
+        {
+          "id": "VW-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/presentation_layer/widget/weather_forecast_card_widget.dart:27-55",
+          "reason": "build/콜백이 표시·이벤트 위임만(onTap→forecast.forecastDate 전달). 권한·전이·가격 정책 build에 없음. list_view build도 state.when 분기 표시만. Fat Widget 아님."
+        },
+        {
+          "id": "VW-6",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/presentation_layer/section/weather_forecast_detail_error_section.dart:33-37",
+          "reason": "design_system 컴포넌트가 전역키/전역 context로 자기를 띄우는 static show/present/display 경로 0. 다이얼로그·시트 자체가 없고 내비는 View가 콜백(onShowForecastList)으로 navigator 위임. 위반 없음."
+        },
+        {
+          "id": "ST-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/application_layer/view_model/weather_forecast_list_vm.dart:21-39",
+          "reason": "VM Model 방향 호출이 UseCase 인스턴스뿐(Repo/DataSource/box/SDK import·생성 0). BuildContext·TextEditingController 미보유. 자기 freezed State만 노출(WeatherForecastListState). 직행 없음—치명 PASS."
+        },
+        {
+          "id": "ST-2",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/application_layer/view_model/weather_forecast_list_vm.dart:32-37",
+          "reason": "조회 실패=build()가 fold에서 BadRequestResponse를 throw→AsyncValue.error(view가 state.when error로 표시, list_view.dart:37). throw 대상이 도메인 BadRequestResponse(plain Exception/문자열 아님). 액션 채널은 액션 메서드 자체가 없어 미발화(N/A)—읽기전용 VM. valueOrNull 미사용(grep exit 1). 채널 혼선 없음."
+        },
+        {
+          "id": "ST-4",
+          "verdict": "NA",
+          "cite": "lib/application/weather/application_layer/view_model/weather_forecast_detail_vm.dart:31-43",
+          "reason": "watch=build 안만(view), read 핸들러 없음, listen 없음. await 직후 state 접근하는 액션 핸들러가 0(VM은 build()만, await 후 fold로 값 반환만 하고 state 필드 접근 안 함). mounted 가드 발화 조건(await 경계 후 state 접근) 미충족이라 N/A. requireValue 무전제 사용 0(grep exit 1)."
+        },
+        {
+          "id": "DT-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/infra_layer/repository/weather_forecast_repo.dart:15-26",
+          "reason": "Repo 공개 시그니처 Future<Either<BadRequestResponse,T>>. 모든 소비처(UseCase 통과→VM fold)가 Left를 폐기 않고 throw로 상위 전달(list_vm.dart:33). fold Left 분기 no-op 아님. Either 계약 준수."
+        },
+        {
+          "id": "DT-2",
+          "verdict": "PASS",
+          "cite": "lib/common/network/safe_api_call.dart:6-39",
+          "reason": "외부 호출이 safeApiCall로 감싸져 Either 단일 출구. safeApiCall이 DioException·FormatException·TypeError 개별 + catch-all 보유. Repo/UseCase throw/rethrow/Future.error 우회 0. DataSource는 FormatException throw하나 Repo의 safeApiCall이 포섭(infra service 단일출구 유지). 인터셉터 에러 정규화 없음."
+        },
+        {
+          "id": "HR-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/domain_layer/weather_forecast/weather_forecast.dart:1",
+          "reason": "신규 BC가 application/weather/ 하위, 1뎁스={domain,application,infra,presentation}_layer 4계층 존재, BC 직속 2파일(weather_router.dart·weather_navigator.dart)만. application/ 직속 BC 폴더만. 골격 적합."
+        },
+        {
+          "id": "HR-4",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/domain_layer/weather_forecast/enum/weather_condition.dart:1",
+          "reason": "domain은 순수 Dart만(grep: flutter/common/presentation/infra/design_system/riverpod/dio/dartz import 0, freezed_annotation만—dddart domain 허용). application→presentation import 0. presentation→infra import 0. 매트릭스 ✗ 셀 위반 없음(전수 grep exit 1)."
+        },
+        {
+          "id": "HR-5",
+          "verdict": "NA",
+          "cite": "lib/application/weather/weather_router.dart:1-6",
+          "reason": "단일 BC(weather) 신규 기능. 타 BC import 0(root_router가 weatherRouter만 조립). 교차 BC 채널 발화 자체가 없어 N/A. 신규 순환 없음."
+        },
+        {
+          "id": "BG-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/domain_layer/weather_forecast/weather_forecast.dart:9-13",
+          "reason": "freezed 단일생성자 abstract·본문 멤버 시 const X._() 완비(weather_forecast.dart:12-13, weather_forecast_date.dart:9). part 지시문 완비(.freezed/.g). GoRoute builder 필수 충족(weather_router.dart:20,36). valueOrNull 0·3.10+ dot shorthand 미관측. 단 pubspec sdk:^3.12.1로 표준 ^3.9 상한과 불일치(컴파일 형태 자체는 합법, 실행결과 봉인). 코드 형태 컴파일 가능—PASS."
+        },
+        {
+          "id": "BG-2",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/application_layer/view_model/weather_forecast_list_vm.dart:11-19",
+          "reason": "실행 봉인(analyze 결과 미수령)—코드 형태만 판정. 미사용 import·명백한 미선언 심볼·deprecated 직접 사용 미관측. withValues(alpha:) 신 API 사용(card_widget.dart:69)은 최신 flutter 정합. added 코드 신규 analyzer 이슈 유발 형태 미발견—형태 기준 PASS(실측은 조정자 봉인)."
+        },
+        {
+          "id": "FC-1",
+          "verdict": "FAIL",
+          "cite": "lib/application/weather/presentation_layer/section/weather_forecast_list_content_section.dart:21-41",
+          "reason": "치명 FAIL. 정렬 코드가 lib/ 전체에 0건(sort/compareTo/오름차순 grep exit 1). DataSource→Repo→UseCase→VM→State→Section 전 경로가 서버 배열 순서 그대로(forecasts[index]). 골든 데이터셋 D(배열순 D2,D0,D5,D1,D6,D3,D4) 주입 시 첫 카드=D2(rain), 마지막=D4 — G-1 날짜 오름차순(첫=D0,끝=D6) 불일치. g1 규칙 '정렬코드 없으면 서버순서 의존이며 골든 D 역순 데이터엔 FAIL' 정확히 적중. g3g4/g5/g7/g8은 통과하나 핵심 G-1 단일 불일치로 FC-1 overall FAIL."
+        },
+        {
+          "id": "FC-2",
+          "verdict": "FAIL",
+          "cite": "test/application/weather/presentation_layer/view/weather_forecast_list_view_test.dart:70-106",
+          "reason": "치명 FAIL. M1(정렬 역전/키 제거)을 두드릴 순서-단언 테스트가 0건(test/ 전체 sort/order/순서 grep exit 1). 목록 테스트는 2항목 각 findsOneWidget만 검사—상대 순서 미검증이라 M1 주입해도 green(vacuous). 게다가 정렬 사이트 자체가 부재→死코드 아닌 '기능 누락'. M2(아이콘/색 swap)·M3(temp swap)·M4(날짜 파라미터)·M5(상세 지표)는 실효 테스트 존재(ui_extension_test, 최고/최저 텍스트 단언, repo requestedPaths·detail 날짜라벨, 상세 3지표 단언)하나, 필수 M1 red율 0%→FC-2 FAIL."
+        },
+        {
+          "id": "FC-3",
+          "verdict": "FAIL",
+          "cite": "lib/application/weather/presentation_layer/section/weather_forecast_list_content_section.dart:33-41",
+          "reason": "치명 FAIL. Negative-gate N2(날짜 순서 깨짐—배열순 그대로) 직접 관측됨: 목록이 서버 배열 순서를 그대로 itemBuilder로 노출, 오름차순 보장 장치 전무. 골든 §3 N2가 'FAIL'로 명시한 '배열순 그대로' 케이스에 정확히 해당. 다른 N(개수7·필드·6종매핑·기온부호·상세날짜·라벨)은 오류 없으나 N2 단일로 FC-3 FAIL."
+        }
+      ],
+      "nonCritical": [
+        {
+          "id": "SD-9",
+          "verdict": "WEAK",
+          "reason": "계층 관통 철자는 weatherForecast 일관(domain/application/presentation 동일). 그러나 유비쿼터스 언어 의미 drift 존재: enum 상수 WeatherCondition.cloudy가 서버 'overcast'(흐림)에, mostlyCloudy가 서버 'cloudy'(구름많음)에 매핑(weather_condition.dart:5-9,14-15). 즉 코드 상수 'cloudy'가 도메인 '흐림'을 뜻해 자연어 직관과 역행—철자는 안 깨졌으나 어휘-의미 대응이 혼란. 최종 화면 라벨은 정확(흐림/구름많음 올바름)이라 기능 무해이나 도메인 언어 명료성 약점."
+        },
+        {
+          "id": "ST-5",
+          "verdict": "FAIL",
+          "reason": "표준(riverpod 3.x @riverpod 클래스형 codegen, class extends _$X) 미충족. pubspec이 riverpod ^2.6.1·flutter_riverpod ^2.6.1이고 riverpod_annotation/riverpod_generator 의존 전무(@riverpod grep exit 1). 프로바이더가 수동 top-level AutoDisposeAsyncNotifierProvider<...>(VM.new) 선언(list_vm.dart:11-19, detail_vm.dart:12-22). 클래스는 AutoDisposeAsyncNotifier extends(코드젠 _$X 아님). family는 build 인자로 받긴 함. 코드젠 면제 대상도 아님(애초 toolchain 부재)—표준 형태 FAIL."
+        },
+        {
+          "id": "VW-5",
+          "verdict": "PASS",
+          "reason": "도메인 enum→UI 매핑(한글라벨·아이콘·색)이 weather_condition_ui_extension.dart extension에만 거주(:6-39). VM/State getter·design_system에 매핑 누수 0. WeatherForecast→라벨 매핑도 weather_forecast_ui_extension.dart에 격리. 매핑 유일 자리 준수."
+        },
+        {
+          "id": "VW-4",
+          "verdict": "PASS",
+          "reason": "색·타이포·radius·spacing이 전부 App* 토큰 참조(AppColor/AppTypography/AppRadius/AppSpacing/AppShadow). application 내 Color(0x·Colors.·생 TextStyle·생 Duration 리터럴 0(grep exit 1). VM/State에 시각 반환 getter·design_system import 0. 토큰 단일출처 준수. (단 statusInfo/accentSky 둘 다 청색 계열이나 hex 구별—VW-4 무관, G-7 distinct 충족)."
+        },
+        {
+          "id": "SD-3",
+          "verdict": "PASS",
+          "reason": "불변식 위반(detailMetrics null) 시 변경/조회 메서드 안에서 도메인 예외 throw(weather_forecast.dart:26-33 requireDetailMetrics→WeatherDetailMetricsRequiredException, exception.dart 거주). fromServerValue의 생성시점 검증은 malformed(잘못된 날짜형식·미지 enum)만 거부하고 safeApiCall이 Left로 정규화—정상 서버 데이터 유입 차단 아님(SD-3 '직파싱 차단' 함정 회피). 일반 Exception/문자열 아닌 도메인 *Exception 사용."
+        },
+        {
+          "id": "ST-8",
+          "verdict": "FAIL",
+          "reason": "main.dart ProviderScope에 전역 retry:(_,__)=>null 1줄 부재(main.dart:11은 const ProviderScope(child:...)만). riverpod 2.x엔 전역 retry 파라미터 자체가 없어 표면적으로 비해당이나, 표준이 요구하는 retry OFF 장치가 결여된 상태. hooks/copyWithPrevious/valueOrNull/Mutations 0(grep exit 1)은 충족. retry OFF 부재로 항목 미충족."
+        },
+        {
+          "id": "DT-4",
+          "verdict": "PASS",
+          "reason": "DataSource 반환이 도메인 엔티티 List<WeatherForecast>(data_source.dart:15,32). dto/·DTO·Mapper·Response 변환계층 0. 서버 JSON을 _parseSummaryForecast/_parseDetailForecast가 엔티티로 직조립(VO fromServerValue 경유). 이름 바꾼 변환계층 우회 없음."
+        },
+        {
+          "id": "DT-5",
+          "verdict": "PASS",
+          "reason": "Repo가 인터페이스 없는 단일 구체 final class(repo.dart:9), 원격 DataSource 조합. Repo·DataSource 무상태 plain·생성자 직접 생성(DI 컨테이너 없음). 추상 인터페이스·가변 상태 필드 없음."
+        },
+        {
+          "id": "DT-2-datasource",
+          "verdict": "PASS",
+          "reason": "보강: DataSource가 FormatException을 throw(data_source.dart:21,24,82,91,100,112)하나 이는 infra service 단일출구 위반 아님—Repo의 safeApiCall이 모두 포섭해 Either로 정규화. retrofit 대신 수동 dio.get + 수동 파싱 방식(DT-6 @RestApi 미사용)이나 표준이 retrofit 강제는 조건부—수동 DataSource도 엔티티 직반환·무상태 충족."
+        },
+        {
+          "id": "HR-2",
+          "verdict": "PASS",
+          "reason": "파일이 계층별 종류 폴더 화이트리스트 안(view_model/state/use_case/section/widget/view/ui_extension/enum/value_object/domain_service). 지정 접미사 일치: _vm·_repo·_state·_view·_section·_widget·_ui_extension·_data_source·_use_case. provider/·viewmodel/ 등 화이트리스트 밖 폴더 없음."
+        },
+        {
+          "id": "VW-2",
+          "verdict": "PASS",
+          "reason": "section/widget이 ref·자기 VM 없이 prop·콜백으로 성립(content_section은 state prop+onForecastSelected 콜백, card_widget은 forecast prop+onTap 콜백). view 삼총사(list/detail_view)만 ConsumerWidget으로 ref 보유(자기 상태 watch 사유 실재). widget이 화면 State 직수신 안 함(WeatherForecast 엔티티만). 과승격 없음."
+        },
+        {
+          "id": "VW-3",
+          "verdict": "PASS",
+          "reason": "section/widget에 ref·provider import 0(presentation grep으로 section/widget 파일에 riverpod import 없음, view만 flutter_riverpod). 데이터=prop·동작=콜백 계약 준수."
+        },
+        {
+          "id": "Q-1",
+          "verdict": "PASS",
+          "reason": "클래스/enum UpperCamel·멤버 lowerCamelCase·SCREAMING_CAPS 상수 0·헝가리안 0·공개 선행_ 0·bool 긍정형(isShow·pending). 지역변수 타입 명시 일관(final WeatherForecast forecast 등). 명명 표기 양호."
+        },
+        {
+          "id": "ST-3",
+          "verdict": "PASS",
+          "reason": "두 State가 application_layer/state/의 @freezed(list_state.dart:8, detail_state.dart:8), build()가 자기 freezed State 반환. 도메인 엔티티는 State 필드로 래핑(forecasts/forecast). error 필드(BadRequestResponse?) 보유. 패키지 타입 직노출 없음."
+        }
+      ],
+      "fc": {
+        "g1": "FAIL — 정렬 코드 lib/ 전체 0건(grep exit 1). 서버 배열순 그대로 itemBuilder 노출(content_section.dart:33-41). 골든 데이터셋 D 주입 시 첫 항목 D2(배열[0]), 기대 D0 불일치. '정렬코드 없으면 골든 D 역순 데이터엔 FAIL' 규칙 적중.",
+        "g3g4": "PASS — 최고/최저 바인딩 정순(highTemperatureLabel→tempMax, lowTemperatureLabel→tempMin, ui_extension:14-20). 음수 부호 유지(문자열 보간 '$tempMin°C', 절댓값/부호탈락 없음). card_widget _TemperatureText가 high 슬롯=최고, low 슬롯=최저.",
+        "g5": "PASS — 탭 항목→상세 날짜 일치. card onTap이 forecast.forecastDate 전달(card_widget:33-35)→onForecastSelected(forecastDate.value)(content_section:37-39)→navigator pushNamed pathParameters[forecastDate]=그 날짜(weather_navigator.dart:18-22)→detail route가 pathParameters로 raw date 추출→detail VM이 그 날짜로 조회. 인접/고정 날짜 치환 없음.",
+        "g7": "PASS — 6종 distinct. 아이콘 6개 상이(wb_sunny/cloud_queue/cloud/water_drop/ac_unit/thunderstorm). 색 6개 상이 토큰(accentYellow/neutralMuted/statusInfo/accentSky/accentViolet/statusDanger, hex 전부 다름). cloudy(흐림)=cloud_outlined+statusInfo ↔ mostlyCloudy(구름많음)=cloud_queue_outlined+neutralMuted 구별됨. 6종 미매핑/기본아이콘 fallthrough 없음(switch 소진).",
+        "g8": "PASS — 한글 라벨 §0 대응표 정확 일치(end-to-end): 서버 clear→맑음, cloudy→구름많음, overcast→흐림, rain→비, snow→눈, thunderstorm→뇌우. enum 상수명은 혼란(cloudy 상수=흐림)이나 fromServerValue 이중매핑+koreanLabel이 최종 라벨 올바르게 산출(ui_extension:9-15, condition_test로 검증). 영문 enum 화면 노출 없음.",
+        "overall": "FAIL"
+      },
+      "rubricBlindSpot": "57차원이 'riverpod 버전 자체가 표준(3.x)과 다른 토대'를 직접 게이팅 못함 — ST-5는 @riverpod 형태만 보고 FAIL 잡지만, pubspec이 riverpod 2.x로 고정돼 codegen·retry·신 API 표준 전제가 통째로 어긋나는 '토대 불일치'가 개별 항목 누적이 아닌 단일 근본 결함인데 평가지엔 이를 한 번에 표기할 자리가 없다.\"",
+      "summary": "치명 FAIL 3건(FC-1·FC-2·FC-3) — 핵심 결함은 '날짜 오름차순 정렬'의 완전 부재다. 정렬 코드가 lib/ 전체 0건이라 서버 배열순을 그대로 화면에 노출, 골든 데이터셋 D(섞인 순서) 기준 G-1/N2 즉시 불일치이며 이를 잡을 순서-단언 테스트도 없어 M1 mutation이 vacuous(FC-2). 정렬 외 기능축(최고/최저 바인딩·음수부호·탭↔상세 날짜·6종 distinct 아이콘/색·한글라벨)은 모두 정확하고 DDD 척추(SD/VW/ST-1/DT/HR 치명군)는 대체로 견고하다. 비치명 약점: ST-5/ST-8(riverpod 2.x 수동 프로바이더·retry OFF 부재 — 표준 3.x codegen 토대 불일치), enum 상수명 의미 drift(cloudy 상수=흐림). 종합: 구조·표기는 우수하나 요청 기능의 핵심 한 가지(정렬)를 누락해 기능 정확성 게이트 불통과."
+    }
+  },
+  {
+    "run": "Y",
+    "lens": "adv",
+    "adversarial": true,
+    "verdict": {
+      "critical": [
+        {
+          "id": "SD-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/domain_layer/weather_forecast/weather_forecast.dart:22-33",
+          "reason": "도메인 판정 isForDate/requireDetailMetrics가 애그리거트 루트 메서드로 거주. VM/view/State getter에 판정 누수 없음(weather_forecast_list_vm.dart:34 은 state 래핑만). enum 분류도 fromServerValue가 enum 안. 빈 wrapper 위장 아님."
+        },
+        {
+          "id": "SD-2",
+          "verdict": "NA",
+          "cite": "lib/application/weather/domain_layer/weather_forecast/weather_forecast.dart:15-20",
+          "reason": "읽기전용 기능 — 분기·전이·계산이 걸린 copyWith 갱신 자체가 코드 전체에 없음(Model 밖 copyWith 0). 발화 안 함."
+        },
+        {
+          "id": "SD-7",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/application_layer/use_case/weather_forecast_use_case.dart:14-23",
+          "reason": "UseCase 무상태 plain·Repo Either 끝까지 통과(새 throw 0·침묵 폐기 0). UI(material/presentation/design_system) import 0 — dartz/domain VO/repo만 import. 치명 UI호출 없음."
+        },
+        {
+          "id": "VW-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/presentation_layer/widget/weather_forecast_card_widget.dart:27-55",
+          "reason": "build가 표시·onTap 위임만. 권한·상태전이·가격 정책 없음. 라벨/색/아이콘은 ui_extension·enum 위임. content_section(:33-41)도 itemBuilder 표시만."
+        },
+        {
+          "id": "VW-6",
+          "verdict": "PASS",
+          "cite": "lib/design_system/foundation/app_typography.dart:6",
+          "reason": "design_system 전역 grep 결과 static show/present/display·GlobalKey·navigatorKey 0(유일 매치는 typography displaySmall 토큰명). 다이얼로그/시트 자기표시 static 경로 없음."
+        },
+        {
+          "id": "ST-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/application_layer/view_model/weather_forecast_list_vm.dart:23-26",
+          "reason": "VM Model방향 호출이 UseCase 인스턴스뿐(Repo/DataSource/box/SDK import·생성 0). BuildContext·TextEditingController 미보유. 자기 freezed State만 노출. detail_vm.dart:26-29 동일. 구조 직행 없음."
+        },
+        {
+          "id": "ST-2",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/application_layer/view_model/weather_forecast_list_vm.dart:32-37",
+          "reason": "조회 실패: build()가 BadRequestResponse(plain Exception 아님) fold로 throw→AsyncValue.error(view :37 state.when error 처리). 읽기전용 기능이라 액션 채널 미발화(액션 메서드 0)·consumeError 발화 조건 없음. valueOrNull 미사용(state.when). 채널 혼선 없음."
+        },
+        {
+          "id": "ST-4",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/application_layer/view_model/weather_forecast_detail_vm.dart:32-42",
+          "reason": "build()가 await 후 ref/state 접근 없이 fold 결과를 바로 return — await 경계 뒤 상태접근 자체가 없어 mounted 가드 불요. 액션 핸들러(await 후 state 변경) 없음. requireValue 무전제 사용 없음. 위반 표면 부재."
+        },
+        {
+          "id": "DT-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/infra_layer/repository/weather_forecast_repo.dart:15-18",
+          "reason": "Repo 공개 시그니처 Future<Either<BadRequestResponse,T>>(Right=성공). Left 폐기 없음 — VM fold가 Left를 throw로 상위(AsyncError) 전달(list_vm:33). no-op fold 아님. 소비처 전파 실재."
+        },
+        {
+          "id": "DT-2",
+          "verdict": "PASS",
+          "cite": "lib/common/network/safe_api_call.dart:9-39",
+          "reason": "외부 호출 safeApiCall 단일 출구로 Either화. DioException·FormatException·TypeError 개별 + catch-all. Repo/UseCase throw/rethrow/Future.error 탈출 0(repo는 safeApiCall만 호출). 인터셉터 정규화 없음(dio_client.dart 인터셉터 미부착)."
+        },
+        {
+          "id": "HR-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/weather_router.dart:1",
+          "reason": "신규 BC가 application/weather/ 하위. BC 1뎁스 {domain,application,infra,presentation}_layer 완비, BC 직속 2파일(weather_router.dart·weather_navigator.dart)만. 루트 평면·잡파일 없음."
+        },
+        {
+          "id": "HR-4",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/domain_layer/weather_forecast/weather_forecast.dart:1-7",
+          "reason": "grep 확인: domain_layer는 flutter/common/design_system import 0(freezed_annotation+자기 도메인만 — 순수 Dart). application은 presentation import 0. presentation은 infra_layer import 0. infra는 상위 import 0. 매트릭스 위반 없음."
+        },
+        {
+          "id": "HR-5",
+          "verdict": "NA",
+          "cite": "lib/application/weather/weather_navigator.dart:4-23",
+          "reason": "단일 BC(weather) 신규 기능 — 타 BC import 자체가 없음(grep상 타 application/* 참조 0). 교차 4채널 발화 조건 미충족·신규 순환 0. 거짓 FAIL 금지 대상."
+        },
+        {
+          "id": "BG-1",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/domain_layer/weather_forecast/weather_forecast.dart:11-13",
+          "reason": "실행결과 봉인 — 코드 형태만 판정. freezed 단일생성자 abstract·본문멤버 시 const X._() 완비(:13), part '*.freezed.dart' 지시문 완비, GoRoute builder 필수 충족(weather_router.dart:20·36), valueOrNull 0, 3.10+ dot-shorthand/private named params 미관측. 형태상 컴파일 차단요소 없음."
+        },
+        {
+          "id": "BG-2",
+          "verdict": "PASS",
+          "cite": "lib/application/weather/presentation_layer/ui_extension/weather_condition_ui_extension.dart:8-15",
+          "reason": "실행결과(analyze green) 봉인 — 형태만. switch가 6 enum 전수 소진(default 없음)·deprecated 표면 미사용(withValues 신API 사용 card_widget:69). added 코드에 명백한 신규 analyzer 유발 형태 미관측. 단 실제 analyze exit는 조정자 봉인."
+        },
+        {
+          "id": "FC-1",
+          "verdict": "FAIL",
+          "cite": "lib/application/weather/application_layer/view_model/weather_forecast_list_vm.dart:34-36",
+          "reason": "치명. 전체 lib/ 정렬코드 grep(sort/compareTo/isBefore/ascending/orderBy) 결과 0 — domain·VM·UseCase·view·section 어디에도 날짜 오름차순 정렬 부재. list_vm은 서버 배열을 그대로 State(forecasts: forecasts)로 래핑, content_section:34는 forecasts[index] 순차 렌더. 골든 데이터셋 D(배열순 D2,D0,D5,D1,D6,D3,D4 — 비오름차순)에선 첫 항목이 D0 아닌 D2로 떠 G-1 단언 불일치. spec/scope도 정렬 언급 0(서버순서 전적 의존). g3g4(최고/최저 자리·음수)·g5(탭→상세 날짜)는 코드상 정상이나 g1 단독으로 FC-1 FAIL."
+        },
+        {
+          "id": "FC-2",
+          "verdict": "FAIL",
+          "cite": "test/application/weather/presentation_layer/view/weather_forecast_list_view_test.dart:70-106",
+          "reason": "치명. 핵심 판정(G-1 정렬)에 대한 mutation을 red로 만들 테스트가 부재 — 목록테스트는 이미 오름차순인 2건(06-15,06-16)을 findsOneWidget으로만 확인하고 *순서/위치 단언 0*(test/ 전체 sort/order/widgetList/indexOf grep 0). 정렬코드도 없어 M1 주입 대상 자체가 없음(死메커니즘). G-4 음수기온(-4) 케이스 미검증. M2(아이콘/색 swap)는 ui_extension 단위테스트가 핀고정해 검출 가능하나, 가장 중요한 G-1이 vacuous — 비-vacuous 입증 실패."
+        },
+        {
+          "id": "FC-3",
+          "verdict": "FAIL",
+          "cite": "lib/application/weather/presentation_layer/section/weather_forecast_list_content_section.dart:27-42",
+          "reason": "치명. negative-gate N2(목록 날짜가 오름차순이 아님·배열순 그대로) 발화 — 정렬 부재로 서버 배열 순서를 그대로 표시, 비오름차순 응답 시 오늘이 맨 위가 아니고 단조증가 깨짐. SCENARIO §1 task ④ '날짜 오름차순 표시' 명백 도메인 요구 미충족. N2 1건만으로 FC-3 FAIL."
+        }
+      ],
+      "nonCritical": [
+        {
+          "id": "SD-9",
+          "verdict": "FAIL",
+          "reason": "유비쿼터스 언어 관통 철자 붕괴: enum WeatherCondition.cloudy 가 서버 enum 'cloudy'가 아니라 'overcast'(흐림)에 매핑(weather_condition.dart:14-15 'overcast'=>cloudy), 서버 'cloudy'는 mostlyCloudy로(:14). 즉 도메인 식별자 cloudy의 의미가 계약 cloudy와 역전. scope.md:25-31도 'mostly cloudy/cloudy'로 계약 어휘(cloudy/overcast) 미준수. 라벨·아이콘·색은 결과적으로 정상(흐림=cloud_outlined 등)이라 G-7/G-8 동작은 통과하나, 계층 관통 동일 철자 계약 위반."
+        },
+        {
+          "id": "ST-5",
+          "verdict": "FAIL",
+          "reason": "provider 형태가 riverpod 3.x @riverpod 코드젠(class extends _$X·part .g.dart) 아님 — 수동 Riverpod 2.x 표기. list_vm.dart:11-19/21-22 = top-level AutoDisposeAsyncNotifierProvider<...>(VM.new) + class extends AutoDisposeAsyncNotifier. detail_vm.dart:12-25 = AutoDisposeAsyncNotifierProvider.family + extends AutoDisposeFamilyAsyncNotifier. pubspec.yaml: riverpod 2.6.1·flutter_riverpod 2.6.1, riverpod_annotation/riverpod_generator 부재, @riverpod grep 0. 표준(클래스형 @riverpod codegen) 미충족."
+        },
+        {
+          "id": "VW-5",
+          "verdict": "PASS",
+          "reason": "도메인 enum/VO→UI 매핑(색·아이콘·한글라벨)이 weather_condition_ui_extension.dart·weather_forecast_ui_extension.dart extension에만 거주. VM/State getter·design_system에 매핑 누수 없음(VM은 State 래핑만). 거주 유일성 충족."
+        },
+        {
+          "id": "VW-4",
+          "verdict": "PASS",
+          "reason": "시각 토큰 단일출처 — weather feature 코드에 Colors.*/Color(0x/raw TextStyle(/raw Duration( grep 0. ui_extension 색은 AppColor 6토큰(accentYellow·neutralMuted·statusInfo·accentSky·accentViolet·statusDanger 전부 app_color.dart 실재) 참조. VM/State 시각 getter·design_system import 0."
+        },
+        {
+          "id": "SD-3",
+          "verdict": "WEAK",
+          "reason": "WeatherForecastDate.fromServerValue(weather_forecast_date.dart:16-31)가 생성 시점에 canonical YYYY-MM-DD 아니면 InvalidWeatherForecastDateException throw. SD-3 FAIL절('생성 시점 검증으로 직파싱 차단')에 형식상 근접하나, 서버 계약이 date.format=date(YYYY-MM-DD canonical)이라 정상 데이터는 통과 — 불변식이 아닌 형식가드 수준. 비canonical(예 2026-6-5) 정상값을 막을 위험은 낮으나 존재. 치명 아님."
+        },
+        {
+          "id": "ST-3",
+          "verdict": "PASS",
+          "reason": "두 State 모두 application_layer/state/ @freezed, build()가 자기 freezed State만 반환(엔티티는 forecasts/forecast 필드로 래핑), error 필드(BadRequestResponse?) 보유(list_state.dart:12·detail_state.dart:12). 도메인 State·패키지 타입 직노출 없음."
+        }
+      ],
+      "fc": {
+        "g1": "FAIL — 정렬코드 전무(lib/ 전체 sort/compareTo/isBefore grep 0). list_vm이 서버배열 그대로 State 래핑·content_section[index] 순차렌더. 골든 D(비오름차순 배열)에서 첫 항목 D0 아닌 D2 → 단조증가 깨짐. spec/scope 정렬 언급 0.",
+        "g3g4": "PASS — temperature_range.tempMax/tempMin이 high/low 슬롯에 정대응(ui_extension highTemperatureLabel='최고 ${tempMax}'·lowTemperatureLabel='최저 ${tempMin}', card_widget _TemperatureText high→max·low→min). 음수도 int 부호 보존('최저 -4°C') — 절댓값화·소수왜곡 없음. 자리바뀜 없음.",
+        "g5": "PASS — card onTap이 forecast.forecastDate(VO) 전달→content_section onForecastSelected(forecastDate.value) VO노출키→navigator pushNamed pathParam(weather_router.dart:23-28)→detail build(rawForecastDate)로 동일 날짜 조회. 탭한 날짜=상세 날짜 일치. 인접/고정 날짜 오류 없음.",
+        "g7": "PASS — 6종 distinct 아이콘(wb_sunny/cloud_queue/cloud/water_drop/ac_unit/thunderstorm 중복0)·6종 distinct 색(accentYellow/neutralMuted/statusInfo/accentSky/accentViolet/statusDanger 중복0). cloudy(흐림=cloud_outlined/statusInfo)↔overcast 구별 확보 — 단 enum 식별자가 역전돼 'mostlyCloudy'(서버cloudy,구름많음)=cloud_queue/neutralMuted, 'cloudy'(서버overcast,흐림)=cloud/statusInfo. 미매핑·기본아이콘 낙하 0(switch 전수소진).",
+        "g8": "PASS — koreanLabel switch가 §0 대응표 일치: clear=맑음·mostlyCloudy(서버cloudy)=구름많음·cloudy(서버overcast)=흐림·rain=비·snow=눈·thunderstorm=뇌우. 영문 enum 화면노출 없음. 라벨 오배치 없음(서버값→라벨 종단 정합).",
+        "overall": "FAIL"
+      },
+      "rubricBlindSpot": "RUBRIC 57차원은 enum *식별자*가 서버 계약값과 의미 역전(code cloudy=서버 overcast)돼도 라벨·아이콘·색만 종단 정합하면 G-7/G-8·VW-5가 PASS로 잡혀, 향후 유지보수자가 WeatherCondition.cloudy를 서버 cloudy로 오인해 매핑을 '교정'하다 흐림↔구름많음을 뒤바꿀 잠복 함정을 정량 게이트로 포착 못함(SD-9 의미 레인만 약하게 신호).\"",
+      "summary": "치명 FAIL 3건: FC-1·FC-2·FC-3 — 전 계층(domain/VM/UseCase/view/section)에 날짜 오름차순 정렬코드가 전무(grep 0)하고 정렬 책임을 서버에 전적 의존, 골든 D(비오름차순 배열)에서 G-1/N2 즉시 깨짐. 정렬 mutation을 red로 만들 순서-단언 테스트도 부재해 FC-2 vacuous. 나머지 14 치명 게이트(SD-1·SD-7·VW-1·VW-6·ST-1·ST-2·ST-4·DT-1·DT-2·HR-1·HR-4·BG-1·BG-2 PASS, SD-2·HR-5 NA)는 양호하고 데이터/에러/import 골격은 깨끗하나, 핵심 기능(날씨 4번 요구 '날짜 오름차순 표시') 미구현으로 산출물 무가치 판정. 비치명: ST-5 FAIL(수동 Riverpod 2.x — @riverpod 3.x codegen 아님), SD-9 FAIL(cloudy↔overcast 식별자 역전).\""
+    }
+  }
+]
