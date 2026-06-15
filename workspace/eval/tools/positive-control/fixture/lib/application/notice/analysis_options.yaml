@@ -1,0 +1,15 @@
+# dddart 생성 폴더 국소 — 호스트 루트 미수정(houserules §3·plugin 경계). analyzer는 가장 가까운
+# 상위 옵션을 쓰고 하위가 부모를 *대체*(병합 아님)하므로 include·exclude·rules를 전부 명시한다.
+# 호스트가 flutter_lints 의존이고 omit_local_variable_types류와 충돌하면 include를 빼고 아래 rules만 둔다(라이브런서 analyze로 확인).
+include: package:flutter_lints/flutter.yaml
+analyzer:
+  language:
+    strict-raw-types: true
+    strict-inference: true
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+linter:
+  rules:
+    always_specify_types: true
+    always_declare_return_types: true

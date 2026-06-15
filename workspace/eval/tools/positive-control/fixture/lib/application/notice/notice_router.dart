@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'presentation_layer/view/notice_detail_view.dart';
@@ -16,13 +17,13 @@ abstract final class NoticeRoutes {
 final GoRoute noticeRouter = GoRoute(
   path: NoticeRoutes.listPath,
   name: NoticeRoutes.listName,
-  builder: (context, state) => const NoticeListView(),
-  routes: [
+  builder: (BuildContext context, GoRouterState state) => const NoticeListView(),
+  routes: <RouteBase>[
     GoRoute(
       path: NoticeRoutes.detailRelativePath,
       name: NoticeRoutes.detailName,
-      builder: (context, state) {
-        final id = state.pathParameters[NoticeRoutes.idPathParameter]!;
+      builder: (BuildContext context, GoRouterState state) {
+        final String id = state.pathParameters[NoticeRoutes.idPathParameter]!;
 
         return NoticeDetailView(noticeId: id);
       },

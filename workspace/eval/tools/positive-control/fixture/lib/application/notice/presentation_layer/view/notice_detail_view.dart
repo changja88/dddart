@@ -6,6 +6,7 @@ import '../../../../common/network/bad_request_response.dart';
 import '../../../../design_system/component/feedback/error_feedback.dart';
 import '../../../../design_system/component/loading/loading.dart';
 import '../../../../design_system/foundation/app_color.dart';
+import '../../application_layer/state/notice_detail_state.dart';
 import '../../application_layer/view_model/notice_detail_vm.dart';
 import '../section/notice_detail_section.dart';
 
@@ -16,7 +17,8 @@ class NoticeDetailView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final noticeDetail = ref.watch(noticeDetailVMProvider(noticeId));
+    final AsyncValue<NoticeDetailState> noticeDetail =
+        ref.watch(noticeDetailVMProvider(noticeId));
 
     return Scaffold(
       backgroundColor: AppColor.background,
@@ -29,8 +31,9 @@ class NoticeDetailView extends ConsumerWidget {
         title: const Text('공지 상세'),
       ),
       body: noticeDetail.when(
-        data: (state) => NoticeDetailSection(notice: state.notice),
-        error: (error, stackTrace) => ErrorFeedback(
+        data: (NoticeDetailState state) =>
+            NoticeDetailSection(notice: state.notice),
+        error: (Object error, StackTrace stackTrace) => ErrorFeedback(
           title: '공지를 불러오지 못했어요',
           message: _messageFor(error),
           onRetry: () => ref.invalidate(noticeDetailVMProvider(noticeId)),

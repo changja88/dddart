@@ -41,6 +41,8 @@ flutter test test/application/notice/
 - `pub get` exit 0 · `build_runner` exit 0(29 outputs) · **`flutter analyze` → "No issues found!"**(BG-2) · **`flutter test` → "All tests passed!"(12)**(BG-1 컴파일 + FC-2 baseline).
 - **mutation 비-vacuous 실증(3/3 red)**: ① 정렬 비교자 역전(`a.pinned ? -1 : 1`→`? 1 : -1`)→vm 정렬 테스트 red ② 판정 규칙 반전(`||`→`&&`)→isHighlighted·배지 테스트 red(4건) ③ 분류 라벨 swap(`긴급`→`공지`)→위젯 라벨 테스트 red. 적용 후 전부 복원(흔적 0).
 
+**E2d 갱신(2026-06-15·재검 보류)**: feedback-005 목표2(타입 전면 강제)로 `lib/application/notice/analysis_options.yaml`(BC국소·`always_specify_types`+`always_declare_return_types`·codegen exclude)을 추가하고 `lib/**`를 전수 타입 명시로 보강했다 — 지역변수·클로저 파라미터(`(BadRequestResponse error)`·`(BuildContext context, GoRouterState state)`·`(NoticeListState state)`)·fold 결과 타입(VM이 dartz·BadRequestResponse import — architecture-state §4 정합)·**컬렉션 리터럴 타입인자**(`<Widget>[...]`·`@Default(<Notice>[])`). 위 "No issues found!"는 **이 lint 도입 *전*** 측정이라, always_specify_types 하 analyze green은 **다음 라이브런에서 재확인 필요**(`dart analyze`는 호스트 부트스트랩 의존이라 오프라인 불가). test/는 BC국소 options 범위 밖(호스트 루트 lint 적용)이라 미보강. *주의*: always_specify_types는 모든 컬렉션 리터럴에 타입인자를 요구하므로(`children: <Widget>[...]`) 위젯 트리가 장황해진다 — 결정 B(전면)의 실측 비용이며 라이브런이 실용성을 최종 판정한다.
+
 ## FC 골든 (사전등록 행위)
 
 - **정렬**: 고정 공지가 최상단, 그다음 미고정은 게시일 최신순. (입력 [id1 06-01 미고정, id2 06-12 미고정, id3 06-02 고정] → 표시 [3,2,1])

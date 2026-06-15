@@ -18,7 +18,7 @@ user-invocable: false
 ## 핵심 운영 원칙
 
 - 상수는 lowerCamelCase(SCREAMING_CAPS 금지), 3자+ 약어는 단어처럼(Http·Sms), import는 dart:→package:→상대 순 (§2)
-- **의도적 일탈 3건**: Repo·UseCase 조회 메서드의 get 접두는 dddart 방언으로 유지 / 광범위 catch는 safeApiCall 한 곳만 — 일반 코드는 에러 4규칙(on 절 의무·Error 캐치 금지·rethrow) / 지역 변수·클로저 파라미터 타입 명시(`always_specify_types` 기계 강제) (§2)
+- **의도적 일탈 3건**: Repo·UseCase 조회 메서드의 get 접두는 dddart 방언으로 유지 / 광범위 catch는 safeApiCall 한 곳만 — 일반 코드는 에러 4규칙(on 절 의무·Error 캐치 금지·rethrow) / 지역 변수·클로저 파라미터·컬렉션 리터럴(`children: <Widget>[...]`) 타입 명시(`always_specify_types` 기계 강제) (§2)
 - bool 인자는 named로, 공개 API·지역 변수·클로저 파라미터 모두 타입 명시 (§2)
 - freezed 프로퍼티는 public getter라 promotion 불가 — **지역 변수 복사가 표준 관용구**, `!` 연쇄는 열화 형태 (§3)
 - freezed 3: 단일 생성자 모델은 `abstract`, union은 `sealed` 키워드 의무 — 커스텀 getter·메서드엔 `const X._()` 필수 (§4)

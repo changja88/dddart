@@ -58,7 +58,7 @@
 
 1. **조회 메서드의 `get` 접두**: 공식은 "AVOID starting a function or method name with get"이지만, **dddart의 Repo·UseCase 조회 메서드는 `getChannels()` 형태를 쓴다** — HaffHaff 방언이 기준점이고 기존 코드와의 일관이 우선이다(규약 §1 원칙 1). 그 외 일반 메서드는 공식대로 일을 말하는 동사로.
 2. **safeApiCall의 광범위 catch**: 공식은 "AVOID catches without on clauses"·"DON'T explicitly catch Error"지만, **safeApiCall 한 곳만 예외**다 — 전 실패를 Either로 정규화하는 의도적 단일 경계(architecture-data §2의 *왜*가 근거). **일반 코드에서는 4규칙을 지킨다**: on 절 없는 catch 금지 · Error 캐치 금지(버그는 전파되어 스택트레이스를 남겨야 한다) · 재던질 땐 `rethrow`(원 스택 보존 — `throw e`는 리셋) · Error 구현체는 프로그래밍 오류에만 던진다.
-3. **지역 변수·클로저 파라미터 타입 명시**: 공식은 "AVOID type annotating initialized local variables"(추론 권장)이지만, **dddart는 지역 변수·클로저 파라미터까지 타입을 적는다**(`final List<DailyForecast> forecasts = ...`·`(BuildContext context, int index) => ...`) — HaffHaff 방언(지역 변수 ~96% 명시)이 기준점이고, 생성 BC 폴더의 `analysis_options.yaml`에 `always_specify_types`+`always_declare_return_types`로 **기계 강제**한다(codegen `*.g.dart`·`*.freezed.dart`는 `exclude`). Flutter `itemBuilder`·`AsyncValue.when`·`GoRoute` builder 콜백도 타입 명시 — 표준 콜백과의 마찰은 감수한다(dddart 확정).
+3. **지역 변수·클로저 파라미터 타입 명시**: 공식은 "AVOID type annotating initialized local variables"(추론 권장)이지만, **dddart는 지역 변수·클로저 파라미터까지 타입을 적는다**(`final List<DailyForecast> forecasts = ...`·`(BuildContext context, int index) => ...`) — HaffHaff 방언(지역 변수 ~96% 명시)이 기준점이고, 생성 BC 폴더의 `analysis_options.yaml`에 `always_specify_types`+`always_declare_return_types`로 **기계 강제**한다(codegen `*.g.dart`·`*.freezed.dart`는 `exclude`). Flutter `itemBuilder`·`AsyncValue.when`·`GoRoute` builder 콜백도 타입 명시 — 표준 콜백과의 마찰은 감수한다(dddart 확정). **컬렉션 리터럴에도 타입 인자를 적는다**(`<Widget>[...]`·`<String, String>{...}`·`@Default(<Notice>[])`) — always_specify_types는 타입 인자 없는 리스트·맵·셋 리터럴까지 잡으므로 위젯 트리의 `children`도 `children: <Widget>[...]`로 쓴다(전면 강제의 비용·장황함 감수).
 
 ## §3. 널 안전 실전 — required·연산자·promotion 관용구
 
@@ -133,7 +133,7 @@ final message = switch (result) {
 - **객체 패턴**: `if (order case Order(status: OrderStatus.canceled)) ...` / `Order(:final status)` 축약. freezed getter를 패턴 바인딩으로 추출하면 promotion 불가(§3)를 우회하는 효과.
 - **switch 표현식·guard**: `switch (x) { Pattern when cond => ..., _ => ... }` — `||` 패턴·if-case(`if (data case {'user': [String name, _]}) ...`) 가용.
 - **class modifier**: `sealed`(같은 라이브러리 하위형 한정 → 소진 switch — freezed union의 짝) · `final`(외부 상속·구현 금지) · `interface`(구현만) · `base`(상속만). 어순: `abstract` → modifier → `class`. 확장을 통제할 의도가 있을 때만 쓴다.
-- **컬렉션 합성**: `[...defaults, ...?maybeNull, for (final c in cs) c.name, if (flag) extra, ?nullableElement]` — freezed 컬렉션이 unmodifiable이므로 **이 리터럴 합성이 리스트 갱신의 표준 형태**다.
+- **컬렉션 합성**: `<String>[...defaults, ...?maybeNull, for (final Channel c in cs) c.name, if (flag) extra, ?nullableElement]` — freezed 컬렉션이 unmodifiable이므로 **이 리터럴 합성이 리스트 갱신의 표준 형태**다. 리터럴 타입 인자(`<String>`)·for 변수 타입(`final Channel c`)은 always_specify_types가 요구한다(§2 일탈3).
 
 ## §7. json_serializable — @JsonKey·freezed 연동
 

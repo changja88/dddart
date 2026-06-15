@@ -16,9 +16,9 @@ class NoticeDetailSection extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.screen),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           Row(
-            children: [
+            children: <Widget>[
               Icon(notice.category.icon, color: notice.category.color),
               const SizedBox(width: AppSpacing.sm),
               Text(notice.category.label, style: AppTypography.caption),

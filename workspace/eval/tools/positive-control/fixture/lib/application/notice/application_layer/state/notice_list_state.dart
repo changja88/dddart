@@ -8,7 +8,7 @@ part 'notice_list_state.freezed.dart';
 @freezed
 abstract class NoticeListState with _$NoticeListState {
   const factory NoticeListState({
-    @Default([]) List<Notice> notices,
+    @Default(<Notice>[]) List<Notice> notices,
     BadRequestResponse? error,
   }) = _NoticeListState;
 }

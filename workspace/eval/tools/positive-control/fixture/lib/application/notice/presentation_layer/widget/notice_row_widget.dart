@@ -33,16 +33,16 @@ class NoticeRowWidget extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Row(
-              children: [
+              children: <Widget>[
                 Icon(notice.category.icon, color: notice.category.color),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: <Widget>[
                       Row(
-                        children: [
-                          if (notice.isHighlighted) ...[
+                        children: <Widget>[
+                          if (notice.isHighlighted) ...<Widget>[
                             const Icon(
                               Icons.push_pin,
                               size: 14,
