@@ -189,6 +189,55 @@ echo "class Coupon {}" > "$P/lib/application/coupon/domain_layer/coupon/coupon.d
 OUT=$(run_backstop "$P" --diff-base "$BASE" --only st4); E=$?
 assert "F9 ST4 신규 BC 골격 미완비" 2 "ST4" - "$E" "$OUT"
 
+# ---------- F10: extract_design — config JS→JSON 정규화·아이콘(data-icon+FILL/텍스트폴백)·임의값·icon_map
+P="$T/f10"; mkdir -p "$P/design-ref"
+cat > "$P/design-ref/s.html" <<'EOF'
+<!DOCTYPE html><html><head>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#005da7",
+                      "background": "#f8f9fa"
+              },
+              "spacing": {
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "headline": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline": ["32px", { "lineHeight": "40px", "fontWeight": "600" }]
+              }
+      },
+          },
+        }
+    </script>
+</head><body>
+<button class="material-symbols-outlined text-primary">arrow_back</button>
+<span class="material-symbols-outlined text-4xl" data-icon="sunny" style="font-variation-settings: 'FILL' 1;">sunny</span>
+<div class="bg-surface-bright shadow-[0_4px_20px_0px_rgba(0,0,0,0.04)] -mt-6"></div>
+</body></html>
+EOF
+OUT=$(dart "$SCRIPTS/extract_design.dart" "$P/design-ref" --out "$P/design-tokens.json" --icon-map "$SCRIPTS/icon_map.json" 2>&1); E=$?
+C=$(cat "$P/design-tokens.json" 2>/dev/null || echo "")
+ok=1
+[ "$E" = 0 ] || ok=0
+grep -q '"primary": "#005da7"' <<<"$C" || ok=0                 # 무인용 상위키·trailing comma 정규화 후 색 파싱
+grep -q '"gutter": "16px"' <<<"$C" || ok=0                     # spacing
+grep -q '"Plus Jakarta Sans"' <<<"$C" || ok=0                 # fontFamily+fontSize 병합
+grep -q '"name": "sunny"' <<<"$C" || ok=0                      # data-icon
+grep -A2 '"name": "sunny"' <<<"$C" | grep -q '"fill": 1' || ok=0   # 인라인 FILL
+grep -q '"flutter": "Icons.sunny"' <<<"$C" || ok=0            # icon_map 매핑
+grep -q '"name": "arrow_back"' <<<"$C" || ok=0                # data-icon 없는 텍스트 폴백
+grep -q 'shadow-\[0_4px_20px' <<<"$C" || ok=0                 # 임의값(shadow rgba)
+grep -q '"-mt-6"' <<<"$C" || ok=0                             # 음수마진
+if [ $ok = 1 ]; then PASS=$((PASS+1)); echo "PASS F10 extract_design 정규화·아이콘·임의값·매핑"; else
+  FAIL=$((FAIL+1)); echo "FAIL F10 (exit=$E)"; echo "$C" | head -40 | sed 's/^/    /'
+fi
+
 echo ""
 echo "결과: PASS $PASS / FAIL $FAIL"
 [ $FAIL = 0 ]

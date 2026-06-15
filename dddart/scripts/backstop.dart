@@ -1,5 +1,5 @@
 #!/usr/bin/env dart
-/// dddart 결정적 백스톱 러너 — 단일 엔트리, 검사 51종 인프로세스 실행.
+/// dddart 결정적 백스톱 러너 — 단일 엔트리, 검사 52종 인프로세스 실행.
 /// 설계: workspace/design/2026-06-12-backstop-design.md (확정 2026-06-12)
 ///
 /// 사용:

@@ -1,6 +1,8 @@
 # feedback-005 — Stitch 100%·Dart 타입 전면 강제·view 위젯 직접빌드 차단 (v2·적대리뷰 반영·E 수정 전)
 
-> **상태: 설계 v2 (D 적대리뷰 4개 반영·사용자 결정 2개 확정 · E 수정 승인 대기)** · 베이스 `17100a9` · 원칙 = **기계 강제**
+> **상태: E 수정 진행 중** — E1(view NM17)·E2a~c(타입 전면·analysis_options 국소)·**E3(Stitch 100% — extract_design 신규·명세 4곳·아이콘 `Icons.*` 방언 확정)** 완료·커밋. **남음: E2d(fixture 타입 명시·라이브 검증)·F(적대리뷰)**. · 베이스 `17100a9` · 원칙 = **기계 강제**
+>
+> **E3 완료 요약(2026-06-15)**: ① `scripts/extract_design.dart`+`icon_map.json` 신규 — 동결 HTML의 tailwind-config(JS→JSON 정규화: 무인용 상위키·trailing comma)에서 색·타이포·spacing·아이콘(`data-icon`+`FILL`·텍스트 폴백)·임의값(shadow `rgba`·음수마진)을 `design-tokens.json`으로 **결정론 절단**(실제 동결 HTML로 검증·2회 byte-identical·픽스처 F10 추가 14/14). ② **아이콘 분기 해소**: HaffHaff 방언(`Icons.` 12·`Symbols.` 0·`material_symbols_icons` 없음)+4개 런 전부 `Icons.*` → `Icons.*` 유지(Symbols 도입=방언 이탈). 1:1 한계는 design-tokens가 정확 Material Symbol명+FILL 원천 보존·review-ui/인간 판정으로 흡수. ③ command Phase 0(HTML 의무화·extract_design 호출·`has_stitch_html`)·architect(입력+화면 절 토큰 소비)·review-ui(충실도 4종 게이트)·architecture-ui §5(아이콘=plain extension·`Icons.*`·FILL→`_outlined`·NM14) 명세. ④ 양판 미러 전부(final.md sync 9/9·scripts cp byte-identical·codex SKILL/agents 수동)·stale "검사 51종" 4곳 정합 교정(상수 52와 일치).
 > **v1→v2**: 적대리뷰 4개(skill-creator·plugin-dev·쟁점깨기·정합)가 v1의 약한 고리를 깸 → 본 v2가 보강.
 > **사용자 결정**: ① 타입 강제 = **B 전면(클로저 파라미터 포함)** ② analysis_options = **A BC폴더 국소 + G0 승인**
 
