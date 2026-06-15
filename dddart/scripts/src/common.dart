@@ -13,16 +13,19 @@ import 'dart:io';
 
 class Finding {
   final String checkId;
-  final String path; // lib-상대
+  final String path; // lib-상대 (rootRel=true면 프로젝트 루트-상대)
   final int? line;
   final String message; // 위반 요지
   final String rule; // 제1 규약 조항
   final String fix; // 교정 안내
-  Finding(this.checkId, this.path, this.line, this.message, this.rule, this.fix);
+  final bool rootRel; // path가 lib/ 밖(pubspec.yaml 등) — 'lib/' 접두 생략
+  Finding(this.checkId, this.path, this.line, this.message, this.rule, this.fix,
+      {this.rootRel = false});
 
   @override
   String toString() {
-    final loc = line == null ? 'lib/$path' : 'lib/$path:$line';
+    final prefix = rootRel ? '' : 'lib/';
+    final loc = line == null ? '$prefix$path' : '$prefix$path:$line';
     return '[$checkId] BLOCKER — $loc\n  위반: $message ($rule)\n  교정: $fix';
   }
 }

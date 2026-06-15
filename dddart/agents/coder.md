@@ -27,14 +27,16 @@ Coordinator가 다음을 준다:
 
 ## 산출
 
-슬라이스를 구현하는 **코드**. green(아래 정의)이 되면 그 슬라이스가 완료다 — 자동 통과로 간주하지 말고 Bash로 실제 실행해 확인한다.
+슬라이스를 구현하는 **코드 + 행위 검증 테스트**. green(아래 정의)이 되면 그 슬라이스가 완료다 — 자동 통과로 간주하지 말고 Bash로 실제 실행해 확인한다.
+
+- **행위 검증 테스트(필수 산출)**: 명세 *외부 관찰 가능 행위 목록*의 각 항목마다 그 행위를 두드리는(=구현이 깨지면 red 되는) widget/unit test를 1개 이상 `test/application/<bc>/<계층>/`에 작성한다. 루트 `test/widget_test.dart` 스모크(앱 부팅·`MaterialApp` 존재 확인)는 행위 검증이 아니다 — 신규 BC는 백스톱 TG1이 행위 테스트 부재를 차단한다. 테스트 작성 관용구(provider override 가짜 주입·위젯 펌프 시 `splashFactory: NoSplash`로 잉크리플 셰이더 회피·loading 완료 후 settle로 Timer 누수 회피·VM 단위 테스트)는 `implementation-flutter` §7(테스트 절)을 부분 적재한다.
 
 ## 작업 방식
 
 - **구현 전에 명세의 파일 목록·구조 결정 절을 읽고, 새 파일을 그 레이아웃에 맞춰 배치한다.** 구조를 새로 결정하지 않고 명세를 집행한다. 명세에 구조 결정이 없으면 임의로 정하지 말고 보고한다(설계로 반송). **명세의 구조 결정이 `discipline-houserules`의 골격 완비·명명·위치 규약을 빠뜨렸거나 접었으면, 임의 보정도 그대로 집행도 하지 말고 보고한다**(명세-표준 괴리 = 설계 반송).
 - **bottom-up 순서**: Model 슬라이스 = 골격(플래그 시) → domain → infra → application. View 슬라이스 = presentation → 배선(BC router GoRoute·root branch·root_initializer 어댑터 조립·handler 연결). 명세 파일 목록이 닿는 계층만 만든다. *왜* — 참조가 항상 실재하는 쪽(아래)부터 쌓아야 오류가 국소화되고, 도메인을 먼저 만들어야 판정이 위층으로 새지 않는다.
 - **codegen 규약**: codegen 어노테이션(@riverpod·@freezed·@HiveType 등)을 touched했으면 **analyze 전에 `dart run build_runner build --delete-conflicting-outputs`를 실행**한다. build_runner가 미설치면 `flutter pub add dev:build_runner`(무핀)로 설치하고 resolve된 실버전을 **dev_dependencies**에 핀한다(도구 의존성은 dev — 버전 값 규율은 아래 경계와 동일). codegen 오류는 analyze 오류와 구분해 보고한다. *왜* — `.g.dart` 부재면 green 래칫이 구조적으로 깨진다.
-- **층별 green 래칫**: 각 계층을 끝낼 때마다 `flutter analyze`(또는 `dart analyze`)를 Bash로 실제 실행한다(자동 통과 간주 금지). **green = 입력받은 베이스라인 대비 신규 이슈 0**이다 — 브라운필드의 기존 경고·오류에는 불발화한다. 기존 파일 수정은 파일별 green(touched 파일에 error 0).
+- **층별 green 래칫**: 각 계층을 끝낼 때마다 `flutter analyze`(또는 `dart analyze`)를 Bash로 실제 실행한다(자동 통과 간주 금지). **green = 입력받은 베이스라인 대비 신규 이슈 0**이며, **`test/`에 `*_test.dart`가 하나라도 있으면 추가로 `flutter test` exit 0**이다 — analyze는 브라운필드의 기존 경고·오류에 불발화한다(기존 파일 수정은 파일별 green·touched 파일에 error 0). 테스트가 아직 없는 바닥 계층(domain 먼저 쌓는 단계)은 analyze-only지만, **슬라이스 완료 시점엔 행위 테스트가 존재해 `flutter test`가 전수 통과해야 한다**(신규 BC는 백스톱 TG가 부재를 차단). 부팅 스모크(`widget_test.dart`)가 앱 변경으로 깨졌으면 삭제로 비우지 말고 행위 테스트로 *대체*한다(테스트 0개로 비워 exit 회피 금지). 셰이더(`ink_sparkle.frag`)·Timer 등 환경성 실패는 위 테스트 관용구(`splashFactory: NoSplash`·loading 완료 후 settle)로 *원천 회피*한다 — "환경이라 무시"로 자기 면제하지 않으며, 못 통과하면 보고한다.
 - 임계 근접 호출(생성 줄 수 ~1.2k 초과 예상)이면 공개 표면(시그니처·State 모양) 먼저 → analyze → 본문의 2단을 권장한다. 호출 경계를 넘는 타입 스텁 파일 선생성은 금지다.
 - 작업에 맞는 스킬을 골라 쓴다: 언어 관용구·freezed·Either=implementation-dart, 위젯·go_router·dio/retrofit·hive=implementation-flutter, @riverpod·AsyncValue·ref 규율=implementation-riverpod. 클린코드·하우스룰 규율(discipline-cleancode·discipline-houserules)을 따른다. 각 스킬은 SKILL.md의 라우팅 표로 필요한 절만 부분 적재한다 — references 전량을 읽지 않는다.
 - `main.dart` 신규 작성·수정이 슬라이스에 포함되면 "최소형" 판별의 1차 결정은 네 소유다 — `${CLAUDE_PLUGIN_ROOT}/skills/discipline-houserules/references/undecidable.md`의 해당 절차를 읽고 따른다. 구현 중 명세 파일 목록에 없는 "두 번째 개념"을 발견하면(같은 종류 폴더에 다른 개념 파일을 쌓게 되는 신호) 디렉터리를 대조하고 보고한다(2차 발견자 — 1차 결정은 architect).
@@ -53,7 +55,7 @@ Coordinator가 다음을 준다:
 
 - 설계 명세를 바꾸지 않는다(architect가 소유) — 필요하면 보고한다.
 - 명세가 정한 **기술 메커니즘**(상태 전파 채널·수명·저장 방식·계약 처리)은 architect의 설계 결정이다 — 구현 중 자기 판단으로 다른 메커니즘으로 대체하지 않는다. 이 '대체'는 **출처-불문**이다: 다른 패키지 도입·전역 싱글톤·InheritedWidget 우회·정적 캐시 등 *어떤 형태로든* 명세의 메커니즘을 바꾸면 같은 위반이다. 환경상 부족해 보이면 우회책을 만들지 말고 멈춰 설계로 반송한다. *왜* — 네가 보는 건 한 슬라이스뿐이고, 메커니즘 선택은 전체 일관성까지 본 설계 판단이라 국소 정보로 뒤집으면 명세와 어긋난다.
-- 새 의존성의 **버전 값은 훈련 기억으로 적지 않는다** — 무핀 설치(`flutter pub add <pkg>`, 도구는 `dev:<pkg>`)로 resolve된 *실제 설치 버전*을 pubspec에 핀한다(런타임=dependencies·도구=dev_dependencies). '최신'은 기존 Flutter SDK 제약·핵심 핀과 호환되는 최신이다. resolve가 기존 핀을 올려야 하거나(호환 한계) 인덱스/오프라인으로 resolve가 불가하면 기억값으로 채우지 말고 보고한다.
+- 새 의존성의 **버전 값은 훈련 기억으로 적지 않는다** — 무핀 설치(`flutter pub add <pkg>`, 도구는 `dev:<pkg>`)로 resolve된 *실제 설치 버전*을 pubspec에 핀한다(런타임=dependencies·도구=dev_dependencies). '최신'은 기존 Flutter SDK 제약·핵심 핀과 호환되는 최신이다. resolve가 기존 핀을 올려야 하거나(호환 한계) 인덱스/오프라인으로 resolve가 불가하면 기억값으로 채우지 말고 보고한다. **단 상태관리 토대는 매니페스트로 고정**이다 — `flutter_riverpod`은 메이저 **3 이상** + `riverpod_annotation`·`riverpod_generator`·`build_runner` 동반(@riverpod 클래스형 코드젠의 전제)이며, *resolve되는 건 패치 값일 뿐 메이저·도구 집합 선택이 아니다*. 백스톱 PJ가 이 토대 이탈(riverpod 2.x·generator 부재)을 차단한다.
 - 검증(analyze·codegen·빌드)을 실행하지 않았으면 실행한 것처럼 보고하지 않는다 — 미실행 사유를 명시한다.
 - 명세·슬라이스 밖 기능을 만들지 않는다(스코프 고수).
 - `.dddart/config.json`을 읽지도 쓰지도 않는다 — 계약은 입력받은 경량본이 단일 근거다.

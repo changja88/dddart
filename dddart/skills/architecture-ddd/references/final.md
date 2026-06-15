@@ -193,7 +193,7 @@ full-DDD 관행을 들고 오는 것을 막는 명시 목록이다. **아래 패
 | **도메인 이벤트** (`event/`·`*Event`·핸들러·디스패처) | 클라는 도메인 이벤트를 생성하지 않고 구독한다. HaffHaff 실물 0건, 클라엔 트랜잭션·프로세스 경계 없음 (규약 §9-15) | 교차 BC 통지는 4채널(discipline-houserules §5), 화면 동기화는 SharedState(architecture-state §5), 서버 이벤트 구독은 그 BC의 `application_layer/service/`(architecture-state §6). 이벤트형 요구가 진짜면 설계 반송 — shared_state로 위장하지 않는다 |
 | **Event Sourcing·Saga** | 분산 트랜잭션·이벤트 저장은 서버 관심사 | 서버가 진실원천 — 클라는 재조회 |
 | **CQRS** (Command/Query 모델 분리) | 클라 규모에서 분리 비용 > 이득 | UseCase가 command+query 통합 (규약 §3.3) |
-| **Repository 인터페이스 + UoW** | 테스트 없음·DI 없음 결정에서 추상 계층은 무의미 (규약 §9-1) | Repo는 구체 1개 — architecture-data §1 |
+| **Repository 인터페이스 + UoW** | 구체 Repo 직접 생성 결정에서 추상 계층은 무의미 — 행위 테스트는 Repo 인터페이스 DI가 아니라 provider override로 격리한다 (규약 §9-1) | Repo는 구체 1개 — architecture-data §1 |
 | **DIP·DI 컨테이너** | 직접 생성 결정 (규약 §9-13) | UseCase·Repo·DataSource는 사용처가 직접 생성 |
 | **핵사고날(포트·어댑터)** | `port/` 없음 (규약 §9-0) | 계층 import 매트릭스(discipline-houserules §5)가 경계 |
 | **ACL·컨텍스트 맵(OHS 등)** | 조직 간 패턴 — 클라 단일 팀, `acl/` 없음 (규약 §9-3) | 교차 BC는 4채널 |

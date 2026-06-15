@@ -33,7 +33,7 @@
 - §13. 중복 제거와 DRY
 - §14. 협력과 의존성 관리
 - §15. 리팩토링
-- §16. 레거시 코드 다루기 (dddart 단서: 테스트 없음 — 안전망은 analyze 래칫·백스톱)
+- §16. 레거시 코드 다루기 (dddart 단서: 생성 코드엔 행위 검증 테스트 산출[green=flutter test]·레거시 특성화 테스트는 비강제 — 안전망은 analyze 래칫·백스톱·테스트)
 - §17. 설계 철학과 프로세스
 - §18. dddart 코드 규율 — 반복>상속 (원본 §18 Python 관용구는 비승계 — implementation-dart가 대체)
 - 핵심 요약 체크리스트 (말미 — 전 범주 1줄 요약표)
@@ -2550,7 +2550,7 @@ double getInsuranceRate(int age, String gender, bool smoker) {
 
 ## §16. 레거시 코드 다루기
 
-> **dddart 단서**: dddart는 자동 테스트를 작성하지 않는다(테스트 없음 결정). 이 절의 테스트 전제 장치(Seam·특성화 테스트·Sensing)는 원전(WELC) 이론으로 보존하되, dddart에서 동작 보존의 안전망은 **analyze green 래칫·결정적 백스톱·G2 행위 대조**다. Sprout/Wrap(기존 코드를 최소로 건드리는 변경 기법)은 테스트 없이도 그대로 유효하며, "기존 코드 수정 불요구" 경계 규칙(discipline-houserules §7)과 한 방향이다.
+> **dddart 단서**: dddart는 **생성 코드의 외부 관찰 행위를 두드리는 검증 테스트를 산출한다**(coder 필수 산출·green=`flutter test`·신규 BC는 백스톱 TG가 강제) — 단 레거시 전체를 감싸는 특성화 테스트·Seam 도입 같은 *대규모 레거시 테스트 인프라*는 비강제다. 이 절의 테스트 전제 장치(Seam·특성화 테스트·Sensing)는 원전(WELC) 이론으로 보존하되, dddart에서 동작 보존의 안전망은 **analyze green 래칫·결정적 백스톱·G2 행위 대조 + 행위 검증 테스트**다. Sprout/Wrap(기존 코드를 최소로 건드리는 변경 기법)은 그대로 유효하며, "기존 코드 수정 불요구" 경계 규칙(discipline-houserules §7)과 한 방향이다.
 
 ### 16.1 레거시 코드의 정의 [WELC]
 
@@ -2689,7 +2689,7 @@ class Employee {
 }
 ```
 
-### 16.5 특성화 테스트 (Characterization Tests) [WELC] — dddart 비적용(테스트 없음 결정·원전 보존)
+### 16.5 특성화 테스트 (Characterization Tests) [WELC] — dddart 레거시엔 비적용(생성 코드는 행위 검증 테스트로 대체·레거시 특성화는 원전 보존)
 
 "올바른 동작"을 검증하는 것이 아니라, **현재 동작을 포착**하는 테스트. 리팩토링 전에 안전망으로 작성한다.
 
