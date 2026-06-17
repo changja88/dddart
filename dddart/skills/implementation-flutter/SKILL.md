@@ -27,7 +27,7 @@ user-invocable: false
 - **@GenerateAdapters 비채택**(패키지 1파일 강제 — BC 분산 선언과 빌드 충돌): @HiveType per-class를 저장 전용 Box 모델에 붙인다 — 엔티티 무어노테이션 보존 (§5)
 - typeId는 앱 전역 유일 — BC별 대역 주석으로 조정, 등록 함수는 isAdapterRegistered 가드 (§5)
 - 컨트롤러는 State가 생성·dispose가 해제(쌍 규율), await 뒤 context는 mounted 체크 — lint가 집행 (§6)
-- **테스트(coder 필수 산출)**: 명세 행위마다 깨지면-red 테스트 1+(green=`flutter test`·신규 BC는 백스톱 TG가 부재 차단), provider override로 가짜 주입(라이브 0)·뒤섞인 ≥2원소로 순서 검증, 위젯 펌프는 `splashFactory: NoSplash`로 잉크리플 셰이더 회피·loading은 완료 후 settle로 Timer 누수 회피 (§7)
+- **테스트는 전용 스킬로 이전**: 무엇을/오라클/비-vacuity/단언 FORM은 `discipline-test`, Flutter 메커니즘(provider override 가짜 주입·`ProviderContainer.test`·NoSplash/Timer 회피·mocktail 더블·날짜 주입)은 `implementation-test` (§7)
 
 ## 상세 레퍼런스
 
@@ -39,6 +39,6 @@ user-invocable: false
 | DioException 분기·dio 설정·retrofit 표기 | final.md §4 |
 | hive 어댑터·box·초기화 표기 | final.md §5 |
 | 컨트롤러 보유·async gap의 context | final.md §6 |
-| 행위 검증 테스트·셰이더(NoSplash)/Timer 회피·provider override 가짜 주입·VM 단위 테스트 | final.md §7 |
+| 테스트 표기는 어디로 이전했나(discipline-test·implementation-test) | final.md §7 |
 
 각 절은 필요한 절만 읽는다(`## §N.` 헤더로 grep 가능 — 전체 로드 불필요).

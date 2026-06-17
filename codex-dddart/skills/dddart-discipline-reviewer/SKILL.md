@@ -9,7 +9,7 @@ description: dddart 코디네이터가 Phase 2(구현)에서 게이트 직전에
 
 ## 로드할 지식 스킬
 
-`discipline-cleancode`, `discipline-houserules`을 로드해 작업에 맞게 골라 쓴다.
+`discipline-cleancode`, `discipline-houserules`, `discipline-test`을 로드해 작업에 맞게 골라 쓴다.
 
 **결정적 백스톱과의 분업**: 러너(검사 55종 — 구조·import·명명·순환·테스트·토대, git added/touched 게이트)가 기계 판별 가능한 위반을 잡는다. 너는 **백스톱이 못 보는 의미 변종 전담**이다 — 백스톱이 보는 것(폴더 위치·import 방향·접미사 철자·순환)을 재검하지 말고, 이름은 맞되 실체가 틀린 것·자리는 맞되 책임이 틀린 것을 본다. 백스톱 통과가 네 의미 점검을 면제하지 않고, 네 통과가 백스톱을 면제하지 않는다.
 
@@ -82,6 +82,16 @@ Coordinator가 감사 범위와 시점을 정해 호출한다 — 너는 받은 
 - "거의 빈 VM"(root_vm) · 푸시 "정규화" 의미론 · common "살아있는 상태" — state 리뷰어 다음의 2차 검증.
 - domain_service "중심" · UseCase "도메인 개념 단위" — ddd 리뷰어 다음의 2차 검증.
 - "두 번째 개념" 식별 · "같은 개념 같은 철자" · 과거형 사건명 · main.dart "최소형" — 네가 종심 검증자다.
+
+### 8. 행위 검증 테스트의 FORM·비-vacuity (positive 감사 — discipline-test §3·§5)
+
+테스트가 *명세 행위를 실제로 두드리는가*를 본다 — 금지 패턴 적발이 아니라 **올바른 FORM을 썼는지 확인**이다(디코이 방법은 열려 있어 블랙리스트는 불완전하다):
+
+- **핵심 행위마다 §3 FORM**: 구별 = 집합 크기(`toSet().length == N`·색-단독 단위) · 순서 = 뒤섞은 입력(≠기대) + `orderedEquals` + 양끝 echo · 위치 = keyed-slot finder + 비대칭·음수 fixture · 탭 = non-edge(`.at(n)`) + 날짜-echo + 상세 subtree `findsOneWidget`. 이 형태를 안 쓰고 통과만 하는 단언은 vacuous 의심.
+- **오라클이 명세에서 왔는가**: 기대값을 구현에서 베낀 흔적(코드의 버그를 "정답"으로 단언)이 디코이다 — 명세 행위 목록과 단언을 대조한다(5차 codex가 색 충돌을 distinct로 단언한 사례).
+- **비-vacuity**: 단언이 의존하는 로직을 한 곳 깼을 때 red인가 — getter 단언·`findsWidgets`/`findsAny`(≥1)·대칭 fixture·`.first`·이미 정렬된 입력·한쪽 Either 갈래만 단언은 약한 신호다. 코드가 명세-정확인데 테스트가 안 잡으면 important, 코드가 틀렸는데 green이면 blocker.
+- **test/ 한정 1차 스캔(우선순위 신호)**: `.first`·`findsWidgets`·`findsAny`·`unorderedEquals`·`contains(`로 한 자리 단언·대칭/양수-only fixture는 test/에서 정당 용도가 드무니 *먼저* 훑어 의심 후보로 올린 뒤 위 FORM·오라클을 본다(전역 grep의 오탐 우려가 test/엔 약하다 — 백스톱 게이트가 아니라 네 감사의 진입점).
+- 이 감사는 **기계 보장이 아니다**(정직) — 백스톱 TG1은 행위 테스트 *존재*만 본다. 너의 FORM-감사가 비-vacuity의 의미 관문이다(재발 시 작성자 분리·정적 분석 승격은 measure-first).
 
 ## 경계
 

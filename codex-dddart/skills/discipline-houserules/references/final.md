@@ -95,6 +95,8 @@ lib/
 
 **root/ 핵심 사실** (규약 §3.6 — 동작 규율은 architecture-state §10, view 작성 규율은 architecture-ui §2 위임): root는 application·common·design_system 세 컨테이너를 전부 아는 유일한 곳이라 `application/` 밖, `main.dart` 옆이 정위치다. 내부는 계층 없이 역할 4폴더(`router/`·`scaffold/`·`handler/`·`initializer/`)이고 scaffold만 종류 2차(view·view_model·state)를 갖는다. root/ 이하 모든 파일은 `root_` 접두를 유지한다 — BC 코드의 `import '…root_…'` 한 줄로 위반이 즉시 식별된다. 다수 BC 투영 화면(예: 피드 `home_view`)은 root가 아니라 자기 이름의 **일반 BC**다.
 
+**test/ 핵심 사실** (Dart 공식 package-layout — `lib/`의 루트 형제·`main.dart`·`lib/`와 같은 패키지 최상위): 테스트는 `test/`에 두고 **`lib/` 구조를 1:1 미러**한다 — `lib/application/<bc>/<계층>/<sut>.dart` → `test/application/<bc>/<계층>/<sut>_test.dart`. 단 **test/는 sparse다 — SUT가 있는 자리에만 테스트 파일을 두고 빈 미러 폴더·빈 테스트 파일을 만들지 않는다**(골격 완비의 명시적 예외 — §3). 무엇을 테스트할지·단언 FORM은 discipline-test, Flutter 메커니즘·결정성은 implementation-test 소유다. 백스톱 TG1은 신규 BC의 행위 테스트 *존재*만 검사하고(부재 차단), 미러 배치·FORM은 discipline-reviewer가 감사한다.
+
 ## §2. 성장 규칙 — 개념 1차·종류 2차
 
 계층별로 개념 분할 시점이 다르다 (규약 §4):
@@ -131,6 +133,7 @@ BC를 만들면 **4계층 폴더와 모든 표준 종류 폴더를 항상 생성
 - `lib/root/`는 BC 골격 비적용 — 자체 골격(역할 4폴더 + scaffold 하위 `view/`·`view_model/`·`state/`)을 비어 있어도 항상 생성한다.
 - design_system 골격(foundation·theme·component·util 4폴더 + foundation 7파일 자리)도 같은 정신으로 항상 생성한다.
 - BC 루트 직속에는 `<bc>_router.dart`·`<bc>_navigator.dart` 둘만 온다 — `application/` 직속은 BC 폴더만(조립 파일 금지).
+- **`test/`는 골격 완비의 명시적 예외 — sparse다.** "선택 폴더 없음"은 `lib/` 한정이다: `lib/`는 빈 폴더로 자리를 안내하지만 `test/`는 *빈 미러 폴더·빈 테스트 파일을 만들지 않는다* — 테스트는 SUT가 생긴 자리에만 둔다(§1 test/ 핵심 사실). 빈 슬롯을 채우려는 유혹이 헛테스트(vacuous)를 부르기 때문이다(테스트 규율은 discipline-test). 미러 배치 자체는 리지드 골격 검사가 아니라 discipline-reviewer 감사 대상이다(nav·fixture·common·VM-unit 등 '미러'가 자명하지 않은 자리가 있어 false-FAIL·게이밍을 피한다).
 - **타입 강제 국소 lint** — 골격을 만들 때 dddart 생성 영역 루트(BC `application/<bc>/`·`common/`·`design_system/`·`root/`)마다 `analysis_options.yaml`을 생성해 타입 전면 명시(implementation-dart §2 일탈3)를 *그 폴더에 국소* 강제한다. **호스트 루트 `analysis_options.yaml`은 절대 수정하지 않는다** — analyzer는 가장 가까운 상위 옵션을 쓰고 하위가 부모를 *대체*하므로(병합 아님) 템플릿에 `include`·`exclude`·rules를 전부 명시한다(plugin 경계 — 호스트 기존 lint 정책 무파괴). codegen(`*.g.dart`·`*.freezed.dart`)은 `exclude`:
 
 ```yaml

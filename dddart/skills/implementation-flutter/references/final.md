@@ -221,42 +221,6 @@ onPressed: () async {
 
 - VM의 BuildContext 보유 금지(architecture-state §2)가 지켜지면 이 위험 대부분이 구조적으로 사라진다 — mounted 체크가 필요한 자리는 View의 async 콜백뿐이고, `ref.listen` 정식 패턴(architecture-state §4)은 build 안 동기 실행이라 gap 자체가 없다. (VM 쪽 await 뒤 가드는 `ref.mounted` — implementation-riverpod §4.)
 
-## §7. 테스트 표기 — 행위 검증·셰이더/Timer 회피 (coder 필수 산출)
+## §7. 테스트 표기 → discipline-test·implementation-test로 이전
 
-coder는 명세 *외부 관찰 가능 행위 목록*의 각 항목마다 그 행위를 두드리는(=구현이 깨지면 red 되는) 테스트를 1개 이상 `test/application/<bc>/<계층>/`에 쓴다 — green은 `flutter test` exit 0을 포함하고, 신규 BC에 행위 테스트가 없으면 백스톱 **TG1**이 차단한다. 루트 `test/widget_test.dart` 스모크(앱 부팅·`MaterialApp` 존재)는 행위 검증이 아니다. **비-vacuous 자가 점검**: 핵심 판정·정렬·매핑을 머릿속으로 한 곳 깨봤을 때 그 테스트가 red 되어야 한다 — 안 되면 단언이 행위를 안 두드린 것이다(존재만으론 FC-2를 못 닫는다).
-
-**가짜 데이터 주입(라이브 서버 의존 금지)**: 행위는 *구별되는* 입력으로 검증한다 — 순서 행위면 뒤섞인 ≥2원소, 분기 행위면 각 분기 1건. provider override로 Repo/UseCase를 가짜로 갈아끼운다(라이브 호출 0).
-
-**VM/단위 테스트** — `ProviderContainer`로 격리(위젯 불요):
-
-```dart
-test('정렬: 뒤섞인 응답을 날짜 오름차순으로 표시', () async {
-  final ProviderContainer container = ProviderContainer(overrides: <Override>[
-    forecastRepoProvider.overrideWithValue(_FakeRepo(scrambledDates)), // 뒤섞인 입력
-  ]);
-  addTearDown(container.dispose);
-  final List<ForecastSummary> shown =
-      await container.read(forecastListVMProvider.future);
-  expect(shown.map((ForecastSummary f) => f.date), orderedEquals(ascendingDates));
-});
-```
-
-**위젯 테스트 — 잉크리플 셰이더 회피**: 탭/리플을 그리는 위젯을 펌프하면 테스트 환경에서 `ink_sparkle.frag` 셰이더가 없어 실패할 수 있다(앱 결함 아님). 테스트 테마에 `splashFactory: NoSplash.splashFactory`를 주면 그 경로를 안 탄다(앱 동작 불변·테스트 결정성 확보):
-
-```dart
-await tester.pumpWidget(ProviderScope(
-  overrides: <Override>[forecastRepoProvider.overrideWithValue(_FakeRepo(data))],
-  child: MaterialApp(
-    theme: ThemeData(splashFactory: NoSplash.splashFactory), // ink_sparkle 회피
-    home: const ForecastListView(),
-  ),
-));
-await tester.pumpAndSettle();
-await tester.tap(find.byType(ForecastTile).first);
-await tester.pumpAndSettle();
-expect(find.byType(ForecastDetailView), findsOneWidget); // 탭→상세 인자 전달 행위
-```
-
-**loading 상태 — Timer 누수 회피**: 영원히 안 끝나는 future를 펌프한 채 두면 `Timer still pending`으로 dispose가 실패한다(테스트 하니스 결함·환경 아님). loading은 (a) 완료되는 `Completer`를 만들어 완료시킨 뒤 `pumpAndSettle`로 검증하거나 (b) VM의 `AsyncLoading` 상태를 단위로 검증한다 — 미완료 future를 펌프한 채 두지 않는다.
-
-> 경계: VM/notifier override·`ref` 규율 상세는 implementation-riverpod, 위젯 수명은 §6. 테스트는 `lib/` 밖(`test/`)이라 백스톱 NM/IM 검사 비대상이다.
+테스트 표기는 전용 스킬 2종으로 이전했다(2026-06-17 — feedback-008). **무엇을 테스트할지·오라클·비-vacuity·단언 FORM(구별·순서·위치·탭)은 `discipline-test`**, **Flutter 메커니즘(provider override 가짜 주입·`ProviderContainer.test`·셰이더(NoSplash)/Timer 회피·mocktail 더블·날짜 주입·네트워크 이미지 목)은 `implementation-test`** 소유다. coder는 행위 검증 테스트를 쓸 때 이 두 스킬을 로드한다(green 래칫·신규 BC TG1 차단은 coder 산출 규율). 위젯 수명·async gap의 context는 §6.

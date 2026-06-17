@@ -23,6 +23,7 @@
 | [005](feedback-005-stitch-typeforce-viewfat.md) | 사용자 3목표 | `d397ad6` → `140d237` | ✅완료(3차 검증) | Stitch 스크립트 추출·타입 전면강제(BC 국소 lint)·view 위젯클래스 차단(NM17)·적대리뷰 4개 반영 |
 | [006](feedback-006-testgate-foundation-pin.md) | 3차 양판 | `a8fb2e3` | ✅검증완료(4차) | 백스톱 +2검사(TG 행위테스트·PJ 의존성)·coder 테스트 게이트·riverpod 3.x 핀 — FC-2 비-vacuity만 잔존(→008) |
 | [007](feedback-007-stitch-designmd-source.md) | Stitch 연결 후 | (미커밋·배포 동기) | ✅검증완료(5차 **양판**) | 연결 경로 첫 발동·**양판 5/5 프로세스 관측 성공**(design-ref 채움·design_source 핀·has_design_tokens=true·**Stitch 쓰기 0회=읽기전용 HELD**·claude·codex 둘 다)·디자인시스템 실소비. 부작용=제한 팔레트 색충돌(**양 엔진 동일 clear=cloudy=#FEAE2C·2/2**·FC-1/3) — rubric 종합은 FC-2 vacuity로 FAIL(연결 무관·→008·엔진 무관 확정) |
+| [008](feedback-008-test-skills-positive-form.md) | 5차 양판 FC-2·FC-1/3 | (코퍼스 작성 완료·미커밋) | 🔧작성완료(6차 검증대기) | 테스트 스킬 2종 신설(`discipline-test`+`implementation-test`·각 3벌)·**positive FORM 가이드**(비-vacuity/디코이·coder 산출+reviewer #8)·§7→포인터(6사이트)·houserules test/ sparse·Key 짝·날짜 주입(시간 가드 철회)·**백스톱 무변경**(`_totalChecks` 55·sync 11/11·픽스처 16/16)·기계 floor는 6차 실측 후 조건부 승격 |
 
 ## 규약
 

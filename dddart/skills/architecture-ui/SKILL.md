@@ -20,6 +20,7 @@ user-invocable: false
 - 3단은 크기가 아니라 VM 보유(view)/화면 전속(section)/재사용(widget)으로 가른다 — 판별은 위에서부터, 처음 해당하는 것이 답 (§1)
 - VM watch는 view 하나뿐 — view는 자기 VM(+같은 BC SharedState)만 watch, 임베드 view는 자기 VM을 스스로 watch하므로 배치만 (§2)
 - section·widget은 ref·provider 금지 — prop·콜백만. section은 화면 State 가능(전속), widget은 화면 State 금지 (§3)
+- 테스트가 집는 슬롯·tile은 안정 `Key`·공개 표면으로 노출 — keyed-slot 위젯은 리터럴 `const Key` 부착(discipline-test §3.3/§3.4 FORM과 짝) (§3)
 - 자기 상태·로직이 필요하면 버튼 하나여도 view 삼총사로 — section에 ref가 필요해지는 것은 승격 신호이지 예외가 아니다 (§1·§4)
 - 성장하면 단을 옮긴다: 두 번째 화면→widget으로, 상태 발생→view+vm으로, BC 어휘 탈피→design_system으로 (§4)
 - 도메인 enum·VO→UI 매핑(색·아이콘·라벨)은 ui_extension이 유일한 자리 — extension만, 위젯·상태 금지 (§5)

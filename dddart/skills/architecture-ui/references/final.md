@@ -53,6 +53,7 @@ view는 VM과 1:1로 바인딩되는 루트다 — `ConsumerWidget`으로 `ref.w
 
 - section이 화면 State를 받는 것은 정상(전속이니까)이고, widget이 화면 State를 받기 시작하면 section으로 오배치된 것이다(`undecidable.md` §2 신호).
 - 접두 규칙의 의미: section의 화면 접두는 "전속"의 선언이고, widget의 화면 이름 금지는 "재사용"의 선언이다 — 이름이 곧 단의 계약을 드러낸다.
+- **테스트가 집는 표면은 안정적으로 노출한다 — Key 짝 규약**: discipline-test §3.3/§3.4 FORM이 슬롯을 `find.byKey(const Key('temp-high'))`로 집고 tile을 `tester.widget<ForecastTile>(target).summary`로 읽는다 — 그러므로 *그 위젯을 생성하는 view/section/widget이* ⓐ 구별돼야 하는 슬롯(최고/최저 기온 등)에 **안정 `Key`**(리터럴·`const`·텍스트 내용이 아니라 *역할*을 가리킴)를 부착하고 ⓑ tile은 자신이 받은 도메인 요약(관찰 가능 값)을 **공개 필드로 노출**한다. Key가 없으면 테스트가 텍스트 위치를 추정하다 디코이가 되거나 약화되므로, 슬롯 Key 부착은 view 작성의 일부다(테스트 FORM은 discipline-test 소유).
 
 ## §4. 승격·이동 규칙 — 성장 시 단 이동
 

@@ -170,7 +170,7 @@
 <body>
 <div class="wrap">
   <h1>dddart 파이프라인</h1>
-  <p class="sub">기존 Flutter 프로젝트에 한 기능을 <b>간소화 DDD + 철저한 MVVM</b>으로 <b>요구 → 설계 → 구현</b>까지 끌고 가는 오케스트레이터. <code>dddjango</code>를 모델로 하되 클라이언트(Flutter) 차이를 반영 — 디자인 시안 소비·리뷰 4축(ddd·ui·state·data)·구조 슬라이스 bottom-up·백스톱 51종. 호출은 Claude <code>Agent</code> · Codex <code>spawn_agent→wait_agent</code> — 골격 동일.</p>
+  <p class="sub">기존 Flutter 프로젝트에 한 기능을 <b>간소화 DDD + 철저한 MVVM</b>으로 <b>요구 → 설계 → 구현</b>까지 끌고 가는 오케스트레이터. <code>dddjango</code>를 모델로 하되 클라이언트(Flutter) 차이를 반영 — 디자인 시안 소비·리뷰 4축(ddd·ui·state·data)·구조 슬라이스 bottom-up·행위 검증 테스트(discipline-test FORM)·백스톱 55종. 호출은 Claude <code>Agent</code> · Codex <code>spawn_agent→wait_agent</code> — 골격 동일.</p>
 
   <div class="legends">
     <div class="legcol">
@@ -301,10 +301,10 @@
         <div class="grpflow">
           <div class="node">
             <div class="role"><span class="dot" style="background:var(--green)"></span>coder · 슬라이스 k</div>
-            <div class="desc"><b>bottom-up</b>(domain→infra→application→presentation) · codegen(freezed·json·retrofit·riverpod) · <b>층별 green 래칫</b> → analyze 신규 0 Bash 확인 → green마다 커밋</div>
+            <div class="desc"><b>bottom-up</b>(domain→infra→application→presentation) · codegen(freezed·json·retrofit·riverpod) · <b>층별 green 래칫</b> → analyze 신규 0 Bash 확인 · <b>행위 검증 테스트 산출</b>(discipline-test FORM·신규 BC는 TG1) → green마다 커밋</div>
             <div class="chips">
-              <span class="chip i">implementation-dart</span><span class="chip i">implementation-flutter</span><span class="chip i">implementation-riverpod</span>
-              <span class="chip d">discipline-cleancode</span><span class="chip d">discipline-houserules</span>
+              <span class="chip i">implementation-dart</span><span class="chip i">implementation-flutter</span><span class="chip i">implementation-riverpod</span><span class="chip i">implementation-test</span>
+              <span class="chip d">discipline-cleancode</span><span class="chip d">discipline-houserules</span><span class="chip d">discipline-test</span>
             </div>
           </div>
           <div class="conn sm"></div>
@@ -331,17 +331,17 @@
         <div class="grpflow">
           <div class="node">
             <div class="role"><span class="dot" style="background:var(--purple)"></span>discipline-reviewer · 홀리스틱</div>
-            <div class="desc">코드 전체를 1회 독립 감사 → blocker / important / nit → coder 반영·재감사 수렴 (의미 변종 = 판정 누수·빈혈·이름 위장 전담)</div>
-            <div class="chips"><span class="chip d">discipline-cleancode</span><span class="chip d">discipline-houserules</span></div>
+            <div class="desc">코드 전체를 1회 독립 감사 → blocker / important / nit → coder 반영·재감사 수렴 (의미 변종 = 판정 누수·빈혈·이름 위장·테스트 비-vacuity/디코이 전담)</div>
+            <div class="chips"><span class="chip d">discipline-cleancode</span><span class="chip d">discipline-houserules</span><span class="chip d">discipline-test</span></div>
           </div>
           <div class="conn sm"></div>
           <div class="node">
-            <div class="role"><span class="dot" style="background:var(--tx2)"></span>백스톱 51종</div>
-            <div class="desc"><b style="color:var(--tx)">coordinator</b>가 <code style="font-family:var(--mono);font-size:13px">backstop.dart --diff-base</code>를 셸로 1회 — 구조·import·명명·순환을 의미 해석 0으로 판별 · git diff 게이트(이번 변경분만)</div>
+            <div class="role"><span class="dot" style="background:var(--tx2)"></span>백스톱 55종</div>
+            <div class="desc"><b style="color:var(--tx)">coordinator</b>가 <code style="font-family:var(--mono);font-size:13px">backstop.dart --diff-base</code>를 셸로 1회 — 구조·import·명명·순환·테스트 게이트·의존성 핀(ST·IM·NM·CY·TG·PJ)을 의미 해석 0으로 판별 · git diff 게이트(이번 변경분만)</div>
             <div class="chips"><span class="chip n">스킬 아님 · 고정밀 결정적 안전망</span></div>
           </div>
           <div class="conn sm"></div>
-          <div class="gate" style="min-width:0;width:auto">51종 전부 통과?</div>
+          <div class="gate" style="min-width:0;width:auto">55종 전부 통과?</div>
           <div class="backs"><span class="back o">↩ exit2 → <b style="color:var(--tx)">coordinator</b>가 발견 합쳐 성격 판단 → 설계(architect) <i>또는</i> coder 반송</span></div>
         </div>
       </div>
@@ -374,7 +374,7 @@
   <!-- ===== 수정 모드 ===== -->
   <div class="patchwrap">
     <h2>🔧 수정 모드 <span style="font-size:11px;font-weight:600;color:var(--tx3)">— 국소 변경은 풀 파이프라인을 다시 돌지 않는다</span></h2>
-    <p class="ps">기존 구조 내 변경이면 영향받는 부분만. 리뷰는 4축 전부가 아니라 <b>touched-layer 기계 매핑</b>으로 줄인다(domain→ddd / infra→data / application→state / presentation→ui · <b>ddd는 항상</b>). 설계 변경 없는 순수 구현 수정이고 승인된 명세가 있으면 G1′도 생략. 두 경로 모두 G2 직전 <b>백스톱 51종을 동일하게</b> 돈다.</p>
+    <p class="ps">기존 구조 내 변경이면 영향받는 부분만. 리뷰는 4축 전부가 아니라 <b>touched-layer 기계 매핑</b>으로 줄인다(domain→ddd / infra→data / application→state / presentation→ui · <b>ddd는 항상</b>). 설계 변경 없는 순수 구현 수정이고 승인된 명세가 있으면 G1′도 생략. 두 경로 모두 G2 직전 <b>백스톱 55종을 동일하게</b> 돈다.</p>
     <div class="patchrow">
       <div class="pstep"><div class="t">G0 · 영향 범위</div><div class="s">영향 파일 목록 산출 + 산출물 폴더 ⓐ재사용</div></div>
       <div class="parrow">→</div>
@@ -382,7 +382,7 @@
       <div class="parrow">→</div>
       <div class="pstep"><div class="t">영향 구현</div><div class="s">coder · 슬라이스 = G0 영향 파일</div></div>
       <div class="parrow">→</div>
-      <div class="pstep"><div class="t">discipline touched 경량 1회</div><div class="s">+ 백스톱 51종(동일·touched만)</div></div>
+      <div class="pstep"><div class="t">discipline touched 경량 1회</div><div class="s">+ 백스톱 55종(동일·touched만)</div></div>
       <div class="parrow">→</div>
       <div class="pstep" style="background:#231d12;border-color:#4a3a1c"><div class="t" style="color:var(--amber)">💬 G2 승인</div><div class="s">빌드 = 조건부(codegen·에셋·네이티브 시만)</div></div>
     </div>
@@ -411,9 +411,9 @@
       <div class="diffrow"><div class="dk">모드</div><div class="dj">풀 / 수정 2분류</div><div class="da">풀 / 수정 / <b>트리비얼</b> 삼분류 — 라벨급 변경 패스트트랙</div></div>
       <div class="diffrow"><div class="dk">Phase 0 출처</div><div class="dj">서버 계약(OpenAPI)</div><div class="da">서버 계약 + <b>화면 디자인 출처 해소</b>(디자인 MCP·시안 → design-ref)</div></div>
       <div class="diffrow"><div class="dk">리뷰 lens</div><div class="dj">ddd · api · db (활성 추론)</div><div class="da"><b>ddd · ui · state · data — 항상 4축</b>(추론 안 함)</div></div>
-      <div class="diffrow"><div class="dk">Phase 2 방식</div><div class="dj">TDD 이중 루프 — acceptance-tester(Red) + 슬라이스 TDD</div><div class="da"><b>구조 슬라이스 bottom-up</b>(Model→View) · <b>analyze 베이스라인 대비 신규 0</b> green 래칫 (전용 테스터 단계 없음)</div></div>
+      <div class="diffrow"><div class="dk">Phase 2 방식</div><div class="dj">TDD 이중 루프 — acceptance-tester(Red) + 슬라이스 TDD</div><div class="da"><b>구조 슬라이스 bottom-up</b>(Model→View) · <b>analyze 베이스라인 대비 신규 0</b> green 래칫 + coder가 <b>행위 검증 테스트 산출</b>(TG1 게이트·discipline-test FORM — 단 acceptance-tester 같은 전용 테스터 에이전트는 없음)</div></div>
       <div class="diffrow"><div class="dk">슬라이스 분할</div><div class="dj">인수 테스트에서 도출</div><div class="da">기계 규칙(정수 임계) — 축퇴/2분할/세분 + <b>tracer 선행</b>(가정 계약·계약 위험)</div></div>
-      <div class="diffrow"><div class="dk">결정적 백스톱</div><div class="dj">16종(끝 1회)</div><div class="da"><b>51종</b>(구조·import·명명·순환 · 끝 1회 · git diff 게이트)</div></div>
+      <div class="diffrow"><div class="dk">결정적 백스톱</div><div class="dj">16종(끝 1회)</div><div class="da"><b>55종</b>(구조·import·명명·순환·테스트게이트·의존성핀 · 끝 1회 · git diff 게이트)</div></div>
       <div class="diffrow"><div class="dk">중간 확인</div><div class="dj">—</div><div class="da"><b>미니 게이트</b>(가정 계약 케이스 · tracer 직후 눈 확인)</div></div>
       <div class="diffrow"><div class="dk">G2 확인</div><div class="dj">pytest green</div><div class="da">행위 체크리스트 + <b>디자인 시각 대조</b> · 런타임은 사용자 <code style="font-family:var(--mono);font-size:13px">flutter run</code></div></div>
     </div>
@@ -427,7 +427,7 @@
     <b>리뷰는 항상 4축</b>(ddd·ui·state·data) — 활성 lens를 추론하지 않는다(특히 state는 설계 중에 드러나 활성 오판이 침묵 사각이 된다 · 미활성 오판 ≫ 병렬 리뷰 1회 비용). 관심사 없는 리뷰어는 <span class="k">"해당 없음 + 근거 한 줄"</span>을 의무로 낸다.<br>
     <b>조건부·선택 단계</b>(점선 노드) — <span class="k">＊설계 경량 점검</span>은 명세 복잡 시 coordinator 재량(생략 가능), <span class="k">＊슬라이스별 감사</span>는 <b>슬라이스 3개 이상일 때만</b> + Model/View 경계 통과 시 경량 1회(판정 소유 감사 최적 시점).<br>
     <b>홀리스틱 감사와 백스톱은 끝에 1회만</b> 돈다(슬라이스마다 아님 — <span class="k">✅ 전체 1회</span> 박스). 백스톱은 결정적 스크립트라 코드 완성 상태에서 봐야 거짓양성이 없다. 통과(0)도 discipline-reviewer의 의미 점검(판정 소유·빈혈·이름 위장)을 면제하지 않는다.<br>
-    <b>coder는 bottom-up + analyze 베이스라인 green 래칫</b>으로 구현한다(전용 테스트 작성 단계는 파이프라인에 없다 — FC(UI 행위 골든)는 채점 장치이지 빌드 단계가 아니다). 같은 지식 스킬이 여러 역할에서 재사용된다 — <span class="chip d" style="display:inline">discipline-*</span>·<span class="chip i" style="display:inline">implementation-*</span>는 감수자 전용이 아니라 작성자(coder)도 로드한다.
+    <b>coder는 bottom-up + analyze 베이스라인 green 래칫</b>으로 구현하고 <b>행위 검증 테스트를 산출</b>한다(discipline-test FORM·implementation-test 메커니즘·신규 BC는 백스톱 TG1이 부재 차단 — 단 dddjango의 acceptance-tester 같은 전용 테스터 <i>에이전트</i>는 없고, FC(UI 행위 골든)는 채점 장치이지 빌드 단계가 아니다). 같은 지식 스킬이 여러 역할에서 재사용된다 — <span class="chip d" style="display:inline">discipline-*</span>·<span class="chip i" style="display:inline">implementation-*</span>는 감수자 전용이 아니라 작성자(coder)도 로드한다.
   </div>
 </div>
 </body>
