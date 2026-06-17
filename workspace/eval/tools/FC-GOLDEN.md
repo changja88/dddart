@@ -24,17 +24,17 @@
 
 ## 2. Mutation 3종 (FC-2) — 논리 정의 (사이트는 조정자가 코드 열람 후)
 
-> 정렬·중요판정·표시 세 축. 산출물의 정렬 비교자/배지 매핑이 *실제로* 동작을 결정하는지(비-vacuous) 검증. red = 그 mutation을 주입하면 골든을 두드리는 widget test가 깨진다.
+> 정렬·중요판정·표시 세 축. 산출물의 정렬 비교자/배지 매핑이 *실제로* 동작을 결정하는지(비-vacuous) 검증. red = 그 mutation을 주입하면 해당 골든을 두드리는 **행위 검증 테스트(맞는 seam — 판정=순수 도메인 단위 직접·배지매핑=ui_extension 직접·view/새로고침=VM-override 위젯; EVAL §2.5)**가 깨진다.
 
 > 각 mutation은 **정본 변이 1개**로 고정(택일 OR 금지 — 채점자가 변이를 골라 red가 갈리는 비결정 차단).
 
 | ID | 정본 논리 mutation | 기대(테스트 red여야 PASS) | 주입 사이트(계층) |
 |---|---|---|---|
-| **M1** | 정렬 **키 우선순위 swap** — pinned 우선 단계를 게시일 우선으로 교체(비교자 1차 키를 게시일로) | G1 순서 단언 red(중요A가 일반C 아래로) | 정렬 비교자(M2와 동일 사이트·SD-1 교차) |
+| **M1** | 정렬 **키 우선순위 swap** — pinned 우선 단계를 게시일 우선으로 교체(비교자 1차 키를 게시일로) | G1 순서 단언 red(중요A가 일반C 아래로) | 정렬이 *코드상 거주한 위치*(domain이면 순수 단위테스트·VM이면 VM-override 위젯테스트; M2와 동일 사이트·SD-1 교차) |
 | **M2** | 게시일 **방향 역전** — 내림차순 → 오름차순 | G1·G6 순서 단언 red | 정렬 비교자 |
 | **M3** | 배지 **표시 조건 반전** — 중요 공지의 배지 표시 조건을 false로 | G2 배지 단언 red | 배지 매핑/ui_extension(VW-5 교차) |
 
-> **주입 사이트(결정적 규칙)**: 각 mutation이 두드리는 골든 경로상 핵심 판정 **각각** — **M1·M2 = 정렬 비교자, M3 = 배지 매핑/ui_extension**(서로 다른 계층이라 "1곳"이 아니다). 조정자가 행위표 동결 후 코드 열람해 식별하되, **동작 결정 위치가 여럿이면(정렬을 domain·VM 두 곳에 중복) 전부 주입**(부분 주입 시 다른 경로가 살아 거짓 green). red가 1곳도 안 나면 그 경로가 死코드/중복임을 FC-2 발견 로그에 기록. **단순 freezed 필드·codegen은 mutation 대상 제외**(도메인 판정 아님). **M1·M2·M3 각각 자기 사이트 주입 시 해당 골든 단언 red여야 PASS**(red율 100% 미달 = FC-2 FAIL·vacuous). 러너 = `dart run build_runner build` **선행** 후 `flutter test`(정렬·배지·새로고침은 widget test 행위 검증 — `RUBRIC.md` FC-2 lint 사각).
+> **주입 사이트(결정적 규칙)**: 각 mutation이 두드리는 골든 경로상 핵심 판정 **각각** — **M1·M2 = 정렬 비교자, M3 = 배지 매핑/ui_extension**(서로 다른 계층이라 "1곳"이 아니다). 조정자가 행위표 동결 후 코드 열람해 식별하되, **동작 결정 위치가 여럿이면(정렬을 domain·VM 두 곳에 중복) 전부 주입**(부분 주입 시 다른 경로가 살아 거짓 green). red가 1곳도 안 나면 그 경로가 死코드/중복임을 FC-2 발견 로그에 기록. **단순 freezed 필드·codegen은 mutation 대상 제외**(도메인 판정 아님). **M1·M2·M3 각각 자기 사이트 주입 시 해당 골든 단언 red여야 PASS**(red율 100% 미달 = FC-2 FAIL·vacuous). 러너 = `dart run build_runner build` **선행** 후 `flutter test`(전 스위트 — **정렬 M1·M2 = 코드 거주 seam**(도메인=순수 단위테스트·VM=VM-override 위젯테스트; positive-control 정렬=VM 정합) / **배지 M3 = ui_extension getter 직접 호출 단위테스트** / **탭·새로고침 = VM-override 위젯테스트**; dddart엔 repo provider 없음).
 
 ## 3. 산출물별 실행 어댑터 (조정자 — 코드 열람 후 기록)
 
@@ -45,6 +45,6 @@
 | (plan-a) | `announcement_list_view` / `AnnouncementRoutes.list` | `announcementListVMProvider` | (열람 후: domain/VM/?) | (배지 위젯·ui_extension) | `AnnouncementRoutes.detail` | `RefreshIndicator.onRefresh` |
 | (plan-b) | (동일 형식 추가) | | | | | |
 
-> **어댑터 작성법**: ① 목록 화면 위젯을 펌프하는 widget test 스캐폴드 작성(서버 응답은 fake/mock provider override) → ② §1 G1~G6을 그 위젯 트리에 대한 finder 단언으로 표현 → ③ §2 M1~M3을 식별된 사이트(정렬 비교자·배지 매핑) *각각*에 주입해 red 확인(복수 거주 시 전부). **조정자 메모는 *위치 사실*만**(예: "정렬 비교자 심볼이 파일 X에 존재") — "X가 domain이라 SD-1 PASS" 같은 *적법성 결론* 금지(SD-1 거주 적법성은 의미 grader 독립 판정·EVAL `§2.0`·`§2.4`). 어댑터·위치 메모는 조정자 보유·grader 미수령.
+> **어댑터 작성법(seam별 분기)**: ① 행위 종류별 맞는 seam에 테스트 스캐폴드 — **정렬(판정)=코드 거주 seam**(도메인이면 순수 단위 직접 호출·VM이면 VM-override 위젯테스트) / **배지=ui_extension getter 직접 호출 단위테스트** / **탭·새로고침(view)=VM-override 위젯테스트**(상태보유 VM변종 provider override; dddart엔 repo/usecase provider 없음) → ② §1 G1~G6을 그 seam에 맞는 단언(단위=값/컬렉션·위젯=finder)으로 표현 → ③ §2 M1~M3을 식별된 사이트(정렬 비교자·배지 매핑) *각각*에 주입해 red 확인(복수 거주 시 전부·주입사이트 死=FAIL). **조정자 메모는 *위치 사실*만**(예: "정렬 비교자 심볼이 파일 X에 존재") — "X가 domain이라 SD-1 PASS" 같은 *적법성 결론* 금지(SD-1 거주 적법성은 의미 grader 독립 판정·EVAL `§2.0`·`§2.4`). 어댑터·위치 메모는 조정자 보유·grader 미수령.
 
 > **S1 특이사항**: 공지는 네트워크 전용(hive 미사용)이라 캐시 무효화 골든 없음. 당겨 새로고침(G4)은 `invalidateSelf`/재조회 경로 — provider 재실행이 관측점. 재탭 2단(implementation-flutter §3)은 S1 단일 탭 화면엔 미발화(탭 바 없음) → 해당 메커니즘 widget test는 S1에서 N/A(`RUBRIC.md` FC-2 메커니즘은 *발화 시*만).
