@@ -289,6 +289,48 @@ else
   FAIL=$((FAIL+1)); echo "FAIL F11 (exit=$E, NM17=$N)"; echo "$OUT" | head -30 | sed 's/^/    /'
 fi
 
+# ---------- F12: extract_design --from-theme — 브랜드seed/렌더색 분리·_fixed 분리·rounded 블록 표적파싱·타이포 매핑·불일치 경고
+P="$T/f12"; mkdir -p "$P"
+cat > "$P/designtheme.json" <<'EOF'
+{
+  "designTheme": {
+    "colorMode": "LIGHT",
+    "customColor": "#4a90e2",
+    "overridePrimaryColor": "#4a90e2",
+    "overrideSecondaryColor": "#f5a623",
+    "roundness": "ROUND_EIGHT",
+    "bodyFontFamily": "Be Vietnam Pro",
+    "namedColors": {
+      "primary": "#005da7",
+      "secondary": "#835500",
+      "surface": "#f8f9fa",
+      "primary_fixed": "#d4e3ff",
+      "on_primary_fixed_variant": "#004883"
+    },
+    "spacing": { "gutter": "16px", "card-padding": "20px" },
+    "typography": {
+      "body-md": {"fontFamily": "Be Vietnam Pro", "fontSize": "16px", "fontWeight": "400", "lineHeight": "24px"}
+    },
+    "designMd": "---\nname: AC\ncolors:\n  primary: '#005da7'\nrounded:\n  sm: 0.25rem\n  lg: 1rem\n  full: 9999px\nspacing:\n  gutter: 16px\n---\n\n## Components\n- Cards 16px.\n"
+  }
+}
+EOF
+OUT=$(dart "$SCRIPTS/extract_design.dart" --from-theme "$P/designtheme.json" --out "$P/design-tokens.json" 2>&1); E=$?
+C=$(cat "$P/design-tokens.json" 2>/dev/null || echo "")
+ok=1
+[ "$E" = 0 ] || ok=0
+grep -q '"source": "designTheme"' <<<"$C" || ok=0                  # 모드 메타
+grep -q '"primary": "#4a90e2"' <<<"$C" || ok=0                     # 브랜드 seed(brandColors)
+grep -q '"primary": "#005da7"' <<<"$C" || ok=0                     # 렌더 색(colors) — seed와 다름(둘 다 산출)
+grep -q '"primary_fixed": "#d4e3ff"' <<<"$C" || ok=0               # *_fixed → extendedColors 분리
+grep -q '"lg": "1rem"' <<<"$C" || ok=0                             # designMd `rounded:` 블록만 표적 파싱
+grep -q '"full": "9999px"' <<<"$C" || ok=0
+grep -A3 '"body-md"' <<<"$C" | grep -q '"family": "Be Vietnam Pro"' || ok=0   # fontFamily→family 매핑
+grep -q "브랜드 seed" <<<"$OUT" || ok=0                            # seed≠렌더 불일치 경고 표면화
+if [ $ok = 1 ]; then PASS=$((PASS+1)); echo "PASS F12 extract_design --from-theme(브랜드/렌더 분리·_fixed·rounded·타이포·경고)"; else
+  FAIL=$((FAIL+1)); echo "FAIL F12 (exit=$E)"; echo "$C" | head -40 | sed 's/^/    /'; echo "$OUT" | sed 's/^/    /'
+fi
+
 echo ""
 echo "결과: PASS $PASS / FAIL $FAIL"
 [ $FAIL = 0 ]

@@ -1,15 +1,20 @@
 #!/usr/bin/env dart
-/// extract_design — Phase 0 직후 동결 Stitch design-ref를 design-tokens.json으로 기계 절단 (feedback-005 목표1).
+/// extract_design — Phase 0 직후 동결 디자인 출처를 design-tokens.json으로 기계 절단 (feedback-005 목표1).
 ///
-/// 동결 HTML의 `<script id="tailwind-config">`(색·spacing·borderRadius·타이포)과 본문
-/// `material-symbols-outlined`(아이콘 `data-icon`+`FILL`)·임의값(`shadow-[...]`·음수마진)을
-/// 결정론 추출한다. LLM 추출(피드백3 재현)을 제거하고 architect는 산출물만 소비한다(설계 §목표1).
+/// 두 입력 모드(둘 다 LLM 추출[피드백3 재현]을 제거하고 architect는 산출물만 소비):
+///   1) HTML 모드(기본): 동결 HTML의 `<script id="tailwind-config">`(색·spacing·borderRadius·타이포)과
+///      본문 `material-symbols-outlined`(아이콘 `data-icon`+`FILL`)·임의값(`shadow-[...]`·음수마진)을 결정론 추출.
+///   2) --from-theme 모드: Stitch designTheme(구조화 JSON·디자인 시스템)에서 색·타이포·간격·모서리를 추출.
+///      색은 namedColors(렌더 색) + override*(브랜드 seed)를 둘 다 산출하고 불일치는 경고(architect가 결정).
+///      granular 모서리는 designMd 머리말 `rounded:` 블록만 표적 파싱(전면 YAML 파서 불요).
 ///
 /// 사용:
 ///   dart run extract_design.dart <design-ref-dir> --out <design-tokens.json> [--icon-map <icon_map.json>]
+///   dart run extract_design.dart --from-theme <designtheme.json> --out <design-tokens.json>
 ///
-/// 종료코드: 0=성공(미매핑 아이콘은 경고·산출물에 `flutter:null`로 표시) / 1=사용법·HTML 없음·config 파싱 실패.
-/// HTML 부재는 그 자체가 발견이다 — Phase 0이 이미 G0 차단하지만 여기서도 exit 1(동결 누락 = 시안 미반영).
+/// 종료코드: 0=성공(미매핑 아이콘은 경고·산출물에 `flutter:null`로 표시) / 1=사용법·파싱 실패·토큰 0.
+/// **모드별 exit 1 의미가 다르다**: HTML 모드는 *HTML 부재*가 발견이다(동결 누락 = 시안 미반영 → exit 1).
+/// --from-theme 모드는 *theme JSON 부재·파싱실패·토큰 0*만 실패다 — "화면 HTML 없음"은 이 모드에선 정상.
 library;
 
 import 'dart:convert';
@@ -19,22 +24,32 @@ void main(List<String> argv) {
   String? dir;
   String? outFile;
   String? iconMapFile;
+  String? themeFile;
   for (var i = 0; i < argv.length; i++) {
     switch (argv[i]) {
       case '--out':
         outFile = argv[++i];
       case '--icon-map':
         iconMapFile = argv[++i];
+      case '--from-theme':
+        themeFile = argv[++i];
       default:
         dir = argv[i];
     }
   }
-  if (dir == null || outFile == null) {
-    stderr.writeln('사용: dart run extract_design.dart <design-ref-dir> --out <design-tokens.json> [--icon-map <icon_map.json>]');
+  if (outFile == null || (dir == null && themeFile == null)) {
+    stderr.writeln('사용(HTML): dart run extract_design.dart <design-ref-dir> --out <design-tokens.json> [--icon-map <icon_map.json>]');
+    stderr.writeln('사용(designTheme): dart run extract_design.dart --from-theme <designtheme.json> --out <design-tokens.json>');
     exit(1);
   }
 
-  final dirEntity = Directory(dir);
+  // --from-theme: Stitch designTheme(구조화 JSON) → 토큰. 별 함수가 산출·exit 한다(HTML 경로와 분리).
+  if (themeFile != null) {
+    _runThemeMode(themeFile, outFile);
+    return; // 도달 불가(_runThemeMode가 exit) — 명시
+  }
+
+  final dirEntity = Directory(dir!);
   if (!dirEntity.existsSync()) {
     stderr.writeln('[extract-design] design-ref 디렉터리 없음: $dir');
     exit(1);
@@ -376,4 +391,181 @@ class _IconAgg {
   final int fill;
   final String? flutter;
   final Set<String> screens = <String>{};
+}
+
+// ---- --from-theme: Stitch designTheme(구조화 JSON·디자인 시스템) → 토큰 ----
+
+void _runThemeMode(String themeFile, String outFile) {
+  final f = File(themeFile);
+  if (!f.existsSync()) {
+    stderr.writeln('[extract-design] designTheme 파일 없음: $themeFile');
+    exit(1);
+  }
+  dynamic doc;
+  try {
+    doc = jsonDecode(f.readAsStringSync());
+  } catch (e) {
+    stderr.writeln('[extract-design] designTheme JSON 파싱 실패: $e — 동결본을 확인하라.');
+    exit(1);
+  }
+  final theme = _resolveTheme(doc);
+  if (theme == null) {
+    stderr.writeln('[extract-design] designTheme 객체를 찾을 수 없다 — top-level "designTheme" 키도, theme 형태(namedColors/typography/designMd)도 아님.');
+    exit(1);
+  }
+
+  final warnings = <String>[];
+
+  // 색: namedColors = Stitch가 *렌더한* Material 톤 색(*_fixed* 계열만 extendedColors로 분리).
+  // override* = 사용자가 *고른* 브랜드 seed. 둘이 다르면 경고(architect가 fromSeed vs 직접지정 결정 — 둘 다 산출).
+  final colors = <String, String>{};
+  final extendedColors = <String, String>{};
+  final named = theme['namedColors'];
+  if (named is Map) {
+    named.forEach((dynamic k, dynamic v) {
+      if (v is! String) return;
+      final key = k.toString();
+      (key.contains('fixed') ? extendedColors : colors)[key] = v;
+    });
+  }
+  final brandColors = <String, String>{};
+  void brand(String name, String themeKey) {
+    final v = theme[themeKey];
+    if (v is String && v.isNotEmpty) brandColors[name] = v;
+  }
+
+  brand('primary', 'overridePrimaryColor');
+  brand('secondary', 'overrideSecondaryColor');
+  brand('tertiary', 'overrideTertiaryColor');
+  brand('neutral', 'overrideNeutralColor');
+  brand('custom', 'customColor');
+  for (final role in const ['primary', 'secondary', 'tertiary']) {
+    final seed = brandColors[role];
+    final resolved = colors[role];
+    if (seed != null && resolved != null && seed.toLowerCase() != resolved.toLowerCase()) {
+      warnings.add('색 $role: 브랜드 seed($seed) ≠ 렌더 색($resolved) — Stitch 톤 보정. '
+          'architect가 seed로 ColorScheme.fromSeed 할지 렌더 색을 직접 박을지 결정(둘 다 산출됨).');
+    }
+  }
+
+  // 타이포: designTheme.typography(이미 구조화) → HTML 경로와 동일 출력 모양(fontFamily→family·fontSize→size).
+  final typography = <String, Map<String, String>>{};
+  final typo = theme['typography'];
+  if (typo is Map) {
+    typo.forEach((dynamic k, dynamic v) {
+      if (v is! Map) return;
+      final m = <String, String>{};
+      if (v['fontFamily'] != null) m['family'] = v['fontFamily'].toString();
+      if (v['fontSize'] != null) m['size'] = v['fontSize'].toString();
+      for (final attr in const ['lineHeight', 'fontWeight', 'letterSpacing']) {
+        if (v[attr] != null) m[attr] = v[attr].toString();
+      }
+      if (m.isNotEmpty) typography[k.toString()] = m;
+    });
+  }
+
+  // 간격: designTheme.spacing(구조화).
+  final spacing = <String, String>{};
+  final sp = theme['spacing'];
+  if (sp is Map) {
+    sp.forEach((dynamic k, dynamic v) {
+      if (v is String) spacing[k.toString()] = v;
+    });
+  }
+
+  // 모서리: 구조화엔 roundness(enum)뿐 → granular 스케일은 designMd 머리말 `rounded:` 블록만 표적 파싱.
+  final borderRadius = <String, String>{};
+  final md = theme['designMd'];
+  if (md is String) _parseRoundedBlock(md, borderRadius);
+  if (borderRadius.isEmpty && theme['roundness'] != null) {
+    warnings.add('borderRadius granular 미검출(designMd `rounded:` 블록 없음) — meta.roundness(${theme['roundness']}) enum만 보존.');
+  }
+
+  // fail-loud: 핵심 토큰군이 모두 비면 theme JSON이 비정상 — exit 1.
+  // (HTML 모드와 달리 "화면 HTML 없음"은 실패가 아니다 — 이 모드의 입력은 theme JSON 자체다.)
+  if (colors.isEmpty && typography.isEmpty && spacing.isEmpty) {
+    stderr.writeln('[extract-design] designTheme에서 색·타이포·간격 토큰 0 — theme JSON이 비었거나 형태가 다르다.');
+    exit(1);
+  }
+
+  final fonts = <String, String>{};
+  void font(String name, String themeKey) {
+    final v = theme[themeKey];
+    if (v is String && v.isNotEmpty) fonts[name] = v;
+  }
+
+  font('body', 'bodyFontFamily');
+  font('headline', 'headlineFontFamily');
+  font('label', 'labelFontFamily');
+
+  final out = <String, dynamic>{
+    'meta': <String, dynamic>{
+      'generator': 'extract_design.dart',
+      'version': 1,
+      'source': 'designTheme',
+      'roundness': theme['roundness'],
+      'colorMode': theme['colorMode'],
+      'fonts': _sorted(fonts),
+    },
+    'brandColors': _sorted(brandColors),
+    'colors': _sorted(colors),
+    'extendedColors': _sorted(extendedColors),
+    'spacing': _sorted(spacing),
+    'borderRadius': _sorted(borderRadius),
+    'typography': _sortedNested(typography),
+    // designTheme엔 아이콘 목록·임의값이 없다(화면 HTML 경로가 채운다) — 스키마 호환 위해 빈 값 유지.
+    'icons': <Map<String, dynamic>>[],
+    'arbitraryValues': <String>[],
+    'negativeMargins': <String>[],
+    'unmappedIcons': <String>[],
+  };
+
+  File(outFile).writeAsStringSync('${const JsonEncoder.withIndent('  ').convert(out)}\n');
+  for (final w in warnings) {
+    stdout.writeln('[warn] $w');
+  }
+  stdout.writeln('[extract-design] designTheme → 브랜드색 ${brandColors.length} · 색 ${colors.length}'
+      '(+확장 ${extendedColors.length}) · 간격 ${spacing.length} · 모서리 ${borderRadius.length} · 타이포 ${typography.length} → $outFile');
+  exit(0);
+}
+
+/// doc가 프로젝트 응답이면 `doc['designTheme']`, theme 객체 자체면 그대로. 아니면 null.
+Map<String, dynamic>? _resolveTheme(dynamic doc) {
+  if (doc is! Map) return null;
+  final dt = doc['designTheme'];
+  if (dt is Map) return dt.cast<String, dynamic>();
+  if (doc.containsKey('namedColors') || doc.containsKey('typography') || doc.containsKey('designMd')) {
+    return doc.cast<String, dynamic>();
+  }
+  return null;
+}
+
+/// designMd YAML 머리말의 `rounded:` 블록만 표적 파싱(전면 YAML 파서 불요).
+/// `^rounded:` 다음의 들여쓰기된 `key: value` 줄을 비들여쓰기 줄(다음 top-level 키)까지 수집.
+void _parseRoundedBlock(String md, Map<String, String> into) {
+  final entry = RegExp(r'^(\s+)([\w-]+):\s*(.+?)\s*$');
+  final header = RegExp(r'^rounded:\s*$');
+  var inBlock = false;
+  for (final line in md.split('\n')) {
+    if (!inBlock) {
+      if (header.hasMatch(line)) inBlock = true;
+      continue;
+    }
+    final m = entry.firstMatch(line);
+    if (m != null) {
+      into[m.group(2)!] = _stripQuotes(m.group(3)!);
+    } else if (line.trim().isEmpty) {
+      continue; // 블록 내 빈 줄 허용
+    } else {
+      break; // 비들여쓰기 줄 = 블록 종료
+    }
+  }
+}
+
+String _stripQuotes(String s) {
+  if (s.length >= 2) {
+    final q = s[0];
+    if ((q == '"' || q == "'") && s[s.length - 1] == q) return s.substring(1, s.length - 1);
+  }
+  return s;
 }
