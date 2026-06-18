@@ -11,7 +11,7 @@
 - **베이스 코퍼스**: `9aa5c86`(현 HEAD·feedback-009 a27c357 + A13-1 골든 f3f2b3e + 스크린샷 제거 299fd09)
 - **시술 커밋**: `327640c`(2026-06-18·main 직접·push 안 함) — measure-first 5건(eval·RUBRIC/골든/EVAL-METHOD) + 코퍼스 산문 3건(architecture-ddd ①ⓐ③ⓑ·implementation-flutter ④·corpus_mirror_sync --write 양미러·11/11 in-sync)
 - **검증 런**: `<다음 라이브런(8차)·양판>`
-- **상태**: **🔧 v2 시술 완료·커밋(`327640c`) — measure-first 5/6(④ Q-1 dim 보류)·코퍼스 산문 3건·양미러 11/11 in-sync / Phase 3(②백스톱·⑤러너) 미적용·8차 검증대기**
+- **상태**: **🔧 v2 시술 완료 — measure-first 5/6(④ Q-1 dim 보류)·코퍼스 산문 3건(커밋 `327640c`)·**Phase 3 ②⑤ 적용**(RV1 backstop _totalChecks 57→58·러너 게이트·미커밋)·VW-7 과대범위 positive-control 교정 / 8차 검증대기**
 
 ## 적대 2차 요약 (시술 직전 반증 — 8 서브에이전트)
 - **방향(미러)은 반증 견디고 강화**·confabulation 없음(전건 file:line·6차 0012/7차 1312 폴더 분리).
@@ -40,6 +40,11 @@
 4. ⏸**RUBRIC Q-1 / 위젯 키 절**(항목 4·**보류**) — 위젯 키 관용을 Q-1 정의 포함/별도 절 여부는 차기 동결창 검토(현 Q-1=명명/타입 전용·미적용).
 5. ✅**FC-GOLDEN G-7 ↔ A1 경계**(housekeeping·적용) — G-7 판정바에 "아이콘 distinct=A1 인간큐·치명 아님·**색 distinct만 자동 측정**" 명시(§3 N4 아이콘 부분도 이 경계·거짓 🟡 차단).
 6. ✅**EVAL-METHOD §2.6 병렬 결정성 가드**(항목 5ⓐ·적용) — `flutter test` 병렬 concurrency>1 ×N(≥3) 전회 green 기계 게이트 + 실패양태 선분해·"isolate static 비공유→cross-shard 오염 불가·reset 실재·randomize-ordering 별축" 주의 등록.
+
+## Phase 3 시술 (2026-06-18 · ②ST-8 백스톱 · ⑤러너 게이트)
+- **② RV1 백스톱**(단일출처·미러 불필요): `dddart/scripts/src/check_riverpod.dart` 신설 + `backstop.dart` 배선(`_totalChecks` 57→58·**새 family `RV`**·검사ID `ST8`(check_structure 점유) 충돌 회피). 루트 합성(main.dart류 *touched*)에 전역 retry-OFF(`ProviderScope`/`ProviderContainer`의 `retry:` 인자) 부재면 RV1 발화·합성 0개=N/A 무발화. **positive-control**: `scripts/test/run_fixtures.sh` **F14a-d** — 부재 발화(7차 회귀 실표본)·ProviderScope(retry:) 침묵(6차)·**ProviderContainer+UncontrolledProviderScope 변종 침묵(5차 실표본 — 거짓-FAIL 반증)**·BC단독 N/A 무발화. **전체 21/21 PASS**·`dart analyze` clean.
+- **⑤ 러너 병렬 결정성 게이트**(eval 단일출처): `workspace/eval/tools/parallel-determinism-gate.sh` 신설 — `flutter test` 병렬 ×N 전회 green=exit0 / red=exit2+양태 분해(serial·순서축 대조). EVAL-METHOD §2.6-5 포인터. **기계 게이트·차원 아님**·8차 실행 시 선분해 겸.
+- **VW-7 과대범위 교정(positive-control 적발)**: measure-first VW-7/§3 '직렬화 거주' 문언이 positive-control navigator의 `'$id'`(int→String 식별자 전달)를 거짓-FAIL할 위험 → RUBRIC VW-7·architecture-ddd §3을 "**변환 로직 있는 직렬화**(날짜 포맷·다필드 조립)만, 단순 식별자 `'$id'`·String 전달 제외"로 정밀화·재미러(11/11 in-sync). *positive-control이 제 역할(규칙 변경 후 known-good 거짓-FAIL 차단).*
 
 ## 범위 제외 (수정 대상 아님 — 적대 2차 확증)
 - **FC-1(G-7 아이콘 distinct)·FC-3(N4 아이콘 공유)** — **UI/A1·인간 오라클·스킬 무관**(적대 2차 반증 후 유지). architecture-ui §5는 아이콘 *자리*(ui_extension)·*방언*(`Icons.*`)만 강제·*어느 아이콘/충실도*는 design-review-ui·인간 오라클 위임. RUBRIC A1 "아이콘 비측정". G-7이 UI를 행위게이트로 박은 분류오류 → 차기 동결창 정리(위 measure-first 5).

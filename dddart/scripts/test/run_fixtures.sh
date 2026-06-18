@@ -371,6 +371,59 @@ else
   FAIL=$((FAIL+1)); echo "FAIL F13 (exit=$E)"; echo "$OUT" | head -20 | sed 's/^/    /'
 fi
 
+# ---------- F14: RV1 전역 retry-OFF — 부재 발화, ProviderScope(retry)·ProviderContainer 변종 침묵
+# f14a: retry 부재(7차 claude 회귀 실표본) → RV1 발화
+P="$T/f14a"; BASE=$(mkproj "$P")
+cat > "$P/lib/main.dart" <<'EOF'
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+void main() {
+  runApp(const ProviderScope(child: SizedBox()));
+}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only rv); E=$?
+assert "F14a RV1 전역 retry 부재 발화" 2 "RV1" - "$E" "$OUT"
+
+# f14b: ProviderScope(retry:) (6차 claude 실표본) → 침묵
+P="$T/f14b"; BASE=$(mkproj "$P")
+cat > "$P/lib/main.dart" <<'EOF'
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+void main() {
+  runApp(ProviderScope(
+    retry: (int retryCount, Object error) => null,
+    child: const SizedBox(),
+  ));
+}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only rv); E=$?
+assert "F14b ProviderScope(retry:) 침묵" 0 - "RV1" "$E" "$OUT"
+
+# f14c: ProviderContainer(retry:)+UncontrolledProviderScope 변종(5차 claude 실표본) → 침묵(거짓-FAIL 반증)
+P="$T/f14c"; BASE=$(mkproj "$P")
+cat > "$P/lib/main.dart" <<'EOF'
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+void main() {
+  final ProviderContainer container = ProviderContainer(
+    retry: (int retryCount, Object error) => null,
+  );
+  runApp(UncontrolledProviderScope(
+    container: container,
+    child: const SizedBox(),
+  ));
+}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only rv); E=$?
+assert "F14c ProviderContainer 변종 침묵(거짓-FAIL 반증·5차 실표본)" 0 - "RV1" "$E" "$OUT"
+
+# f14d: 합성 없는 BC 단독 변경(main.dart 미변경) → N/A 무발화
+P="$T/f14d"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/application/notice/domain_layer/notice"
+echo "class Notice {}" > "$P/lib/application/notice/domain_layer/notice/notice.dart"
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only rv); E=$?
+assert "F14d 합성 없는 BC 단독 변경 N/A 무발화" 0 - "RV1" "$E" "$OUT"
+
 echo ""
 echo "결과: PASS $PASS / FAIL $FAIL"
 [ $FAIL = 0 ]
