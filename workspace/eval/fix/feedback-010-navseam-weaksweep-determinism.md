@@ -9,9 +9,9 @@
 - **회차**: 010 (v2 — 적대 2차 반영)
 - **트리거**: 7차 양판 — `results/20260618-1610-weather-{claude,codex,compare,graders-raw}.md`. + 시술 직전 적대 2차(2026-06-18·워크플로우 `wf_24c44040-b60`).
 - **베이스 코퍼스**: `9aa5c86`(현 HEAD·feedback-009 a27c357 + A13-1 골든 f3f2b3e + 스크린샷 제거 299fd09)
-- **시술 커밋**: `327640c`(2026-06-18·main 직접·push 안 함) — measure-first 5건(eval·RUBRIC/골든/EVAL-METHOD) + 코퍼스 산문 3건(architecture-ddd ①ⓐ③ⓑ·implementation-flutter ④·corpus_mirror_sync --write 양미러·11/11 in-sync)
+- **시술 커밋**: `327640c`(measure-first 5건 + 코퍼스 산문 3건·양미러 11/11) → `4c423fd`(해시 기록) → **`882cc0c`(Phase 3 ②RV1 backstop·⑤러너 게이트·VW-7 과대범위 교정·재미러)**. 전부 2026-06-18·main 직접·push 안 함.
 - **검증 런**: `<다음 라이브런(8차)·양판>`
-- **상태**: **🔧 v2 시술 완료 — measure-first 5/6(④ Q-1 dim 보류)·코퍼스 산문 3건(커밋 `327640c`)·**Phase 3 ②⑤ 적용**(RV1 backstop _totalChecks 57→58·러너 게이트·미커밋)·VW-7 과대범위 positive-control 교정 / 8차 검증대기**
+- **상태**: **🔧 v2 전부 적용·커밋 — measure-first 5/6(④ Q-1 dim 보류)·코퍼스 산문 3건(`327640c`)·Phase 3 ②⑤(RV1 backstop _totalChecks 57→58·러너 게이트·VW-7 교정·`882cc0c`) / 8차 라이브런 검증대기**
 
 ## 적대 2차 요약 (시술 직전 반증 — 8 서브에이전트)
 - **방향(미러)은 반증 견디고 강화**·confabulation 없음(전건 file:line·6차 0012/7차 1312 폴더 분리).
