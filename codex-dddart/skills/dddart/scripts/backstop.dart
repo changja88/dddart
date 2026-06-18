@@ -1,5 +1,5 @@
 #!/usr/bin/env dart
-/// dddart 결정적 백스톱 러너 — 단일 엔트리, 검사 55종 인프로세스 실행.
+/// dddart 결정적 백스톱 러너 — 단일 엔트리, 검사 57종 인프로세스 실행.
 /// 설계: workspace/design/2026-06-12-backstop-design.md (확정 2026-06-12)
 ///
 /// 사용:
@@ -15,13 +15,14 @@ import 'dart:io';
 
 import 'src/check_cycles.dart';
 import 'src/check_imports.dart';
+import 'src/check_models.dart';
 import 'src/check_naming.dart';
 import 'src/check_pubspec.dart';
 import 'src/check_structure.dart';
 import 'src/check_tests.dart';
 import 'src/common.dart';
 
-const _totalChecks = 55; // ST12 + IM22 + NM17 + CY1 + TG1 + PJ2
+const _totalChecks = 57; // ST12 + IM22 + NM17 + CY1 + TG1 + PJ2 + MD2
 
 void main(List<String> argv) {
   String? targetPath;
@@ -83,6 +84,7 @@ void main(List<String> argv) {
   final findings = <Finding>[];
   try {
     if (familyOn('st')) findings.addAll(runStructure(ctx));
+    if (familyOn('md')) findings.addAll(runModels(ctx));
     if (familyOn('im')) findings.addAll(runImports(ctx));
     if (familyOn('nm')) findings.addAll(runNaming(ctx));
     if (familyOn('cy')) findings.addAll(runCycles(ctx, updateBaseline: updateBaseline));

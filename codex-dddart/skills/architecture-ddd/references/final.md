@@ -68,7 +68,7 @@ abstract class Money with _$Money {
 
 **엔티티** — 고유 식별자를 보유하고, 식별자가 같으면 속성이 달라도 같은 것이다. dddart에서 엔티티는 **애그리거트의 일부로만 사용**한다(독립 엔티티 없음): 애그리거트 루트(`<aggregate>.dart` 폴더 직속) 또는 종속 엔티티(`entity/`).
 
-- **직파싱**: 엔티티는 서버 JSON을 직접 파싱한다(freezed + json_annotation, DTO 없음 — 규약 §9-2). 유입 경로 계약은 architecture-data §4 소유.
+- **직파싱(필수 형태)**: 엔티티·VO는 **`@freezed`로 선언**한다 — 서버 JSON을 직파싱하는 모델은 `json_serializable`의 `factory X.fromJson(Map<String, Object?> json) => _$XFromJson(json)` 생성 위임만 둔다(DTO 없음 — 규약 §9-2). **모델 클래스 자신의 수기 `fromJson`·수기 타입 리더(`_readString`/`_readInt`/`_readDouble` 류)·모델 클래스 안 `FormatException` throw는 금지** — 직렬화는 생성 companion이 전담하고, 파싱 실패 정규화는 safeApiCall의 몫이다(architecture-data §2). *이 금지의 예외*: `enum`은 freezed 대상이 아니라 `@JsonValue` 매핑을 쓴다(수기 `parse` 불요) · `@JsonKey(fromJson:)` 커스텀 컨버터(top-level/static 함수)와 도메인 `*Exception`(불변식 위반 — §4 3규칙-2)은 금지 대상이 아니다. 유입 경로 계약은 architecture-data §4 소유.
 - 의도를 드러내는 인터페이스: 메서드 이름은 "무엇을 하는가"(도메인 어휘)를 말하고 "어떻게"를 숨긴다 — `order.cancel()`이지 `order.setStatus(canceled)`가 아니다. 부작용 없는 함수(조회는 상태를 바꾸지 않음)는 freezed 불변이 구조로 보장한다.
 
 ## §4. 애그리거트 — 일관성 경계의 클라 번역 (§10-5 ③)

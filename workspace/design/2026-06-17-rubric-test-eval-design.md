@@ -1,6 +1,32 @@
 # dddart rubric 개선 — 테스트 스킬 평가 (확정 설계 v2 · 동결됨 2026-06-17)
 
-> **현재 상태(2026-06-17·brainstorming 종료·설계 확정)**: feedback-008(테스트 스킬 2종) 커밋 완료(`d18f2d1`). brainstorming 결론 = **새 채점 차원 신설 불필요** — FC-1/G-7이 색충돌을·FC-2가 헛테스트를 *이미* 측정한다(rubric은 판사이지 피고가 아님). 대신 스킬이 *산출물 모양을 바꿨으므로*(판정=도메인 단위테스트·view=VM-override 위젯테스트) **기존 FC-2 측정을 새 seam에 맞게 *유효화*하는 보정**이 필요하다(안 하면 6차 채점이 올바른 도메인 단위테스트를 거짓 FAIL). 아래 **§확정 설계**가 정본(이하 §목표~§제약은 그 결론에 이른 분석). **동결됨 확인 완료(2026-06-17)** → 6차 양판 라이브런(사용자 드라이브) 채점 준비 완료. 동결 후 소급 변경 금지(`EVAL-METHOD.md §0`·§5). 코퍼스 불변(eval-side·양판 미러·백스톱 무관). 프로젝트 밖 writing 금지·메모리 보류.
+> **현재 상태(2026-06-17·brainstorming 종료·설계 확정)**: feedback-008(테스트 스킬 2종) 커밋 완료(`d18f2d1`). brainstorming 결론 = **새 채점 차원 신설 불필요** — FC-1/G-7이 색충돌을·FC-2가 헛테스트를 *이미* 측정한다(rubric은 판사이지 피고가 아님). 대신 스킬이 *산출물 모양을 바꿨으므로*(판정=도메인 단위테스트·view=VM-override 위젯테스트) **기존 FC-2 측정을 새 seam에 맞게 *유효화*하는 보정**이 필요하다(안 하면 6차 채점이 올바른 도메인 단위테스트를 거짓 FAIL). 아래 **§확정 설계**가 정본(이하 §목표~§제약은 그 결론에 이른 분석). **동결됨(2026-06-17)** → **6차 RCA·feedback-009 수립·적용·적대검증 완료(2026-06-18)** → **7차 라이브런 준비 단계**(아래 **§6차 라이브런 → feedback-009**가 compact 재개 앵커). 동결 후 소급 변경 금지(`EVAL-METHOD.md §0`·§5). 코퍼스 불변(eval-side·양판 미러·백스톱 무관). 프로젝트 밖 writing 금지·메모리 보류.
+
+## 6차 라이브런 → feedback-009 (적용 완료·7차 대기 · compact 재개 앵커 · 2026-06-18)
+
+> **6차 RCA → feedback-009 수립·적용·적대검증 완료.** compact 후 재개 = **7차 라이브런 준비**(`workspace/eval/tools/RUNBOOK-weather.md`). 정본은 **`workspace/eval/fix/feedback-009-st2-deadbranch-freezed-gate.md`**(적용 내역·적대검증 3패스·잔여). 아래 6차 findings/A13은 그 입력(역사 기록·대부분 feedback-009로 라우팅).
+>
+> **feedback-009 적용 요약(코퍼스·이 커밋):** **ST-2** 死분기 카브아웃(architecture-state §4)+reviewer 2-조건 트리거 / **@freezed** ddd §3 명령형+**백스톱 MD1·MD2 신설(55→57종·양엔진)** / **DT-5** no-DI 경계(state §2·data §1)+reviewer §6(백스톱은 🟡·N=1로 보류). G-8 무변경·finalize-collapse(항목5) 별도 트랙. **적대검증 3패스**(구현 후 MD `_read*(Map<)` FP 1건 적발→`!hasGen` 게이트 수정·F13 회귀잠금). 미러 11/11·run_fixtures 17/17·positive-control 0. **7차가 ST-2 PASS·수기모델 기계 차단을 실측**(인과는 N=1 주의·measure-first).
+
+**채점 결과(커밋 `5e40c17`·결과지 4종 `results/20260618-0012-weather-{claude,codex,compare,graders-raw}.md`)** — 양판 **둘 다 ❌ FAIL**:
+- **공통 = FC-2/M1**(정렬 死=서버순서 위임·정렬코드 0·order test가 사전정렬 fixture라 vacuous). 동결 룰 적용(소급 금지).
+- **claude** = FC-2/M1 *단독*(치명 16 PASS·정규 dddart형: @freezed/json·clean 단일 에러채널·no-DI·정직 테스트·**역대 최청정**).
+- **codex** = FC-2/M1 + **ST-2**(죽은 State.error 채널·VM 미set·view 死분기·consumeError 0·**3:0 만장**) + **FC-1/G-8**(라벨 "구름 많음"≠"구름많음"·cosmetic·인간큐) + WEAK군(전 모델 **수기 비-@freezed**·SD-4/DT-4/ST-3·전 계층 optional 주입 DT-5).
+- **진전**: 5차 양판 공통 색 충돌·M3 vacuity·codex 디코이 → 6차 해소(**feedback-008 테스트 스킬 효과 시사**·N=1 인과 단정 금지). v3.2 seam 일반화 유효화 실증(codex 도메인·ui_ext 테스트 정확 인정).
+- grader 3(n1·n2 중립·adv 적대)·전원 Claude·**비-Claude 오라클 0(⚠️ A3)**·positive-control 2026-06-14 검증 인용(백스톱 55 byte-불변).
+
+**이미 조치(커밋 `2326dd0`)**: A13-1(정렬) → RUNBOOK §3 프롬프트에 "서버 응답 순서에 의존하지 말고 앱에서 날짜 오름차순으로 정렬해 보여준다" 명시(양판). 정렬이 앱 책임이 돼 차기 런부터 M1이 공정한 치명 게이트.
+
+**수정 계획 입력(미해결·다음 단계서 [[eval-fix-ledger]]식 분류·예상효과 사전등록)** — eval-side(채점) vs 코퍼스 feedback(플러그인) 라우팅:
+- **A13-1 잔여(eval·다음 런 전 필수)**: `FC-GOLDEN-WEATHER §0/§2` 미정정 — §0 게이트답 "(서버 순서 유지)" 제거·M1을 "정렬 필수·뒤섞은 입력 검증·死=FAIL"로 재동결(프롬프트 정합).
+- **A13-2(eval+코퍼스)**: 아이콘 distinct 미검증 — 색 set-size만 보는 테스트가 아이콘 swap 우회. FC-GOLDEN M2 / `discipline-test §3.1`에 아이콘 distinct 단언.
+- **A13-3(코퍼스/백스톱·신중)**: 수기 비-@freezed 모델이 BG 통과로 백스톱 전체 탈출(codex) — "도메인/State가 @freezed인가" 결정검사 부재=게임가능 갭.
+- **A13-4(eval)**: G-8/N7 라벨 이진 일치 — 공백·시각등가 한글 허용대역 없음. FC-GOLDEN "정규화 후 비교" 단서.
+- **A13-5(코퍼스 feedback)**: codex ST-2 죽은-but-read 상태필드(읽기전용에 액션 에러채널 과적) — architecture-state/discipline 피드백 후보.
+- **A13-6**: 실질성 관문/near-degenerate 도메인 — 프롬프트 정렬 명시로 부분 완화.
+- **codex codegen 포기(코퍼스 feedback)**: 전 모델 수기 fromJson — implementation-dart/discipline 피드백 후보.
+
+**핵심 핀**: 코퍼스 HEAD `d18f2d1`(feedback-008) · eval `2326dd0`(RUNBOOK 프롬프트 정렬)·`5e40c17`(6차 결과지) · baseline `abee26d`(유일 소스 `dddart-20260613-2310-*` history·remote/tag 없음) · 런폴더 `dddart-20260618-0012-{claude@ab99a82,codex@64bb27e}`.
 
 ## 확정 설계 v2 (적대 리뷰 4렌즈 반영 · **eval 편집 적용 완료 · 동결됨 2026-06-17**)
 

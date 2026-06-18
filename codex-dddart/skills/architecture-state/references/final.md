@@ -45,7 +45,7 @@ VM은 화면 1개의 상태 주인이다 (규약 §3.3): `build()`가 `FutureOr<
 
 - **BuildContext 직접 보유 금지** (규약 §3.3·§9-7): 화면 전환은 `<bc>_navigator`(BC 루트) 경유 — navigator는 라우트 이름만 참조하므로 VM이 호출해도 계층 역류·import 순환이 없다. HaffHaff 실측: `_vm.dart` 77개 중 73개가 이미 준수.
 - **컨트롤러는 View 소유** (규약 §3.3 — §10-5 ① 확정): TextEditingController·FocusNode 등 UI 컨트롤러는 View(StatefulWidget/hooks)가 보유하고, **값은 VM 메서드 인자로 전달**한다. HaffHaff 실측: 입력 컨트롤러의 VM 보유 0건 — 이미 관례다. (ScrollController·탭 재탭 스크롤톱은 §8 참조.)
-- **DI 없음** (규약 §3.3·§9-13): UseCase는 VM 안에서 **직접 생성**한다(`ChannelUseCase()`). UseCase·Repo·DataSource는 무상태다 — 상태는 box·서버·State 모델에만 둔다. `@riverpod` provider가 허용되는 위치의 닫힌 열거는 discipline-houserules §4 소유 — 결정 절차는 단순하다: **상태를 보유하는 ViewModel 변종(VM·SharedState·Service, root에선 root_vm·handler)만 provider가 된다.**
+- **DI 없음** (규약 §3.3·§9-13): UseCase는 VM 안에서 **직접 생성**한다(`ChannelUseCase()`). **생성자에 의존성을 선택적 named 파라미터로 받아 `?? Default()` 폴백으로 외부 치환을 허용하는 DI seam은 두지 않는다**(`{UseCase? useCase}) : _x = useCase ?? UseCase()` 형태 — 테스트용이라도). 싱글턴·클라이언트를 위치 인자로 넘기는 직접 생성(`DataSource(DioClient.instance)`)은 정당하다 — 테스트는 생성자 주입이 아니라 도메인 직접·VM provider override·Dio 목으로 한다(implementation-test §2). UseCase·Repo·DataSource는 무상태다 — 상태는 box·서버·State 모델에만 둔다. `@riverpod` provider가 허용되는 위치의 닫힌 열거는 discipline-houserules §4 소유 — 결정 절차는 단순하다: **상태를 보유하는 ViewModel 변종(VM·SharedState·Service, root에선 root_vm·handler)만 provider가 된다.**
 - **base VM·공용 헬퍼 없음** (규약 §10-5 ① 확정): 에러 처리·listen 패턴을 상속·믹스인으로 공통화하지 않는다 — 상속은 전 VM을 한 몸으로 묶는 결합 표면이고, AI coder에겐 반복이 더 결정적이다. 패턴은 §4의 정식 예제를 그대로 반복한다(반복>상속 일반 규율은 discipline-cleancode §18 소유).
 
 ## §3. State 계약 — 항상 freezed `*State`
@@ -123,6 +123,7 @@ ref.listen(channelSummaryVMProvider, (AsyncValue<ChannelSummaryState>? previous,
 ```
 
 - `isShow: false`인 에러도 **소비는 한다** — error 필드에 남겨두면 다음 액션 실패와 구별되지 않는다.
+- **조회 전용 화면(액션 메서드 없음)은 채널①만 쓴다** — 실패가 `build()` throw로만 흐르므로 State의 `error` 필드엔 채울 writer가 없다. 필드 선언 자체는 무해하나, **view·section이 `state.error`에 분기(`if (state.error != null) …`)를 그리면 어떤 VM도 채우지 않는 도달 불가 死코드**다 — 조회 화면의 에러 표시는 채널①(`.when`의 error 빌더)이 전담한다. `state.error` 분기를 그릴 거면 그 State를 쓰는 VM에 채널② writer(액션 메서드의 `copyWith(error: …)`)가 실재해야 한다(읽기 전용 BC가 채널① 위에 채널② 분기를 덧그리는 것이 전형 死채널이다).
 - 에러를 DateTime·카운터 핵으로 위장한 "이벤트 신호"로 바꾸지 않는다 — §5의 과거형 사건명 금지와 같은 축.
 
 ## §5. SharedState — 화면 간 공유 상태

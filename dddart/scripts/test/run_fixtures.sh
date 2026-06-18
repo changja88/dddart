@@ -331,6 +331,46 @@ if [ $ok = 1 ]; then PASS=$((PASS+1)); echo "PASS F12 extract_design --from-them
   FAIL=$((FAIL+1)); echo "FAIL F12 (exit=$E)"; echo "$C" | head -40 | sed 's/^/    /'; echo "$OUT" | sed 's/^/    /'
 fi
 
+# ---------- F13: MD 모델 형태 — 수기 비-@freezed 발화(MD1+MD2), @freezed 침묵(거짓FAIL 반증)
+P="$T/f13"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/application/weather/domain_layer/weather/entity"
+cat > "$P/lib/application/weather/domain_layer/weather/entity/hand_day.dart" <<'EOF'
+final class HandDay {
+  const HandDay(this.date);
+  final String date;
+  factory HandDay.fromJson(Map<String, Object?> json) => HandDay(_readString(json, 'date'));
+  static String _readString(Map<String, Object?> j, String k) {
+    final v = j[k];
+    if (v is String) return v;
+    throw FormatException('bad');
+  }
+}
+EOF
+cat > "$P/lib/application/weather/domain_layer/weather/entity/good_day.dart" <<'EOF'
+@freezed
+abstract class GoodDay with _$GoodDay {
+  const factory GoodDay({required String date}) = _GoodDay;
+  factory GoodDay.fromJson(Map<String, Object?> json) => _$GoodDayFromJson(json);
+}
+EOF
+# @freezed + 생성 위임 + @JsonKey 컨버터(_read*(Map<…>)) — 적대검증 2차 FP: 컨버터는 면제, MD 침묵해야
+cat > "$P/lib/application/weather/domain_layer/weather/entity/good_converter.dart" <<'EOF'
+@freezed
+abstract class GoodConverter with _$GoodConverter {
+  const factory GoodConverter({@JsonKey(fromJson: _readMoney) required int money}) = _GoodConverter;
+  factory GoodConverter.fromJson(Map<String, Object?> json) => _$GoodConverterFromJson(json);
+}
+int _readMoney(Map<String, Object?> j) => (j['money'] as num).toInt();
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only md); E=$?
+if [ "$E" = 2 ] \
+   && grep -q "MD1" <<<"$OUT" && grep -q "MD2" <<<"$OUT" \
+   && grep -q "hand_day" <<<"$OUT" && ! grep -q "good_day" <<<"$OUT" && ! grep -q "good_converter" <<<"$OUT"; then
+  PASS=$((PASS+1)); echo "PASS F13 MD 모델형태(수기→MD1+MD2·@freezed→침묵·@JsonKey 컨버터→침묵)"
+else
+  FAIL=$((FAIL+1)); echo "FAIL F13 (exit=$E)"; echo "$OUT" | head -20 | sed 's/^/    /'
+fi
+
 echo ""
 echo "결과: PASS $PASS / FAIL $FAIL"
 [ $FAIL = 0 ]

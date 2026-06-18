@@ -40,7 +40,7 @@ infra_layer는 종류 3폴더다 (규약 §3.4 — 폴더·명명 사실은 disc
 | `repository/` | **구체 클래스 (인터페이스 없음** — 규약 §9-1**)**. 원격·로컬 DataSource를 조합하는 **단일 진실 원천** | `safeApiCall`로 감싸 `Either<BadRequestResponse, T>` 반환 (§2·§3) |
 | `service/` | 수동 SDK 어댑터 — 호출당하는 쪽 | §6 |
 
-호출 방향: UseCase → Repo·infra service → DataSource·SDK. Repo·DataSource는 무상태 plain class이며 사용처가 직접 생성한다(DI 없음 — 규약 §9-13).
+호출 방향: UseCase → Repo·infra service → DataSource·SDK. Repo·DataSource는 무상태 plain class이며 사용처가 직접 생성한다(DI 없음 — 규약 §9-13). **생성자에 의존성을 선택적 named 파라미터+`?? Default()` 폴백으로 받는 DI seam은 두지 않는다** — 위치 인자로 클라이언트를 넘기는 `ChannelDataSource(DioClient.instance)`(§3)는 정당한 직접 생성이다. 테스트는 Dio 목·VM provider override로 한다(implementation-test §2).
 
 **이 스킬과 architecture-state의 경계** (본설계 §8 — 한 주제 한 소유자): data(이 스킬) = 데이터가 앱 바깥(서버·디스크)과 어떻게 오가는가 / state = 들어온 데이터가 앱 안에서 화면들 사이에 어떻게 살아 있는가. 판례 ① **캐싱**: hive 저장 = 이 스킬(§5), 메모리 keepAlive = architecture-state §9. ② **에러**: 서버 에러가 오는 모양(Either 계약·정규화 — §2·§3) = 이 스킬, 그 에러를 State에 담아 표시·소비하는 방식 = architecture-state §4.
 
