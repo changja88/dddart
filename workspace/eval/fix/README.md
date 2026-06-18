@@ -25,6 +25,7 @@
 | [007](feedback-007-stitch-designmd-source.md) | Stitch 연결 후 | (미커밋·배포 동기) | ✅검증완료(5차 **양판**) | 연결 경로 첫 발동·**양판 5/5 프로세스 관측 성공**(design-ref 채움·design_source 핀·has_design_tokens=true·**Stitch 쓰기 0회=읽기전용 HELD**·claude·codex 둘 다)·디자인시스템 실소비. 부작용=제한 팔레트 색충돌(**양 엔진 동일 clear=cloudy=#FEAE2C·2/2**·FC-1/3) — rubric 종합은 FC-2 vacuity로 FAIL(연결 무관·→008·엔진 무관 확정) |
 | [008](feedback-008-test-skills-positive-form.md) | 5차 양판 FC-2·FC-1/3 | (코퍼스 작성 완료·미커밋) | 🔧작성완료(6차 검증대기) | 테스트 스킬 2종 신설(`discipline-test`+`implementation-test`·각 3벌)·**positive FORM 가이드**(비-vacuity/디코이·coder 산출+reviewer #8)·§7→포인터(6사이트)·houserules test/ sparse·Key 짝·날짜 주입(시간 가드 철회)·**백스톱 무변경**(`_totalChecks` 55·sync 11/11·픽스처 16/16)·기계 floor는 6차 실측 후 조건부 승격 |
 | [009](feedback-009-st2-deadbranch-freezed-gate.md) | 6차 양판 codex 단독 | (적용·미커밋) | 🔧적용·미커밋(7차검증대기) | ST-2 死분기(view가 `state.error` 도달불가 분기·§3원문불변+reviewer 2조건AND·backstop기각)·@freezed 게이트(2-detector·enum/`@JsonKey`컨버터/생성파일/도메인exception 제외·positive-control 반증)·G-8 변경없음(§2.2가 처리)·DT-5/finalize-collapse 후속 |
+| [010](feedback-010-navseam-weaksweep-determinism.md) | 7차 양판 + 시술직전 적대2차 | (미적용·사전등록 v2) | 📝사전등록 v2(8차검증대기) | **v2(적대2차 정정)**: FC-2 진짜레버=측정 seam(골든 M4+VW-7 FAIL문언+repo 중복·코퍼스 산문 단독은 8차도 green)·ST-8 백스톱(변종포함 positive-control·신규ID·산문잉여)·SD-3 **측정명확화**(codex parse 적법·도메인*Exception 치환 폐기·RUBRIC 경계)·위젯키 super.key(lint floor 분담·dim Q-1 텍스트밖)·테스트결정성 **차원→게이트 강등**(isolate static 비공유→오염 불가·reset 실재·randomize→병렬×N)·아이콘=UI/A1 배제·measure-first 선결 6·적대 1차11+2차8 서브에이전트 |
 
 ## 규약
 

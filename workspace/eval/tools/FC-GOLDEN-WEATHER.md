@@ -65,6 +65,8 @@
 
 > **판정 바**: **G-1(날짜 오름차순)·G-5(탭↔상세 날짜 일치)·G-7(6종 구별 매핑)이 핵심**. G-3/G-4(최고·최저 바인딩·부호)·G-6(상세 3지표)이 그 다음. **하나라도 불일치 = FC-1 FAIL(치명).** 정렬을 배열순 그대로 두면 G-1 즉시 FAIL. 최고/최저 바인딩을 바꾸면 G-3·G-4 FAIL. cloudy/overcast를 같은 아이콘·색으로 묶으면 G-7 FAIL.
 
+> **G-7 아이콘 ↔ A1 경계(measure-first 2026-06-18)**: 아이콘 *심볼 선택·distinct*는 RUBRIC A1(시각 충실도·아이콘 처리 비측정·인간 오라클 위임)이라 **자동 채점 비측정·인간 큐(치명 아님)**다. 자동 FC-1/FC-3가 거는 것은 **색 distinct**(6종 색 중복 0)다 — cloudy↔overcast가 동일 *아이콘*이라도 색이 distinct면 화면 6종 구별이 성립해 *인간큐*(라이브런 시각 확인 시 사용자 판정)이지 자동 FAIL 아니고, 동일 *색*이면 자동 FC-1/N4 FAIL이다. (위 'G-7 FAIL'·아래 §3 N4 '같은 아이콘/색' 문언의 *아이콘* 부분은 이 경계로 읽는다 — 7차 claude G-7 거짓 🟡 인간큐 재발 차단.)
+
 ## §2 Mutation (FC-2) — 비-vacuous 입증용 (사이트는 조정자가 코드 열람 후)
 
 > 골든 경로상 **핵심 판정마다** 추상 mutation을 사전등록. 주입 사이트(어느 심볼·계층)는 **조정자가 행위표 동결 후 코드 열람해** 식별한다 — 여기서는 *무엇을 깨면 어떤 RED가 나야 하는가*만 적는다. 각 mutation은 **정본 변이 1개**로 고정(택일 OR 금지 — 채점자가 변이를 골라 red가 갈리는 비결정 차단). red = 그 mutation을 주입하면 해당 골든을 두드리는 **행위 검증 테스트(맞는 seam — 판정=순수 도메인 단위 직접 호출·view=VM-override 위젯·통합=integration; EVAL §2.5)**가 깨진다.
@@ -74,10 +76,10 @@
 | **M1** | **날짜 정렬 역전** — 오름차순 비교자를 내림차순으로(또는 정렬키 제거 시 배열순 그대로 노출) | **G-1** 순서 단언 red(첫 항목이 D0가 아니라 D6 또는 D2). 목록 순서 RED. | 정렬이 *코드상 거주한 위치*(domain이면 순수 단위테스트·VM이면 VM-override 위젯테스트 — 복수 거주 시 전부). **뒤섞은 입력 필수**(라이브 서버가 오름차순이라 이미 정렬된 입력은 무정렬 코드도 green·vacuous); 정렬 코드/주입사이트 부재 = 비-vacuity 입증 불가 = FAIL |
 | **M2** | **condition→아이콘/색 매핑 교란** — 두 상태 swap(예: `clear`↔`thunderstorm`의 아이콘·색을 맞바꿈) | **G-7**(및 swap된 두 상태의 배지/아이콘) 단언 red — 맑음 자리에 뇌우 아이콘/색이 뜸. 배지 RED. | condition→아이콘/색 매핑(ui_extension 등) |
 | **M3** | **최고/최저 기온 바인딩 교환** — 목록(및/또는 상세) 항목에서 temp_max ↔ temp_min 표시 위치 swap | **G-3·G-4** 단언 red — D0 항목 최고가 18·최저가 27로 뜨고, D5 최고가 -4로 뜸. 목록 항목 RED. | 목록 항목 표시 바인딩(item 위젯의 high/low 슬롯) |
-| **M4** | **목록→상세 날짜 파라미터 오류** — 탭한 항목의 날짜 대신 인접/고정 날짜를 상세에 전달(예: index N → date[N+1] 또는 항상 첫 날짜) | **G-5** 단언 red — D3을 탭했는데 상세 날짜가 D3이 아님(D2/D4 또는 D0). 내비 RED. | 목록→상세 내비게이션의 날짜 인자 전달부(탭 핸들러·route 파라미터) |
+| **M4** | **목록→상세 날짜 파라미터 오류** — 탭한 항목의 날짜 대신 인접/고정 날짜를 상세에 전달(예: index N → date[N+1] 또는 항상 첫 날짜) | **G-5** 단언 red — D3을 탭했는데 상세 날짜가 D3이 아님(D2/D4 또는 D0). 내비 RED. | 목록→상세 내비게이션의 날짜 인자 전달부(탭 핸들러·route 파라미터·**날짜→문자열 직렬화 format step(DateTime→path)**) |
 | **M5**(선택) | **상세 지표 누락** — 상세에서 습도·풍속·강수확률 중 하나(예: precipitation_prob) 미표시 | **G-6** 단언 red — 상세에 강수확률(또는 택1 지표)이 안 보임. 상세 RED. | 상세 화면 지표 표시부 |
 
-> **주입 사이트(결정적 규칙)**: 각 mutation이 두드리는 골든 경로상 핵심 판정 **각각**. **동작 결정 위치가 여럿이면(정렬을 domain·VM 두 곳에 중복) 전부 주입**(부분 주입 시 다른 경로가 살아 거짓 green). red가 1곳도 안 나면 그 경로가 死코드/중복임을 FC-2 발견 로그에 기록. **단순 freezed 필드·json_serializable codegen은 mutation 대상 제외**(도메인/표시 판정 아님). 러너 = `dart run build_runner build` **선행** 후 `flutter test`(전 스위트 — **정렬 M1·색 distinct M2 = 순수 단위테스트**(도메인 정렬 단위·ui_extension getter 직접 호출·위젯 미펌프) / **기온 슬롯 M3·탭 내비 M4·상세 표시 M5 = VM-override 위젯테스트**; dddart엔 repo provider 없음). **M1~M4(필수)·M5(선택) 각각 자기 사이트 주입 시 해당 골든 단언 red여야 PASS**(필수 red율 100% 미달 = FC-2 FAIL·vacuous).
+> **주입 사이트(결정적 규칙)**: 각 mutation이 두드리는 골든 경로상 핵심 판정 **각각**. **동작 결정 위치가 여럿이면(정렬을 domain·VM 두 곳에 중복) 전부 주입**(부분 주입 시 다른 경로가 살아 거짓 green). red가 1곳도 안 나면 그 경로가 死코드/중복임을 FC-2 발견 로그에 기록. **단순 freezed 필드·json_serializable codegen은 mutation 대상 제외**(도메인/표시 판정 아님). 러너 = `dart run build_runner build` **선행** 후 `flutter test`(전 스위트 — **정렬 M1·색 distinct M2 = 순수 단위테스트**(도메인 정렬 단위·ui_extension getter 직접 호출·위젯 미펌프) / **기온 슬롯 M3·탭 내비 M4·상세 표시 M5 = VM-override 위젯테스트**; dddart엔 repo provider 없음 — **단 M4 날짜→path 직렬화가 navigator/repo 거주면 VM-override가 구조적 미도달이라 그 직렬화 단위 직접 호출(VO.toApiPath 등)·integration seam으로 두드린다**(`MaterialApp(home:)` VM-override 펌프는 실 GoRouter 미배선이라 navigator 직렬화 round-trip 미경유)). **M1~M4(필수)·M5(선택) 각각 자기 사이트 주입 시 해당 골든 단언 red여야 PASS**(필수 red율 100% 미달 = FC-2 FAIL·vacuous).
 
 > **시나리오 특이사항**: 당겨서 새로고침은 SCENARIO §4 게이트에서 **안 함**(visual-only 인디케이터만) — 재조회 행위 골든·mutation **없음**(S1의 G4·M-새로고침에 해당하는 항목이 weather엔 N/A). 로컬 캐시 없음(네트워크 전용) → 캐시 무효화 골든 없음. 재탭 2단(탭 셸 존재 시 발화)은 *발화 시*만 검증 — 단일 BC 2화면 흐름에서 발화 안 하면 N/A.
 

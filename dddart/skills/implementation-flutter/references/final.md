@@ -188,6 +188,8 @@ final box = Hive.box<ChannelBox>('channel_cache'); // 맵 인터페이스 — pu
 
 ## §6. 위젯 수명·BuildContext 안전 — 컨트롤러 쌍·mounted
 
+**위젯 생성자 키 — `super.key`**: 위젯 생성자는 `const View({super.key})` 형태를 쓴다(레거시 `Key? key` + `super(key: key)` 지양 — `use_super_parameters` lint가 평범한 forward를 기계 적발한다). *계산 기본키*가 필요하면(목록 항목 식별 등) 생성자에 `Key? key` fallback을 두지 말고 **호출부에서 `ValueKey`로 주입**하거나 static 팩토리로 만든다 — 키 계산이 위젯 밖에 있어야 super.key가 일관되고, 테스트가 집는 안정 키 부착과도 양립한다.
+
 **컨트롤러 생성-해제 쌍** — "컨트롤러는 View 소유"(architecture-state §2)의 프레임워크 근거: initState는 정확히 1회 호출되고, dispose가 보유 리소스 해제의 자리다. 컨트롤러를 VM에 두면 위젯 수명과 분리되어 이 쌍이 깨진다:
 
 ```dart

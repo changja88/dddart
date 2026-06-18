@@ -27,6 +27,7 @@
 
 > **SD-1 주의(Goodhart·교차)**: 결정 레인만이면 도메인 어휘 없는 *빈 wrapper*를 domain에 두어 녹색 가능 → grader가 "실제 판정이 거주하는가"를 의미 확인해야 PASS. **VM이 specification을 import·평가하면 SD-1 위반**(SD-6 아님 — 판정 소유 단독 소유). enum 분류 판정(isShippable 류)이 enum 밖 VM/extension으로 흩어지면 SD-1 FAIL.
 > **SD-7 주의**: "Either 통과·새 throw 금지"만으론 *침묵 폐기*를 못 막는다 — 실패를 삼켜 성공만 반환하는 변종은 DT-1과 교차로 잡는다.
+> **SD-3 경계(컨버터/parse·measure-first 2026-06-18)**: SD-3는 *전이 조건 위반*(루트 변경 메서드)의 도메인 예외 검증을 본다 — '일반 Exception'·'생성 시점 차단' FAIL문언은 이 맥락이다. **fromJson 컨버터/직렬화 경계의 parse-throw(`FormatException` 등)가 `safeApiCall`로 정규화되고 *정상 서버값을 차단하지 않으면* SD-3 위반 아님**(parse=직렬화 관심사·architecture-ddd §3 컨버터 면제·safeApiCall 단일 출구). '생성 시점 검증 차단'은 *정상값까지 막는* 생성자 검증을 뜻한다(무검증 기본 생성자 + 별도 `.parse` 팩토리는 미저촉). 컨버터 parse-throw의 예외 *타입*(일반 vs 도메인)만으로 WEAK 주지 않는다 — parse 실패는 전이 invariant 위반이 아니므로 도메인 `*Exception`이 정답도 아니다.
 
 ---
 
@@ -41,7 +42,7 @@
 | **VW-4** 시각 토큰 단일 출처 | foundation 토큰만·VM 시각 getter 금지 | ui §7 / HR NM10 | 색·타이포·duration이 App* 토큰(foundation 7파일) 참조, VM/State에 시각 반환 getter·design_system import 0 | 토큰 밖 시각 리터럴(`Color(0x…)`·생 TextStyle·`Colors.*`·생 Duration) 또는 VM/State 시각 매핑 | 결정+의미 | — |
 | **VW-5** ui_extension = 도메인→UI 매핑 유일 자리 | 색·아이콘·라벨 매핑 거주 | ui §5 | 도메인 enum/VO→UI 매핑이 `*_ui_extension.dart` extension에만 | 매핑이 VM·State getter·design_system에 누수 | 의미 | — |
 | **VW-6** 표시 소유·show() 금지 | 컴포넌트 자기표시 경로 차단 | ui §7 | design_system 컴포넌트가 전역키/전역 context로 자기를 띄우는 static 경로 0; 다이얼로그·시트는 View가 자기 BuildContext로 호출 | 컴포넌트가 전역키/context로 자기표시 static 메서드(이름 무관 show/present/display) 노출 | 의미 | ✅ |
-| **VW-7** 라우트 단일 출처·navigator 분업 | 리터럴 router 안만·이름 참조 | ui §6 / HR | 라우트 path/name 리터럴이 `<bc>_router.dart`의 `abstract final class <Bc>Routes`에만, navigator는 pushNamed로 상수만·view import 0, BC는 GoRoute만 export(셸 조립은 root_router)·**내비 인자(path-param) 도메인값 직렬화는 VO/VM 소유**(뷰 onTap은 도메인 값을 VM에 위임하거나 VO 노출 키만 navigator에 전달) | 리터럴 산개(상수 우회·문자열 조립), navigator가 view import, BC가 StatefulShell 조립, **뷰 onTap이 도메인값 인라인 직렬화**(`toIsoDate(date)` 류 path-param 가공 — VO/VM 소유 위반) | 결정+의미 | — |
+| **VW-7** 라우트 단일 출처·navigator 분업 | 리터럴 router 안만·이름 참조 | ui §6 / HR | 라우트 path/name 리터럴이 `<bc>_router.dart`의 `abstract final class <Bc>Routes`에만, navigator는 pushNamed로 상수만·view import 0, BC는 GoRoute만 export(셸 조립은 root_router)·**내비 인자(path-param) 도메인값 직렬화는 VO/VM 소유**(뷰 onTap은 도메인 값을 VM에 위임하거나 VO 노출 키만 navigator에 전달) | 리터럴 산개(상수 우회·문자열 조립), navigator가 view import, BC가 StatefulShell 조립, **뷰 onTap·navigator·repo가 도메인값 인라인 직렬화**(`toIsoDate(date)`·`DateFormat().format(date)` 류 path-param 가공 — VO/VM 소유 위반·거주처 무관) | 결정+의미 | — |
 
 > **VW-7 주의**: 동일 BC 내 `navigator→router→view` import 사슬은 순환 아님(FAIL 금지). **정적 view(약관·안내)는 VM·State 없이 합법** — VW-2 삼총사 미완을 거짓 FAIL 내지 않는다.
 > **VW vs SD 이중계상 금지**: build 내 정책 위반은 표현층(VW-1)·도메인층(SD-1) 중 한 번만 감점한다.
