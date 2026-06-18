@@ -1,8 +1,20 @@
 # dddart rubric 개선 — 테스트 스킬 평가 (확정 설계 v2 · 동결됨 2026-06-17)
 
-> **현재 상태(2026-06-17·brainstorming 종료·설계 확정)**: feedback-008(테스트 스킬 2종) 커밋 완료(`d18f2d1`). brainstorming 결론 = **새 채점 차원 신설 불필요** — FC-1/G-7이 색충돌을·FC-2가 헛테스트를 *이미* 측정한다(rubric은 판사이지 피고가 아님). 대신 스킬이 *산출물 모양을 바꿨으므로*(판정=도메인 단위테스트·view=VM-override 위젯테스트) **기존 FC-2 측정을 새 seam에 맞게 *유효화*하는 보정**이 필요하다(안 하면 6차 채점이 올바른 도메인 단위테스트를 거짓 FAIL). 아래 **§확정 설계**가 정본(이하 §목표~§제약은 그 결론에 이른 분석). **동결됨(2026-06-17)** → **6차 RCA·feedback-009 수립·적용·적대검증 완료(2026-06-18)** → **7차 라이브런 준비 단계**(아래 **§6차 라이브런 → feedback-009**가 compact 재개 앵커). 동결 후 소급 변경 금지(`EVAL-METHOD.md §0`·§5). 코퍼스 불변(eval-side·양판 미러·백스톱 무관). 프로젝트 밖 writing 금지·메모리 보류.
+> **현재 상태(2026-06-17·brainstorming 종료·설계 확정)**: feedback-008(테스트 스킬 2종) 커밋 완료(`d18f2d1`). brainstorming 결론 = **새 채점 차원 신설 불필요** — FC-1/G-7이 색충돌을·FC-2가 헛테스트를 *이미* 측정한다(rubric은 판사이지 피고가 아님). 대신 스킬이 *산출물 모양을 바꿨으므로*(판정=도메인 단위테스트·view=VM-override 위젯테스트) **기존 FC-2 측정을 새 seam에 맞게 *유효화*하는 보정**이 필요하다(안 하면 6차 채점이 올바른 도메인 단위테스트를 거짓 FAIL). 아래 **§확정 설계**가 정본(이하 §목표~§제약은 그 결론에 이른 분석). **동결됨(2026-06-17)** → **6차 feedback-009 완료** → **7차 채점 완료(2026-06-18)·feedback-010 피드백+수정 단계**(아래 **§7차 라이브런 → 채점**이 compact 재개 앵커). 동결 후 소급 변경 금지(`EVAL-METHOD.md §0`·§5). 코퍼스 불변(eval-side·양판 미러·백스톱 무관). 프로젝트 밖 writing 금지·메모리 보류.
 
-## 6차 라이브런 → feedback-009 (적용 완료·7차 대기 · compact 재개 앵커 · 2026-06-18)
+## 7차 라이브런 → 채점 (완료·feedback-010 대기 · compact 재개 앵커 · 2026-06-18)
+
+> **7차 채점 완료.** compact 후 재개 = **7차 피드백(feedback-010) 수립 + 수정 진행**. 결과지 4종 `results/20260618-1610-weather-{claude,codex,compare,graders-raw}.md`(커밋). 코퍼스(산출) `a27c357`·**채점 골든 `f3f2b3e`(A13-1 정합)**·baseline `abee26d`. 런 폴더 `~/Desktop/dddart-run/dddart-20260618-1312-{claude,codex}`(mutation 복원·diff empty). 환경 Dart 3.12.1·Flutter 3.44.1.
+>
+> **판정**: **codex = 준수(PASS)** — 치명 17 전수·G-1~G-8 일치·FC-2 M1·M4 red·적대도 "근거 없음". / **claude = 보수 FAIL** — **FC-2 M4**(navigator 날짜 직렬화 死검증·조정자 직접 +1일 변이에도 green) + **G-7 인간 큐**(cloudy=overcast=`Icons.cloud`·아이콘 5 distinct·색 6·A1 경계·결과지 권장 A·**사용자 판단 미정**). ST-8 WEAK.
+>
+> **측정 목표 달성**: **A13-1(정렬) 정합 성공** — 6차 공통 "M1 정렬 死+vacuous"가 **양쪽 해소**(정렬 domain 거주·뒤섞은 입력 테스트·M1 red 직접 실증). 6차→7차 codex 역전(**N=1·인과 단정 금지**).
+>
+> **feedback-010 후보(발견 3건·다음 단계서 eval-fix-ledger 사전등록)**: ① **navigator 직렬화 seam 공백**(claude·G-5 navigator 구간 死검증·M4 green / FC-GOLDEN §5 어댑터 + implementation-test seam 보강) ② **A13-2 아이콘 distinct 정본화**(G-7 "아이콘 6 distinct" 기능게이트 vs A1 "아이콘=비측정" 긴장·claude `ui_extension` (아이콘,색)쌍 우회 테스트 실발화) ③ **테스트 병렬 flaky**(양쪽·전역 싱글톤 DioClient/rootRouter·implementation-test 격리 규약·차원 신설 검토). G-7 사용자 판단 → 결과지 정밀화.
+>
+> 이후 → **[[stitch-image-asset-bundling]]** 이미지 기능(메모리·7차 피드백 후 착수).
+
+## 6차 라이브런 → feedback-009 (적용 완료 · 2026-06-18)
 
 > **6차 RCA → feedback-009 수립·적용·적대검증 완료.** compact 후 재개 = **7차 라이브런 준비**(`workspace/eval/tools/RUNBOOK-weather.md`). 정본은 **`workspace/eval/fix/feedback-009-st2-deadbranch-freezed-gate.md`**(적용 내역·적대검증 3패스·잔여). 아래 6차 findings/A13은 그 입력(역사 기록·대부분 feedback-009로 라우팅).
 >
