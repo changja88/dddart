@@ -50,7 +50,7 @@ flutter test test/application/notice/
 - **분류 라벨**: notice→`공지`·event→`이벤트`·emergency→`긴급`.
 - **분기**: loading→"공지를 불러오는 중"·error→"공지를 불러오지 못했어요"+재시도(invalidate)·empty→"공지가 없어요".
 
-## 치명 17 채점지 (이 fixture에 적용) — 종합 PASS
+## 치명 18 채점지 (이 fixture에 적용) — 종합 PASS
 
 | 항목 | 판정 | 근거(file:line·fixture 기준) |
 |---|---|---|
@@ -73,8 +73,8 @@ flutter test test/application/notice/
 | FC-2 비-vacuous | ✅ | 12 테스트 + mutation 3/3 red(실측) |
 | FC-3 도메인 정합 | ✅ | 정렬·강조·라벨 방향 정상·명백 오류 0 |
 
-**종합: 치명 17 = 15 ✅ + 2 ➖(SD-2·HR-5) → 전원 non-FAIL → PASS. TIER-Q 상(관용구 청결·analyze 0).**
+**종합: 치명 18 = 16 ✅ + 2 ➖(SD-2·HR-5) → 전원 non-FAIL → PASS. TIER-Q 상(관용구 청결·analyze 0).**(직전 "17=15✅"은 오계수·2026-06-19 교정·항목 불변)
 
 ## 결론 — A12 게이트 실효화
 
-채점 기계가 **dddart-준수 known-good을 치명 17 PASS로 통과**시킴이 실증됐다 → **거짓-FAIL 기계가 아니다**(메타검증 positive control 미완 → 완료). 이제 라이브런 FAIL(claude·codex)은 "기계 결함 가능성"이 배제된 **확정 신호**로 해석할 수 있다(EVAL-METHOD §0-6·§3-8의 잠정 단서 해소 조건 충족). 메타검증 결과지 `results/20260614-2159-meta-validation.md` §4와 정합.
+채점 기계가 **dddart-준수 known-good을 치명 18 PASS로 통과**시킴이 실증됐다 → **거짓-FAIL 기계가 아니다**(메타검증 positive control 미완 → 완료). 이제 라이브런 FAIL(claude·codex)은 "기계 결함 가능성"이 배제된 **확정 신호**로 해석할 수 있다(EVAL-METHOD §0-6·§3-8의 잠정 단서 해소 조건 충족). 메타검증 결과지 `results/20260614-2159-meta-validation.md` §4와 정합.

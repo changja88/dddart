@@ -1,0 +1,24 @@
+{
+  "meta": {"generator": "fixture-ref", "version": 1, "note": "FID positive-control 기준 layout-ir — run.sh가 변종을 파생해 compare_layout 평탄화를 반증한다"},
+  "screens": [
+    {
+      "screen": "control",
+      "areas": [
+        {"role": "appbar", "slots": [{"type": "icon"}, {"type": "text", "width": "flex", "align": "center"}]},
+        {"role": "image", "src": "x", "alt": "control"},
+        {"role": "section", "label": "list", "children": [
+          {"kind": "repeat-group", "unit": {"slots": [
+            {"type": "text", "width": "fixed"},
+            {"type": "icon", "width": "flex", "align": "center"},
+            {"type": "text", "width": "fixed", "align": "right"}
+          ]}}
+        ]},
+        {"role": "section", "label": "hero", "children": [
+          {"kind": "block", "slots": [{"type": "text"}]},
+          {"kind": "block", "slots": [{"type": "icon"}, {"type": "text"}]}
+        ]},
+        {"role": "bottomnav", "slots": [{"type": "button"}, {"type": "button"}]}
+      ]
+    }
+  ]
+}

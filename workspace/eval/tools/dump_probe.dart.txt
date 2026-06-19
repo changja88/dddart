@@ -1,0 +1,63 @@
+// [템플릿·.txt로 보존 — analyze 제외] FID 렌더 덤프 프로브 (step 2b 프로토타입)
+//
+// 산출물 위젯 트리를 {type,text?,icon?,img?,tap?,children} JSON으로 덤프한다 → eval `dump_to_ir.dart`가
+// layout-ir로 정규화 → `compare_layout.dart`가 시안(extract_layout)과 대조.
+//
+// 사용(프로토타입): 이 파일을 산출물 `test/application/<bc>/presentation_layer/view/dump_probe_test.dart`로
+//   복사하고 ① 패키지명(`smaple`→산출물 pubspec name) ② pump 함수명·화면 위젯명(_support.dart 방언)을
+//   산출물에 맞춰 조정한 뒤 `flutter test <경로>` 실행. 산출물 systemTemp에 code-tree-*.json 생성.
+// 정식화: 산출물마다 import/pump를 손보는 이 프로토타입을 "표준 pump 진입점" 테스트 규약(코퍼스·
+//   architecture-ui/implementation-test·양판 미러)으로 대체하면 coordinator가 배선 추론 없이 일관 덤프한다.
+//   (step 2b 규약화·별도 승인 대기.)
+//
+// ── 아래는 8차 claude 산출물(weather BC)에서 검증된 실제 형태 ──
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:smaple/application/weather/domain_layer/forecast/enum/weather_condition.dart';
+import 'package:smaple/application/weather/domain_layer/forecast/forecast.dart';
+import 'package:smaple/application/weather/presentation_layer/view/weather_detail_view.dart';
+import 'package:smaple/application/weather/presentation_layer/view/weather_list_view.dart';
+
+import '_support.dart';
+
+Map<String, dynamic> _dump(Element root) {
+  Map<String, dynamic> node(Element e) {
+    final Widget w = e.widget;
+    final Map<String, dynamic> m = <String, dynamic>{'type': w.runtimeType.toString()};
+    if (w is Text) m['text'] = w.data ?? '';
+    if (w is Icon) m['icon'] = w.icon?.toString() ?? '';
+    if (w is Image) m['img'] = true;
+    if (w is InkWell) m['tap'] = w.onTap != null;
+    final List<Map<String, dynamic>> kids = <Map<String, dynamic>>[];
+    e.visitChildren((Element c) => kids.add(node(c)));
+    if (kids.isNotEmpty) m['children'] = kids;
+    return m;
+  }
+
+  return node(root);
+}
+
+void main() {
+  final String out = Directory.systemTemp.path;
+  testWidgets('dump weekly-list tree', (WidgetTester tester) async {
+    final List<Forecast> week = <Forecast>[
+      for (int i = 0; i < 7; i++)
+        fc(d(i),
+            condition: WeatherCondition.values[i % WeatherCondition.values.length],
+            high: 28 - i,
+            low: 19 - i),
+    ];
+    await pumpList(tester, week);
+    File('$out/code-tree-weekly.json')
+        .writeAsStringSync(jsonEncode(_dump(tester.element(find.byType(WeatherListView).first))));
+  });
+
+  testWidgets('dump daily-detail tree', (WidgetTester tester) async {
+    await pumpDetail(tester, detailState(high: 28, low: 19));
+    File('$out/code-tree-detail.json')
+        .writeAsStringSync(jsonEncode(_dump(tester.element(find.byType(WeatherDetailView).first))));
+  });
+}
