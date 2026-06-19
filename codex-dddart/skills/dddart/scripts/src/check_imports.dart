@@ -1,4 +1,4 @@
-/// IM — import 방향 22종 (설계 §5). 게이트: touched 파일의 added 줄.
+/// IM — import 방향 23종 (설계 §5·IM23=feedback-012 R2). 게이트: touched 파일의 added 줄.
 ///
 /// *왜 결정적 백스톱인가*: 계층·컨테이너의 의존 방향(제1 규약 §3.7 매트릭스·§9-3
 /// 4채널·§3.6 root 규칙)은 정규화된 import 경로 하나로 판별된다 — 의미 해석 0.
@@ -210,13 +210,20 @@ List<Finding> runImports(BackstopContext ctx) {
       if (isBcRouter && isInternal) {
         final tbc = bcOf(t);
         final ok = t.startsWith('design_system/') || // 전환 토큰(IM13 허용과 정합)
+            t.startsWith('common/') || // 중립 유틸·네트워크(houserules §5 — common은 domain만 예외·전 계층 합법; IM21 navigator와 정합·feedback-012 R1)
             (tbc == bc &&
                 ((hasSeg(t, 'presentation_layer') && hasSeg(t, 'view')) ||
                     segsOf(t).length == 3)); // 자기 BC 루트
         if (!ok) {
-          add('IM22', e.line, 'router에서 `$t` import — router는 자기 BC view(GoRoute builder)와 BC 루트만',
+          add('IM22', e.line, 'router에서 `$t` import — router는 자기 BC view(GoRoute builder)·BC 루트·design_system·common만',
               '제1 규약 §3.7·§3.1', 'section·widget은 view가 조립하고, 게이트 상태 확인은 root_router redirect(UseCase 직접 생성)의 일.');
         }
+      }
+
+      // ---- IM23(import 절반): router·navigator → intl 직접 import 금지(날짜 직렬화 보유 금지·feedback-012 R2)
+      if ((isBcRouter || isNavigator) && e.uri.startsWith('package:intl/')) {
+        add('IM23', e.line, 'BC 루트(${isBcRouter ? "router" : "navigator"})에서 `${e.uri}` import — 날짜 직렬화 보유 금지',
+            'architecture-ddd §3.72·architecture-ui §6', '날짜→path 변환은 도메인 VO 메서드(우선)·VM 변환에 단일 거주하고, router·navigator는 결과 String을 전달만 한다.');
       }
     }
 
@@ -242,6 +249,13 @@ List<Finding> runImports(BackstopContext ctx) {
       for (final (line, _) in scanTokens(ms, RegExp(r'\.(go|goNamed|pushNamed)\('))) {
         add('IM14', line, 'application service에서 내비 호출(`.go(`류)', '제1 규약 §3.6',
             '플랫폼 이벤트의 화면 이동은 root_destination_handler가 딥링크 URL로 디스패치한다.');
+      }
+    }
+    // IM23(토큰 절반): router·navigator의 날짜 직렬화 토큰(DateFormat·toIso8601String) — 변환 보유 금지(codec floor·feedback-012 R2)
+    if (isBcRouter || isNavigator) {
+      for (final (line, _) in scanTokens(ms, RegExp(r'\bDateFormat\s*\(|\.toIso8601String\s*\(\s*\)'))) {
+        add('IM23', line, 'BC 루트(${isBcRouter ? "router" : "navigator"})에서 날짜 직렬화(`DateFormat`/`toIso8601String`) 보유 — BC 루트는 변환을 모른다',
+            'architecture-ddd §3.72·architecture-ui §6', '날짜→path 변환은 도메인 VO·VM 단일 거주, router·navigator는 String 전달만.');
       }
     }
   }

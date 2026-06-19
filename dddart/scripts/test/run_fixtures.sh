@@ -424,6 +424,55 @@ echo "class Notice {}" > "$P/lib/application/notice/domain_layer/notice/notice.d
 OUT=$(run_backstop "$P" --diff-base "$BASE" --only rv); E=$?
 assert "F14d 합성 없는 BC 단독 변경 N/A 무발화" 0 - "RV1" "$E" "$OUT"
 
+# ---------- F15: IM22 router 허용목록 — common 허용(R1)·infra 여전 차단(허용목록 정밀)
+P="$T/f15"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/application/weather"
+cat > "$P/lib/application/weather/weather_router.dart" <<'EOF'
+import 'package:pkg/common/util/date_path_codec.dart';
+class WeatherRoutes {}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only im); E=$?
+assert "F15a IM22 router→common 허용(R1)" 0 - "IM22" "$E" "$OUT"
+cat > "$P/lib/application/weather/weather_router.dart" <<'EOF'
+import 'package:pkg/application/weather/infra_layer/repository/weather_repo.dart';
+class WeatherRoutes {}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only im); E=$?
+assert "F15b IM22 router→infra 여전 차단(common만 추가)" 2 "IM22" - "$E" "$OUT"
+
+# ---------- F16: IM23 codec-token floor — router/nav의 intl·날짜직렬화 차단(R2)·단순 String 전달 통과
+#            (케이스별 독립 프로젝트 — 파일 잔존 오염 방지: F16a router·F16b/c navigator는 다른 파일이라 누적됨)
+P="$T/f16a"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/application/weather"
+cat > "$P/lib/application/weather/weather_router.dart" <<'EOF'
+import 'package:intl/intl.dart';
+class WeatherRoutes {
+  static String toPath(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
+}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only im); E=$?
+assert "F16a IM23 router intl import+DateFormat 차단(R2)" 2 "IM23" - "$E" "$OUT"
+P="$T/f16b"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/application/weather"
+cat > "$P/lib/application/weather/weather_navigator.dart" <<'EOF'
+class WeatherNavigator {
+  static String seg(DateTime d) => d.toIso8601String();
+}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only im); E=$?
+assert "F16b IM23 navigator toIso8601String 차단(R2)" 2 "IM23" - "$E" "$OUT"
+P="$T/f16c"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/application/weather"
+cat > "$P/lib/application/weather/weather_navigator.dart" <<'EOF'
+class WeatherNavigator {
+  static void toDetail(dynamic ctx, String forecastDate) {
+    ctx.pushNamed('weather-detail', pathParameters: <String, String>{'forecastDate': forecastDate});
+  }
+}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only im); E=$?
+assert "F16c IM23 단순 String 전달 통과(과대범위 반증)" 0 - "IM23" "$E" "$OUT"
+
 echo ""
 echo "결과: PASS $PASS / FAIL $FAIL"
 [ $FAIL = 0 ]
