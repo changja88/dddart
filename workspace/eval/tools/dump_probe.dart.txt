@@ -38,7 +38,8 @@ Map<String, dynamic> _dump(Element root) {
 }
 
 void main() {
-  final String out = Directory.systemTemp.path;
+  // 출력 경로: eval `fid-gate.sh`가 FID_DUMP_DIR로 수거 위치를 통제(미지정 시 systemTemp).
+  final String out = Platform.environment['FID_DUMP_DIR'] ?? Directory.systemTemp.path;
   // screenProbes(_support.dart)를 순회 — role마다 펌프 후 루트를 덤프. 화면 추가는 산출물 쪽 맵에만.
   screenProbes.forEach((String role, ScreenProbe probe) {
     testWidgets('dump $role tree', (WidgetTester tester) async {
