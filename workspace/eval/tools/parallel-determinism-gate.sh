@@ -41,7 +41,7 @@ echo "[gate] $ROOT — codegen 선행(build_runner)"
 echo "[gate] flutter test 병렬 ${CONC:+--concurrency=$CONC }×$N 회"
 green=0; red=0
 for i in $(seq 1 "$N"); do
-  if ( cd "$ROOT" && flutter test "${CONC_ARG[@]}" ) >"/tmp/dgate-run-$i.log" 2>&1; then
+  if ( cd "$ROOT" && flutter test ${CONC_ARG[@]+"${CONC_ARG[@]}"} ) >"/tmp/dgate-run-$i.log" 2>&1; then
     green=$((green+1)); echo "  run $i: green"
   else
     red=$((red+1));     echo "  run $i: RED (log: /tmp/dgate-run-$i.log)"
