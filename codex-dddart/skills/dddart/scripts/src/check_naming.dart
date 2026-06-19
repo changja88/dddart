@@ -270,13 +270,19 @@ List<Finding> runNaming(BackstopContext ctx) {
         out.add(Finding('NM13', f, line, 'GoRoute 정의가 router 파일 밖에 등장',
             '제1 규약 §3.1', 'GoRoute는 `<bc>_router.dart`가 export하고 root_router가 조립한다.'));
       }
-      for (final m in RegExp(r'\.(go|goNamed|push|pushNamed|pushReplacement|pushReplacementNamed|replace|replaceNamed)\s*\(')
-          .allMatches(ms.tokensView)) {
-        final arg = firstArgOf(ms.tokensView, m.end);
-        if ((arg.startsWith("'") || arg.startsWith('"')) && ctx.lineIsAdded(f, ms.lineOf(m.start))) {
-          out.add(Finding('NM13', f, ms.lineOf(m.start),
-              '내비 호출에 라우트 문자열 리터럴 직접 전달', '제1 규약 §3.1',
-              '라우트 path·name 리터럴은 `<bc>_router.dart` 안에서만 — `<Bc>Routes` 상수를 참조한다.'));
+      // 내비 리터럴은 go_router를 실제 import한 파일에서만 검사한다 — push·replace 등은
+      // 스택·빌더·VO의 보편 메서드명이라, go_router 미import 파일의 동명 사용자 메서드가
+      // 위치 문자열 리터럴을 받으면 거짓양성이 났다(feedback-012 R7·IM22 R1 동형: 합법성 신호 게이트).
+      final usesGoRouter = ctx.edgesOf(f).any((e) => e.uri.startsWith('package:go_router/'));
+      if (usesGoRouter) {
+        for (final m in RegExp(r'\.(go|goNamed|push|pushNamed|pushReplacement|pushReplacementNamed|replace|replaceNamed)\s*\(')
+            .allMatches(ms.tokensView)) {
+          final arg = firstArgOf(ms.tokensView, m.end);
+          if ((arg.startsWith("'") || arg.startsWith('"')) && ctx.lineIsAdded(f, ms.lineOf(m.start))) {
+            out.add(Finding('NM13', f, ms.lineOf(m.start),
+                '내비 호출에 라우트 문자열 리터럴 직접 전달', '제1 규약 §3.1',
+                '라우트 path·name 리터럴은 `<bc>_router.dart` 안에서만 — `<Bc>Routes` 상수를 참조한다.'));
+          }
         }
       }
     }

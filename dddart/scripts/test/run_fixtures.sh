@@ -473,6 +473,36 @@ EOF
 OUT=$(run_backstop "$P" --diff-base "$BASE" --only im); E=$?
 assert "F16c IM23 단순 String 전달 통과(과대범위 반증)" 0 - "IM23" "$E" "$OUT"
 
+# ---------- F17: NM13 내비 리터럴 — go_router import 게이트(R7·feedback-012)
+#            push·replace 등은 스택·빌더·VO 보편 메서드명 → go_router 미import 파일은 무발화(거짓양성 제거)
+P="$T/f17a"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/common/util"
+cat > "$P/lib/common/util/path_builder.dart" <<'EOF'
+class PathBuilder {
+  final List<String> _segs = <String>[];
+  void push(String segment) => _segs.add(segment);
+  String build() => _segs.join('/');
+}
+String demo() {
+  final b = PathBuilder();
+  b.push('users');
+  return b.build();
+}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only nm); E=$?
+assert "F17a NM13 go_router 미import 동명 메서드(push 리터럴) 통과(R7 게이트)" 0 - "NM13" "$E" "$OUT"
+P="$T/f17b"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/application/weather"
+cat > "$P/lib/application/weather/weather_navigator.dart" <<'EOF'
+import 'package:go_router/go_router.dart';
+import 'package:flutter/widgets.dart';
+class WeatherNavigator {
+  static void toList(BuildContext ctx) => ctx.go('/weather');
+}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only nm); E=$?
+assert "F17b NM13 go_router import+라우트 리터럴 여전 차단(false-negative 반증)" 2 "NM13" - "$E" "$OUT"
+
 echo ""
 echo "결과: PASS $PASS / FAIL $FAIL"
 [ $FAIL = 0 ]
