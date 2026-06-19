@@ -5,7 +5,7 @@
 # (RUBRIC §H 게이트 활성 조건 ②의 layout-ir 레벨 부분). ref.json에서 변종을 파생해 --gate로 대조.
 #
 # 범위: 이 스크립트는 *compare의 평탄화*(L2 등가 흡수·차이 검출)를 반증한다.
-#   위젯 트리 변종 A~J(렌더 덤프 → layout-ir 정확성)는 step 2b(dump_layout 구현) 후 README 표대로 추가.
+#   위젯 트리 변종 A~J(렌더 덤프 → layout-ir 정확성) 정식 fixture는 9차 후속(8차 실물로 핵심 입증·dump_probe+dump_to_ir).
 # 사용: bash run.sh   (종료 0=반증 통과·실패 건수=exit)
 
 set -u

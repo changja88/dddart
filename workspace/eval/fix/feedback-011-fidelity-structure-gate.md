@@ -12,7 +12,7 @@
 - **베이스 코퍼스**: `cda1950`(현 HEAD·feedback-010 8차와 동일)
 - **설계 근거**: `workspace/design/2026-06-19-{stitch-fidelity-research,fidelity-eval-design,fidelity-generation-design,layout-ir-schema}.md`
 - **검증 런**: `<다음 라이브런(9차)·양판>`
-- **상태**: **평가측 step 1·2a·2b 핵심 완료(2026-06-19)** — 선결 1·2·3·4 + 도구 4(전부 구현·analyze clean): `extract_layout.dart`(시안 HTML→layout-ir·코퍼스·양판 미러)·`compare_layout.dart`(L1/L2/L3·평탄화·eval)·`dump_probe.dart.txt`(산출물 flutter test 템플릿)+`dump_to_ir.dart`(위젯 트리→layout-ir·eval) + positive-control(평탄화 `run.sh` 반증·8차 실물 등가 흡수). **8차 실측: L1 image/bottomnav 갭 결정론 포착·weekly card/metrics repeat 등가 흡수**. **게이트 활성 직전 — 선결 1건**: 표준 pump 진입점 규약(코퍼스·별도 승인). hero text 흡수 false regression은 `_collapse`(연속 동종 slot 축약·schema §3) 보정 완료(8차 hero L2 ✓·run.sh G 반증). 그 전 비활성·A1 위임. ⑥실측은 9차. 커밋: 미정(사용자 일괄 예정).
+- **상태**: **평가측 step 1·2a·2b 핵심 완료(2026-06-19)** — 선결 1·2·3·4 + 도구 4(전부 구현·analyze clean): `extract_layout.dart`(시안 HTML→layout-ir·코퍼스·양판 미러)·`compare_layout.dart`(L1/L2/L3·평탄화·eval)·`dump_probe.dart.txt`(산출물 flutter test 템플릿)+`dump_to_ir.dart`(위젯 트리→layout-ir·eval) + positive-control(평탄화 `run.sh` 반증·8차 실물 등가 흡수). **8차 실측: L1 image/bottomnav 갭 결정론 포착·weekly card/metrics repeat 등가 흡수**. **✅ 게이트 활성(2026-06-19)**: 표준 pump 진입점 규약 `screenProbes`(`implementation-test §7`·코퍼스 양판 미러·승인) 시술 → **3선결 완비·FID-L1·L2 치명 게이트 활성(치명 18→20)**. dump_probe를 `screenProbes` 순회 **고정 템플릿**으로 재작성(산출물별 손질 0·`_support.dart`만 상대 import)·positive-control `run.sh` 회귀 0(hero false regression은 `_collapse` 보정·G 반증). **9차가 자동 경로 첫 운용**·⑥실측 9차. 커밋: 미정(사용자 일괄 예정).
 
 ## 교정 항목 (사전등록 — ①~④ 작성, 다음 런 후 ⑤~⑥)
 
@@ -20,8 +20,8 @@
 |---|---|---|---|---|---|---|---|
 | 1 | 핵심(신설 게이트) | **FID-L1**(구조 골격 충실도·신설 치명) — 8차 양엔진 `image` 누락·`bottomnav` 누락(list/detail)·codex 섹션 이탈이 A1 비측정이라 자동 미포착 | 시각 충실도=A1 인간(EVAL §2.5)·자동 회귀 게이트 부재 → **골격 누락이 기능 PASS로 통과**. 8차 검산: 시안 `[appbar,image,section,bottomnav]` vs claude `[appbar,—,ListView,—]`(image·nav 누락) | (RUBRIC·measure-first) `rubric/RUBRIC.md`에 **FID-L1 신설**: 화면 영역(appbar/image/section/bottomnav) **존재·종류·순서=치명 게이트**. 집계 위치(치명 군 편입 vs 별도 FID 군)는 시술 시 RUBRIC 구조 보며 확정. 판정원: 시안 layout-ir vs 렌더 덤프 대조(항목 3 도구) | 전: 골격 누락 미측정(②자동 미포착) → 후: image/bottomnav/섹션 누락 자동 FAIL. dim **FID-L1**. ⚠️신설·N=1·positive-control 선결 | ✅`RUBRIC.md §H` 등록(2026-06-19)·**집계 위치=별도 FID 군(섹션 H)·치명 20 조건부 활성(현 18→활성 시 20)** 확정·`EVAL §2.3 (A')`·rubric-metrix §2.5 | (9차 실측·게이트 활성 후) |
 | 2 | 핵심(신설 게이트·평탄화) | **FID-L2**(섹션 구성 충실도·신설 치명) — 섹션 내부 의미노드 순서·존재·반복 분기(8차 claude `ListView` vs codex `header-section`+`card-Column`) | 레이아웃 분해가 LLM *참고*라 엔진 진동·자동 미측정(같은 byte-identical 시안→다른 분해, §3.5 실증) | (RUBRIC·measure-first) **FID-L2 신설**: 섹션 내 의미노드 **순서·존재·반복(`card×N`)=치명·평탄화 비교**(묶음 깊이 흡수·반복 횟수는 데이터 의존이라 제외). **3겹 통제**(평탄화·measure-first 보정·positive-control) `fidelity-eval-design.md §5.1` | 전: 섹션 분기 미측정 → 후: 진짜 차이(누락·순서) FAIL·등가 재구성 PASS. dim **FID-L2**. ⚠️false regression 보정 초기 필요·positive-control 선결 | ✅`RUBRIC.md §H` FID-L2 등록·평탄화 3겹 통제 명문(`EVAL §2.5`·schema §3)·positive-control/fid 표본 사전등록 | (9차 실측·게이트 활성 후) |
-| 3 | 핵심(도구·공유 토대) | **layout-ir 추출·대조**(평가·생성 공유) — 시안 파서(HTML→ir)·렌더 덤프(위젯트리→ir)·대조 리포트 | 양쪽 **동일 스키마** 산출해야 대조 가능. 현 `extract_design`은 토큰만(구조·`<img>` 버림·RCA §3.5) | (도구) `dddart/scripts/extract_design.dart` 확장(시안 layout-ir·`design-tokens.json` 옆 `layout-ir.json`·무의존 파싱) + **평가 도구 신설**(렌더 덤프=`debugDumpApp`류·대조·리포트, `workspace/eval/tools/`) + `layout-ir-schema.md` 준수. 말단(L3)까지 추출·리포트 | 전: 구조 추출 경로 0 → 후: 결정론 ir 산출·시안∥코드 대조 리포트(사용자 눈 재료). dim **(도구)**. ⚠️스키마 §6 4파라미터 positive-control 확정 | ✅스키마 동결본 + **시안 파서 `extract_layout`·대조 `compare_layout`·렌더 덤프 `dump_probe`+`dump_to_ir` 전부 구현·8차 실증**(L1 image/bottomnav 갭 결정론 포착·weekly card/metrics repeat 등가 흡수)·평탄화+실물 positive-control 반증(step 2a·2b·2026-06-19) / **게이트 활성 선결 1: 표준 pump 진입점 규약(코퍼스 승인)**(hero text 흡수는 `_collapse` 보정 완료·run.sh G 반증·8차 hero L2 ✓) | (9차 실측·pump 규약 후 활성) |
-| 4 | 권장(코퍼스·미러·양판) | **표준 pump 진입점**(렌더 덤프 전제) — 화면 pump 배선이 산출물마다 상이(claude `_support.dart` vs codex 헬퍼) | coordinator가 산출물 무관하게 렌더 덤프하려면 일관 진입점 필요(없으면 배선 추론) | (코퍼스·미러) `architecture-ui`/`implementation-test` 테스트 규약에 "**구조 덤프용 표준 pump 진입점**"(시그니처·반환) 명문. 양판 미러(`corpus_mirror_sync`). **생성측(2단계)과 공유 토대** | 전: 배선 추론 필요 → 후: 일관 덤프. dim **(규약)**. ⚠️코퍼스 변경·별도 승인·2단계와 공유 | (2단계와 함께) | (9차+) |
+| 3 | 핵심(도구·공유 토대) | **layout-ir 추출·대조**(평가·생성 공유) — 시안 파서(HTML→ir)·렌더 덤프(위젯트리→ir)·대조 리포트 | 양쪽 **동일 스키마** 산출해야 대조 가능. 현 `extract_design`은 토큰만(구조·`<img>` 버림·RCA §3.5) | (도구) `dddart/scripts/extract_design.dart` 확장(시안 layout-ir·`design-tokens.json` 옆 `layout-ir.json`·무의존 파싱) + **평가 도구 신설**(렌더 덤프=`debugDumpApp`류·대조·리포트, `workspace/eval/tools/`) + `layout-ir-schema.md` 준수. 말단(L3)까지 추출·리포트 | 전: 구조 추출 경로 0 → 후: 결정론 ir 산출·시안∥코드 대조 리포트(사용자 눈 재료). dim **(도구)**. ⚠️스키마 §6 4파라미터 positive-control 확정 | ✅스키마 동결본 + **시안 파서 `extract_layout`·대조 `compare_layout`·렌더 덤프 `dump_probe`+`dump_to_ir` 전부 구현·8차 실증**(L1 image/bottomnav 갭 결정론 포착·weekly card/metrics repeat 등가 흡수)·평탄화+실물 positive-control 반증(step 2a·2b·2026-06-19) / ✅ **게이트 활성(2026-06-19): 표준 pump 진입점 규약 `screenProbes` 충족·dump_probe 고정 템플릿화**(hero false regression `_collapse` 보정·run.sh G 반증·8차 hero L2 ✓) | (9차 실측·게이트 활성) |
+| 4 | 권장(코퍼스·미러·양판) | **표준 pump 진입점**(렌더 덤프 전제) — 화면 pump 배선이 산출물마다 상이(claude `_support.dart` vs codex 헬퍼) | coordinator가 산출물 무관하게 렌더 덤프하려면 일관 진입점 필요(없으면 배선 추론) | (코퍼스·미러) `architecture-ui`/`implementation-test` 테스트 규약에 "**구조 덤프용 표준 pump 진입점**"(시그니처·반환) 명문. 양판 미러(`corpus_mirror_sync`). **생성측(2단계)과 공유 토대** | 전: 배선 추론 필요 → 후: 일관 덤프. dim **(규약)**. ⚠️코퍼스 변경·별도 승인·2단계와 공유 | ✅ **2026-06-19 시술**: `implementation-test §7`에 `screenProbes`(role→펌프+루트 finder 맵·`typedef ScreenProbe = Future<Finder> Function(WidgetTester)`) 명문·양판 미러(cp diff 0). dump_probe가 이 한 맵만 상대 import해 순회(view·헬퍼·fixture·패키지 이름 비의존·손질 0). **architecture-ui 불요**(finder가 맵 내부)·예상보다 좁은 footprint. | (9차 자동 경로 첫 운용) |
 | 5 | 보류(명시) | **VLM grader**(의미 레인) — 비도입 | 사용자 눈 중복(A1)·VLM 전문가 15~20%p 미달(WebDevJudge)·비결정·자기보고·비용 ROI·YAGNI | **비도입.** 재투입 트리거 = "**구조 diff PASS인데 사용자 눈에 반복적으로 걸리는 미관 회귀**"가 라이브런서 패턴화되면(코드+스크린샷+시안·pairwise·blind N≥3·생성≠채점·게이트 아닌 신호) | — | — | — |
 
 - **②근거 공통**: 시각 충실도가 A1 인간 비측정이라 **기능 게이트 통과 = 시안 일치 아님**(8차 image/bottomnav 누락이 PASS로 통과). 자료조사: 충실도 레버 = 평가측(회귀 잡기) + 생성측(덜 흔들리게)의 **쌍**. 이번 011은 평가측(쌍의 절반) — 생성측(2단계)이 입력 유도로 닫는다.
@@ -30,7 +30,7 @@
 
 ## measure-first 선결 (eval 단일출처·9차 채점 착수 *전* 등록·소급 금지)
 > EVAL-METHOD §0·§5 정합 — 코퍼스 아님(승인 불요)이나 *측정을 바꾸므로* 9차 빌드/채점 전 의도적 등록.
-> **시술 진행(2026-06-19): 1·2·3 완료 · 4 명세 등록(검증은 판정원 도구 step 2 후).** FID 게이트는 도구+positive-control 충족 전까지 비활성(리포트·약신호).
+> **시술 완료(2026-06-19): 1·2·3·4 전부 완료.** 표준 pump 진입점 규약 `screenProbes`(항목 4)까지 시술돼 3선결 완비 → **FID-L1·L2 치명 게이트 활성(18→20)**. 9차가 `screenProbes` 자동 경로 첫 운용·⑥ 실측.
 1. ✅ **RUBRIC FID-L1·L2 차원 신설**(항목 1·2) — 화면 영역 게이트(L1)·섹션 구성 게이트(L2·평탄화). FID-L3=약신호(리포트·눈)·FID-L4=A1 명시. **집계 위치 확정 = 별도 FID 군(`RUBRIC.md §H`)·치명 20 조건부 활성(현 18→활성 시 20)**(positive-control+도구 선결).
 2. ✅ **layout-ir 스키마 동결**(항목 3) — `tools/layout-ir-schema.md` **동결본(SSOT) 신설**(노드 트리·번역표·평탄화). design 문서는 경위로 강등(포인터). §6 4파라미터 잠정값 명시·positive-control로 확정 예정.
 3. ✅ **EVAL-METHOD §2.5 보강** — A1 인간 오라클에 "구조 골격·섹션 구성·말단 슬롯(L1·L2·L3)은 FID 결정 레인으로 측정·L4(미관·아이콘 심볼)는 인간 유지" 경계 명시(A1 재정의·축소). §0·§2.3 (A')·§3·§6도 정합.
@@ -43,8 +43,8 @@
 - **스키마 §6 4파라미터**(section fallback·repeat 임계·button 분기·평탄화 깊이) — 구현 시 positive-control로 확정.
 
 ## 미해결 (시술·후속)
-- **도구 구현** — 시안 파서(extract_design 확장)·렌더 덤프·대조 리포트. 9차 전 시술 + positive-control.
-- **positive-control(L2)** — 등가 재구성(묶음/래퍼 차이) 거짓-FAIL 반증이 L2 게이트 투입 선결.
-- **표준 pump 진입점(항목 4)** — 코퍼스 변경이라 2단계(생성측)와 함께 승인·미러.
+- ✅ **도구 구현**(해소·2026-06-19) — 시안 파서 `extract_layout`·렌더 덤프 `dump_probe`+`dump_to_ir`·대조 `compare_layout` 전부 구현·analyze clean·8차 실증.
+- ✅ **positive-control(L2)**(해소·2026-06-19) — `run.sh` 7케이스 거짓-FAIL 0·진짜 차이(누락·순서·영역) 정탐·8차 실물 등가 흡수.
+- ✅ **표준 pump 진입점(항목 4)**(해소·2026-06-19) — `implementation-test §7 screenProbes`·양판 미러·승인. 2단계 생성측과 공유 토대(생성측은 `screenProbes`를 입력유도로 재사용).
 - **효과크기 측정** — 9차에서 L1·L2 게이트 작동·false regression율 실측 → ⑤⑥ 기입·≥2 런으로 확정.
 - ✅ **집계 위치**(해소·2026-06-19 시술) — **별도 FID 군(`RUBRIC.md §H`)·치명 게이트 활성 시 18→20 편입** 확정. (시술 중 "치명 17"이 실제 18개인 선재 오계수도 함께 교정.)

@@ -2,7 +2,7 @@
 /// compare_layout — 시안 layout-ir vs 코드 layout-ir 대조 → FID-L1·L2·L3 리포트.
 ///
 /// 평가측 단일출처(workspace/eval/tools/·eval). 시안 파서(extract_layout.dart)와
-/// 코드 렌더 덤프(dump_layout — step 2b)가 산출한 같은 스키마 두 layout-ir을 받아
+/// 코드 렌더 덤프(dump_probe + dump_to_ir)가 산출한 같은 스키마 두 layout-ir을 받아
 /// 구조 충실도를 대조한다. 스키마(동결본): workspace/eval/tools/layout-ir-schema.md
 ///   L1(골격): areas role 시퀀스(존재·종류·순서).
 ///   L2(섹션 구성): section children 평탄화 시퀀스(block 펼침·repeat-group 경계 보존·group 펼침·§3).

@@ -130,6 +130,19 @@ discipline-test §3 FORM이 쓰는 헬퍼의 *계약*을 여기서 정의한다(
 | `Future<void> pumpList(WidgetTester t, List<ForecastSummary> week)` | 목록 화면을 NoSplash 테마(§4)로 펌프 + 목록 VM override(week) + 상세 VM override(날짜 echo). week는 **≥3**(§3.4 `.at(2)` 전제). |
 | `Future<void> pumpDetail(WidgetTester t, ForecastDetailState state)` | 상세 화면 펌프 + 상세 VM override(state) — 위치 FORM(§3.3). |
 | `String formatDate(DateTime d)` · `String formatTemp(int celsius)` | 화면 표기와 *동일한* 포맷 — §3.4 날짜-echo·§3.3 기온 정확 일치. **SUT 포맷터를 재사용**한다(별도 포맷을 만들면 디코이). |
+| `final Map<String, ScreenProbe> screenProbes` (`typedef ScreenProbe = Future<Finder> Function(WidgetTester)`) | **FID 렌더 덤프 진입점**(eval 평가측이 소비). role 문자열(`'list'`·`'detail'`…)→그 화면을 *대표 fixture로* 펌프하고 루트 finder를 반환하는 함수. view 클래스명·헬퍼명·fixture명을 전부 *맵 값 안에* 가둬 외부 덤프 프로브가 BC 이름에 의존하지 않게 한다 — 화면마다 한 항목, 화면 추가 시 여기 등록. 기존 `pumpList`/`pumpDetail`·`detailState` 위에 얇게 얹는다(중복 펌프 정의 금지). |
+
+`screenProbes`는 §7에서 **유일하게 discipline-test FORM이 직접 소비하지 않는** 헬퍼다(테스트 단언이 부르지 않음) — eval FID 평가측 렌더 덤프가 이 한 맵만 상대 import해 산출물의 모든 화면을 *배선 추론 0*으로 일관 덤프한다. "모든 화면이 대표 데이터로 펌프된다"는 render-smoke 시드를 겸한다. 키는 화면 role로 고정하고, 값에서 BC별 view·헬퍼 이름을 환언한다(그 이름들이 밖으로 새지 않는 게 핵심):
+
+```dart
+typedef ScreenProbe = Future<Finder> Function(WidgetTester tester);
+
+/// role → 대표 fixture로 그 화면을 펌프하고 루트 finder를 반환. 화면 추가 시 여기 등록.
+final Map<String, ScreenProbe> screenProbes = <String, ScreenProbe>{
+  'list':   (WidgetTester t) async { await pumpList(t, fixtureWeek());                return find.byType(ForecastListView); },
+  'detail': (WidgetTester t) async { await pumpDetail(t, detailState(high: 28, low: 19)); return find.byType(ForecastDetailView); },
+};
+```
 
 `_FakeRepo`·`readListVM`(구 repo-seam 헬퍼)은 폐기한다 — dddart엔 repo provider가 없다(§2). 정렬은 도메인 단위를 직접 호출하므로(§3.2) VM 격리 헬퍼가 불요하다.
 

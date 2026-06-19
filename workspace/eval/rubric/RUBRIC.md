@@ -135,12 +135,12 @@
 표준: `tools/layout-ir-schema.md`(동결본) · `EVAL-METHOD.md §2.3 FID·§2.5`
 
 > **성격**: Stitch 시안(동결 `design-ref/*.html`)을 "그대로" 옮겼는지의 **구조 충실도**를 시안 layout-ir vs 생성 코드 렌더 덤프의 결정론 대조로 잰다. 토큰(색·타이포)은 VW-4가, 기능(정렬·매핑)은 FC가 보지만 *레이아웃 골격·섹션 구성*은 어느 차원도 안 봐 8차에서 image·bottomnav 누락·섹션 이탈이 기능 PASS로 통과했다(사용자 지적). **미관·픽셀·아이콘 심볼은 비측정(A1·사용자 눈)** — FID는 *구조*만.
-> **⚠️ 게이트 활성 조건(positive-control 선결·feedback-011 사전등록)**: FID-L1·L2의 **치명 게이트 활성**은 ① 판정원 도구(`extract_design` 시안 파서 + 렌더 덤프·대조 — step 2·코퍼스 승인) 구현 ② `tools/positive-control/fid/` 등가 재구성 표본이 거짓-FAIL 0 반증 — **둘 다 충족 후**다. **충족 전(현재·비활성)**: FID-L1·L2·L3를 *자동 채점하지 않고* 시각 충실도는 현행대로 **사용자 눈(A1·RUNBOOK 스크린샷)** 위임 — 결과지 FID 표는 ➖(도구 미구현)로 적고 **❌(FAIL) 도장 금지**(coordinator가 수기 구조 판정으로 게이트 흉내 내지 않음·blind 역할 보존). **충족 후(활성)**: L1·L2=치명 게이트·L3=약신호(⚠)·L4=A1. 신설 측정이라 N=1·effect size 자체 eval 측정 필요.
+> **✅ 게이트 활성(2026-06-19·feedback-011)**: FID-L1·L2 **치명 게이트 활성 조건 3선결 전부 충족** — ① 판정원 도구 구현(시안 파서 `dddart/scripts/extract_layout.dart` + 렌더 덤프 `tools/dump_probe.dart.txt`+`tools/dump_to_ir.dart` + 대조 `tools/compare_layout.dart`) ② `tools/positive-control/fid/` 거짓-FAIL 0 반증(`run.sh` 7케이스·8차 실물 등가 흡수·false regression 0) ③ 표준 pump 진입점 규약(`implementation-test §7 screenProbes`·코퍼스 양판 미러·승인 2026-06-19). **활성 상태**: L1·L2=치명 게이트(치명 18→**20**)·L3=약신호(⚠)·L4=A1. ⚠️ **정직 단서**: `screenProbes` 자동 덤프 경로의 *산출물 준수*는 **9차가 첫 운용**(8차는 규약 전 수동 dump 손질로 갭 실증)·effect size·false regression율은 9차 1차 실측·확정 ≥2런(N=1). **산출물이 `screenProbes`를 노출하지 않으면**(코더 규약 미준수)=렌더 덤프 불가 → 그 런만 A1 폴백 + 규약 위반을 결과지에 기록(coordinator가 수기로 게이트 흉내 내 거짓 PASS/FAIL 도장 금지·blind 보존).
 
 | ID | 항목 | §근거 | PASS | FAIL | 레인 | 치명 |
 |---|---|---|---|---|---|---|
-| **FID-L1** 구조 골격 충실도 | 화면 영역(appbar/image/section/bottomnav)의 존재·종류·순서가 시안과 일치 | schema §1·§2(번역표)·§5 | 시안 layout-ir `areas`의 role 집합·순서가 렌더 덤프와 일치(영역 누락·종류오인·순서변경 0) | image·bottomnav·section 등 영역 누락, 종류 오인(section↔appbar), 순서 뒤바뀜 | 결정(대조 도구) | ✅(활성 후) |
-| **FID-L2** 섹션 구성 충실도 | section children의 의미노드 순서·존재·반복(`repeat-group`)이 **평탄화 후** 일치 | schema §1·§3(평탄화) | section children 평탄화 슬롯 시퀀스가 시안과 순서보존 일치, repeat-group 존재 일치(횟수 제외) | 노드 누락·순서 뒤집힘(평탄화 후에도), repeat-group↔단일 혼동 | 결정(대조 도구·평탄화) | ✅(활성 후) |
+| **FID-L1** 구조 골격 충실도 | 화면 영역(appbar/image/section/bottomnav)의 존재·종류·순서가 시안과 일치 | schema §1·§2(번역표)·§5 | 시안 layout-ir `areas`의 role 집합·순서가 렌더 덤프와 일치(영역 누락·종류오인·순서변경 0) | image·bottomnav·section 등 영역 누락, 종류 오인(section↔appbar), 순서 뒤바뀜 | 결정(대조 도구) | ✅(활성·9차 첫 운용) |
+| **FID-L2** 섹션 구성 충실도 | section children의 의미노드 순서·존재·반복(`repeat-group`)이 **평탄화 후** 일치 | schema §1·§3(평탄화) | section children 평탄화 슬롯 시퀀스가 시안과 순서보존 일치, repeat-group 존재 일치(횟수 제외) | 노드 누락·순서 뒤집힘(평탄화 후에도), repeat-group↔단일 혼동 | 결정(대조 도구·평탄화) | ✅(활성·9차 첫 운용) |
 | **FID-L3** 말단 슬롯 정합 | repeat unit/block 안 슬롯 type·width·align이 시안과 일치 | schema §1(Slot)·§4 슬롯 원칙 | slot의 type/width/align이 시안 unit과 일치 | 슬롯 타입·배치 추상 불일치 | 결정(약신호 ⚠) | — |
 | **FID-L4** 픽셀·미관 | 패딩·정렬 정확값·그림자·실제 색·아이콘 심볼·미관 | (design-tokens·눈) | (자동 비측정 — VW-4가 토큰 거주만 봄) | (자동 판정 없음) | A1 인간(사용자 눈) | — |
 
@@ -169,7 +169,7 @@
 
 ## 동결 전 결정 (사용자 "동결됨" 확인 대상)
 
-1. **치명 게이트 목록(18 + FID 조건부 2)**: SD-1·SD-2·SD-7(UI호출) / VW-1·VW-6 / ST-1(직행)·ST-2·ST-4(mounted) / DT-1·DT-2 / HR-1·HR-4·HR-5 / BG-1·BG-2 / FC-1·FC-2·FC-3 (=**18개**·적대 검증 보수 배정). — "틀리면 산출물 무가치"만. 의미 레인 FAIL이면 치명 항목은 치명 FAIL(Goodhart 차단). **FID-L1·L2는 §H 게이트 활성 조건(판정원 도구 구현 + positive-control 거짓-FAIL 반증) 충족 후 치명 20으로 편입**(그 전까지 비활성·A1 위임·집계 미산입 — feedback-011 사전등록·measure-first). *주: 직전까지 이 목록은 "17"로 표기됐으나 실제 열거는 18개(2026-06-19 오계수 교정·소급 아님·항목 불변·`EVAL §5`).*
+1. **치명 게이트 목록(18 + FID 조건부 2)**: SD-1·SD-2·SD-7(UI호출) / VW-1·VW-6 / ST-1(직행)·ST-2·ST-4(mounted) / DT-1·DT-2 / HR-1·HR-4·HR-5 / BG-1·BG-2 / FC-1·FC-2·FC-3 (=**18개**·적대 검증 보수 배정). — "틀리면 산출물 무가치"만. 의미 레인 FAIL이면 치명 항목은 치명 FAIL(Goodhart 차단). **FID-L1·L2는 §H 게이트 활성 조건(판정원 도구 + positive-control 거짓-FAIL 반증 + 표준 pump 진입점 규약 `screenProbes`) 3선결 충족(2026-06-19)·치명 20 활성**(9차부터 집계 산입·소급 없음 — feedback-011·measure-first). *주: 직전까지 이 목록은 "17"로 표기됐으나 실제 열거는 18개(2026-06-19 오계수 교정·소급 아님·항목 불변·`EVAL §5`).*
 2. **빌드 게이트(F) 신설**: dddjango에 없는 dddart 고유 — 테스트 약함·codegen 의존이라 컴파일·analyze green이 1차 정확성. 치명.
 3. **MVVM 분리**: 통합 S-MVVM 대신 S-VIEW(표현)+S-STATE(상태) 2축(코퍼스 조사 신호 99:8). view↔vm↔state 결선은 VW-2·HR-8 교차.
 4. **TIER-Q 카운트 기반**: 가중치 수치 미정의 → 카운트 등급(`EVAL-METHOD.md`). BG로 컴파일 전제 이관, 잔여만 품질.

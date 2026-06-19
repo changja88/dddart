@@ -1,6 +1,6 @@
 # layout-ir 스키마 (동결본·SSOT) — 시각 충실도 평가·생성 공유 토대
 
-> **상태: 동결(2026-06-19·feedback-011 시술) — 단, §6 4파라미터(section fallback·repeat 임계·button 분기·평탄화 깊이)는 *잠정*(positive-control 반증 후 확정)**. 노드 트리(§1)·번역표(§2)·평탄화(§3)는 SSOT로 동결, 4파라미터만 미확정이다. 이 문서가 layout-ir의 **단일 출처(SSOT)**다 — 시안 파서(`extract_design` 확장: Stitch HTML → `layout-ir.json`)와 렌더 덤프(평가 도구: Flutter 위젯 트리 → 같은 형식)가 **이 스키마를 산출**해야 대조 가능. **시안 파서·대조·렌더 덤프 전부 구현·8차 실증(step 2a·2b)** — RUBRIC `FID-L1·L2·L3`·EVAL-METHOD `§2.3 FID`·`§2.5`가 이 문서를 판정 기준으로 참조. 게이트 활성 직전이나 **선결 1건**(표준 pump 진입점 규약·hero 보정은 §3 collapse로 완료) 전까지 비활성·A1 위임(`RUBRIC §H`).
+> **상태: 동결(2026-06-19·feedback-011 시술) — 단, §6 4파라미터(section fallback·repeat 임계·button 분기·평탄화 깊이)는 *잠정*(positive-control 반증 후 확정)**. 노드 트리(§1)·번역표(§2)·평탄화(§3)는 SSOT로 동결, 4파라미터만 미확정이다. 이 문서가 layout-ir의 **단일 출처(SSOT)**다 — 시안 파서(`extract_design` 확장: Stitch HTML → `layout-ir.json`)와 렌더 덤프(평가 도구: Flutter 위젯 트리 → 같은 형식)가 **이 스키마를 산출**해야 대조 가능. **시안 파서·대조·렌더 덤프 전부 구현·8차 실증(step 2a·2b)** + 표준 pump 진입점 규약 `screenProbes`(코퍼스 §7·2026-06-19) — RUBRIC `FID-L1·L2·L3`·EVAL-METHOD `§2.3 FID`·`§2.5`가 이 문서를 판정 기준으로 참조. **FID-L1·L2 치명 게이트 활성(`RUBRIC §H`·치명 20·9차가 `screenProbes` 자동 경로 첫 운용).**
 > **설계 경위·검산**: `workspace/design/2026-06-19-layout-ir-schema.md`(노드 합의 과정)·`2026-06-19-fidelity-eval-design.md`(§8 list/detail 실물 검산)·`2026-06-19-stitch-fidelity-research.md`(§3.5 전제검증). 이 동결본은 *사양*, design 문서는 *근거*.
 > **measure-first(소급 금지)**: 동결 후 채점 결과를 보고 스키마를 바꾸지 않는다 — 바꿀 발견은 다음 동결 라운드(fix 원장)로. §6 열린 점 4개만 구현 시 positive-control로 *확정*(동결 시점에 잠정값 명시).
 
@@ -64,7 +64,7 @@ Slot:                                   // ── L3
 - `section` 식별은 dddart `*Section` 명명 규약 의존(architecture-ui 강제) → §6 열린 점 1.
 - `InkWell`은 탭 콜백이 있으면 `button` 신호, 순수 래퍼면 투명 — 역할로 분기(§6 열린 점 3).
 - **표 미정의 위젯 fallback**: 단일 자식 래퍼(`Card`·`Container`·`DecoratedBox`류)=투명·자식 승계 / 다자식 레이아웃(`Stack`·`Wrap`·`Flex`류)=투명 컨테이너·자식 순서 보존 / 콘텐츠 복합 위젯(`ListTile`류)=positive-control 확정 전까지 *리포트에 「미정」 명기*(임의 text/button 분류 금지). 미정의 위젯 조우 시 **투명 추정 + 리포트 표기**(채점자 임의 분류로 L2/L3 갈리는 것 차단).
-- **수기 단계 미판정**: 도구 미구현 시 onTap 유무(InkWell button 분기)·width(fixed/flex)처럼 *렌더 덤프가 자동 검출할 속성*은 수기로 단정하지 않는다(A1 위임·`EVAL §2.3 FID 주의 ①`).
+- **수기 단정 금지**: onTap 유무(InkWell button 분기)·width(fixed/flex)처럼 *렌더 덤프가 자동 검출하는 속성*은 수기로 단정하지 않는다 — 도구(`dump_to_ir`)가 판정하고, 산출물이 `screenProbes` 미노출이라 덤프 불가한 런만 A1 위임(`EVAL §2.3 FID 주의 ①`).
 
 ## 3. 평탄화 규칙 (L2 비교)
 
@@ -103,9 +103,9 @@ L2 게이트 비교 시:
 ```
 (daily-detail = `areas`=[appbar, section"히어로"(children: block.slots=[text,icon,text,group[text,text]]), section"지표"(children: repeat-group unit.slots=[icon,text,text]), bottomnav]. 검산 = `fidelity-eval-design.md §8.1`.)
 
-## 5. 대조 예시 — 8차 claude *수기 구조 대조* vs 위 시안 (게이트 **설계 예시**·도구 미구현)
+## 5. 대조 예시 — 8차 claude *수기 구조 대조* vs 위 시안 (스키마 **설계 예시**·도구 구현 전 작성)
 
-> ⚠️ 아래는 **사람이 수기로 짠 예시**다(렌더 덤프·대조 도구 미구현·step 2). 도구가 산출한 자동 실증이 아니며, 현재 FID 게이트는 비활성(`§7`·`RUBRIC §H`). "도구 구현 시 스키마가 무엇을 잡을 수 있는가"를 보이는 *설계 검증*용.
+> ⚠️ 아래는 **사람이 수기로 짠 예시**다(스키마 설계 시 작성). 이후 도구(`extract_layout`·`dump_probe`+`dump_to_ir`·`compare_layout`)가 구현돼 8차 실물로 자동 실증됐고 **FID 게이트는 활성(2026-06-19·`§7`·`RUBRIC §H`)**. 이 절은 "스키마가 무엇을 잡는가"의 *설계 의도*로 보존한다.
 
 ```
 area appbar     ✓ (BackAppBar → [icon,text])
@@ -130,4 +130,4 @@ area bottomnav  ❌ FID-L1 대상 — 코드에 BottomNav 노드 없음 (도구 
 
 - **RUBRIC**: `FID-L1`(areas role·종류·순서)·`FID-L2`(section children 평탄화 시퀀스·repeat-group 존재)·`FID-L3`(slot type·width·align)이 이 스키마의 계층을 1:1로 판정.
 - **EVAL-METHOD**: `§2.3 FID 결정-판정 표`(판정원=시안 layout-ir vs 렌더 덤프 대조)·`§2.5`(L1·L2 자동 게이트 / L3 약신호 / L4 A1)·`§0`(FID positive-control·게이트 활성 조건).
-- **도구(전부 구현·8차 실증)**: 시안 파서 `dddart/scripts/extract_layout.dart`(HTML→layout-ir·코퍼스·양판 미러·토큰은 `extract_design.dart` 별도) + 대조 `tools/compare_layout.dart`(L1/L2/L3·평탄화·eval) + 코드 렌더 덤프 `tools/dump_probe.dart.txt`(산출물 flutter test 템플릿)+`tools/dump_to_ir.dart`(위젯 트리→layout-ir·eval). 8차 실측: L1 image/bottomnav 갭 포착·repeat 등가 흡수 입증. **게이트 활성 선결 1건**: 표준 pump 진입점 규약(코퍼스 승인) → 그 전 A1 위임. (hero 인접 text 흡수는 §3 collapse로 보정 완료.)
+- **도구(전부 구현·8차 실증)**: 시안 파서 `dddart/scripts/extract_layout.dart`(HTML→layout-ir·코퍼스·양판 미러·토큰은 `extract_design.dart` 별도) + 대조 `tools/compare_layout.dart`(L1/L2/L3·평탄화·eval) + 코드 렌더 덤프 `tools/dump_probe.dart.txt`(산출물 flutter test 템플릿)+`tools/dump_to_ir.dart`(위젯 트리→layout-ir·eval). 8차 실측: L1 image/bottomnav 갭 포착·repeat 등가 흡수 입증. **게이트 활성(2026-06-19)**: 표준 pump 진입점 규약 `screenProbes`(코퍼스 §7·양판 미러) 충족 → FID-L1·L2 치명(20)·9차 자동 경로 첫 운용. (hero 인접 text 흡수는 §3 collapse 보정.)

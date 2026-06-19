@@ -102,4 +102,4 @@ done
 2. 시나리오 입력(`INPUT-SPEC.md`: 기능 요청 + OpenAPI 계약 + 디자인) 준비.
 3. `/dddart` 구동 — claude판(`dddart/`)·codex판(`codex-dddart/`). claude는 메인이 Coordinator로 시뮬레이션(에이전트 정의 주입 spawn·게이트는 INPUT-SPEC 기반 고정답).
 4. 구동 후 `git diff`로 산출물 전량 포착.
-5. `rubric/`(RUBRIC·EVAL-METHOD) 적용 — ① 갭 원장(어디까지 해냈나) ② 품질(57차원·치명17·빌드게이트). 결과지 → `results/<YYYYMMDD-HHMM>-<scenario>-<variant>.md`.
+5. `rubric/`(RUBRIC·EVAL-METHOD) 적용 — ① 갭 원장(어디까지 해냈나) ② 품질(57차원·치명18·FID 활성 시 20·빌드게이트). 결과지 → `results/<YYYYMMDD-HHMM>-<scenario>-<variant>.md`.

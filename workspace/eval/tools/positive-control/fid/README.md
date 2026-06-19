@@ -57,8 +57,8 @@ bash workspace/eval/tools/positive-control/fid/fixture/run.sh
 - ✅ **false regression 해소(2026-06-19)**: 연속 동종 slot **collapse**(`compare_layout.dart _collapse`·schema §3)로 시안 div 흡수 vs 코드 `Text`×2 비대칭 해소. run.sh **G 케이스** 반증·8차 detail hero L2 ✓(`추가=[text]` 해소). 진짜 차이(E·F·L1) FAIL 유지(회귀 0).
 - ⬜ 위젯 변종 A~J 정식 fixture(8차 실물로 핵심 입증·정식 변종은 9차 후속).
 
-→ step 2a·2b **+ hero 보정 완료**. 측정 정확도 완성(L1 갭 포착·L2 등가 PASS·false regression 0). **게이트 활성 선결 = 표준 pump 진입점 규약(코퍼스 승인) 1건만 남음**(`RUBRIC.md §H` 조건 ②).
+→ step 2a·2b **+ hero 보정 + 표준 pump 진입점 규약(`screenProbes`) 완료(2026-06-19)**. **3선결 전부 충족 → FID-L1·L2 치명 게이트 활성**(`RUBRIC.md §H`·치명 18→20·9차가 `screenProbes` 자동 경로 첫 운용).
 
-## 결론 (도구 후 채움)
+## 결론
 
-⬜ FID-L2 평탄화가 등가 재구성을 흡수하고 진짜 차이만 잡음이 실증되면 게이트 활성 선결 충족. (현재: 사전등록만·도구 step 2 대기)
+✅ FID-L2 평탄화가 등가 재구성을 흡수하고 진짜 차이만 잡음 실증(`run.sh` 7케이스·8차 실물 등가 흡수·false regression 0) + 표준 pump 진입점 규약 `screenProbes` 충족 → **FID-L1·L2 치명 게이트 활성(2026-06-19·치명 18→20)**. 9차가 `screenProbes` 자동 덤프 경로 첫 운용·effect size·false regression율 첫 실측(N=1·확정 ≥2런).
