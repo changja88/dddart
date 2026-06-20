@@ -9,7 +9,7 @@
 - **트리거**: 10차 양판(`~/Desktop/dddart-run/dddart-20260619-2248-{claude,codex}`)·ultracode RCA(사실수집 6 + 적대검증 12·`wf_298fba27`) + 처방 적대 리뷰(6관점·`wf_e67d0daf`)·2026-06-20
 - **베이스 코퍼스**: `d30cd85`(feedback-012 R1~R7 머지본)
 - **검증 런**: 11차(양판)
-- **상태**: **R6+R1~R4 시술 완료(2026-06-20·양판·`run_fixtures` 31/0·diff 0·미커밋)**. R5(명세 dry-run 린터) 미시술 = 11차 결과 후 판단. 적대 리뷰 6/6 partial 반영·상세 설계 v2 = `workspace/design/2026-06-20-md1-invariant-pattern-remediation-plan.md`.
+- **상태**: **R6+R1~R4 시술 완료(2026-06-20·양판·`run_fixtures` 31/0·diff 0·커밋 `60a63aa`)**. §1·§2 라이브런 준비 완료(런폴더 `dddart-20260620-1206`·양엔진 재동기·설치본 R6+R1~R4 적재 실증). R5(명세 dry-run 린터) 미시술 = 11차 결과 후 판단. 적대 리뷰 6/6 partial 반영·상세 설계 v2 = `workspace/design/2026-06-20-md1-invariant-pattern-remediation-plan.md`.
 
 ## RCA — 3축의 곱 (적대검증·적대 리뷰로 정교화)
 
@@ -50,7 +50,7 @@
 - **결박**: R3∧R2 = do both or neither(명세가 VO 인자 박으면 R3 무효). R3/R4 load-bearing 철회.
 - **버림**: MD1 완화/예외(기각 — 8차가 @freezed로 됨 증명·규칙 아닌 패턴/기계가 답).
 
-## 시술 결과 (2026-06-20 — R6+R1~R4·양판·미커밋)
+## 시술 결과 (2026-06-20 — R6+R1~R4·양판·커밋 `60a63aa`)
 - **R6 ✅** `check_models.dart:75` MD1 메시지에 컬렉션 루트 named factory 템플릿(`_collectionFieldRe`+`isRoot` 분기)·양판 cp diff 0. fixture **F18a**(컬렉션 plain→템플릿)·**F18b**(@freezed 침묵 positive-control)·**F18c**(컬렉션無 plain→템플릿 미제시 과대범위 반증). `run_fixtures` 31/0(F1~F17 회귀 0).
 - **R1 ✅** architecture-ddd §4(컬렉션 named factory 예제 `WeeklyForecast.fromDays`+가드: 타입봉인 무의미·fromJson codegen·map/when 충돌·plain=MD1 스코프 한정 enum/exception/common 제외)·implementation-dart §4(map/when 장벽 표기)·양판.
 - **R2 ✅** design-architect(모델 @freezed 명세 필수·router=String 명세·**백스톱 정합 스캔** 신설·자기인증 금지)·houserules §4(_view 끼움 금지 반례)·양판(claude `agents/`↔codex `skills/dddart-design-architect` 번역 1:1).
