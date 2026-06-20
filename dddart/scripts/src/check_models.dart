@@ -47,6 +47,7 @@ final _fromJsonFactoryRe = RegExp(r'factory\s+\w+\.fromJson\s*\(');
 final _genFromJsonRe = RegExp(r'_\$\w+FromJson\s*\(');
 final _readHelperRe = RegExp(r'_read\w+\s*\(\s*Map<'); // 수기 타입 리더 선언
 final _formatExcRe = RegExp(r'\bFormatException\b');
+final _collectionFieldRe = RegExp(r'\b(?:List|Set|Map)\s*<'); // R6: 컬렉션 필드 신호
 
 List<Finding> runModels(BackstopContext ctx) {
   final out = <Finding>[];
@@ -66,13 +67,22 @@ List<Finding> runModels(BackstopContext ctx) {
     // ---- MD1: @freezed presence (entity/VO/root/state 공통)
     if (!_freezedRe.hasMatch(code)) {
       final cls = classM.group(1) ?? '?';
+      // R6(feedback-013): 컬렉션 필드를 가진 애그리거트 루트가 plain이면 named factory 정규화
+      // 템플릿을 교정에 인라인한다 — "정렬 불변식을 봉인하려 plain으로"라는 막판 방황을 막판
+      // 기계 붙여넣기로 바꾼다(타입봉인은 fromJson codegen·freezed map/when 충돌로 불가).
+      final collTemplate = (isRoot && _collectionFieldRe.hasMatch(code))
+          ? ' 정렬·중복제거 같은 컬렉션 불변식은 plain class 봉인이 아니라 named factory가 정규화한다'
+              '(타입봉인은 fromJson codegen·freezed map/when 충돌로 무의미·불가): '
+              '`const $cls._(); const factory $cls({required List<E> items}) = _$cls; '
+              'factory $cls.fromItems(List<E> raw) => $cls(items: <E>[...raw]..sort(...));`'
+          : '';
       out.add(Finding(
           'MD1',
           f,
           ms.lineOf(classM.start),
           '모델 클래스 `$cls`에 @freezed 미부착 — 엔티티·VO·State는 @freezed로 선언한다(수기 final class 모델 금지)',
           isState ? _ruleState : _ruleDdd,
-          '`@freezed abstract class $cls with _\$$cls`로 선언하고 직렬화는 생성 companion에 위임한다(enum은 @freezed 비대상 — @JsonValue 매핑).'));
+          '`@freezed abstract class $cls with _\$$cls`로 선언하고 직렬화는 생성 companion에 위임한다(enum은 @freezed 비대상 — @JsonValue 매핑).$collTemplate'));
     }
 
     // ---- MD2: 수기 직렬화 (entity/VO/root만 — State는 fromJson 없음)

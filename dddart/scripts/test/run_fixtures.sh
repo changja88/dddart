@@ -503,6 +503,42 @@ EOF
 OUT=$(run_backstop "$P" --diff-base "$BASE" --only nm); E=$?
 assert "F17b NM13 go_router import+라우트 리터럴 여전 차단(false-negative 반증)" 2 "NM13" - "$E" "$OUT"
 
+# ---------- F18: MD1 named-factory 템플릿(R6·feedback-013) — 컬렉션 루트 plain은 정렬 named factory 안내·@freezed 침묵
+P="$T/f18a"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/application/weather/domain_layer/weekly_forecast"
+cat > "$P/lib/application/weather/domain_layer/weekly_forecast/weekly_forecast.dart" <<'EOF'
+class WeeklyForecast {
+  const WeeklyForecast._(this.days);
+  final List<DailyForecast> days;
+}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only md); E=$?
+assert "F18a MD1 컬렉션 plain 루트 → named factory 템플릿 안내(R6)" 2 "named factory" - "$E" "$OUT"
+
+P="$T/f18b"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/application/weather/domain_layer/weekly_forecast"
+cat > "$P/lib/application/weather/domain_layer/weekly_forecast/weekly_forecast.dart" <<'EOF'
+@freezed
+abstract class WeeklyForecast with _$WeeklyForecast {
+  const WeeklyForecast._();
+  const factory WeeklyForecast({required List<DailyForecast> days}) = _WeeklyForecast;
+  factory WeeklyForecast.fromDays(List<DailyForecast> days) => WeeklyForecast(days: days);
+}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only md); E=$?
+assert "F18b @freezed+named factory 루트 침묵(positive-control)" 0 - "MD1" "$E" "$OUT"
+
+P="$T/f18c"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/application/wallet/domain_layer/money"
+cat > "$P/lib/application/wallet/domain_layer/money/money.dart" <<'EOF'
+class Money {
+  const Money._(this.amount);
+  final int amount;
+}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only md); E=$?
+assert "F18c 컬렉션 없는 plain 루트 → MD1 발화·템플릿 미제시(과대범위 반증)" 2 "MD1" "named factory" "$E" "$OUT"
+
 echo ""
 echo "결과: PASS $PASS / FAIL $FAIL"
 [ $FAIL = 0 ]
