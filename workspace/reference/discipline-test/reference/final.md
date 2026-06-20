@@ -1,16 +1,5 @@
 # dddart 테스트 규율 — 회귀 안전망·단언 FORM
 
-## P1 Source Sufficiency
-
-| field | value |
-|---|---|
-| purpose | dddart가 생성한 코드의 회귀 안전망 테스트 규율 단일 출처 — 무엇을 테스트할지(thick domain 무게중심)·오라클을 명세에서 끄는 법·헛테스트(vacuous)/디코이를 형태로 막는 단언 FORM 4형(+Either 양갈래)·생략 목록·반송 규율. |
-| use when | coder가 슬라이스의 행위 검증 테스트를 작성할 때, discipline-reviewer가 그 테스트의 비-vacuity를 감사할 때. |
-| exclude/handoff | Flutter 메커니즘(펌프 결정성·ProviderContainer.test·mocktail 더블·날짜 주입 셋업·네트워크 이미지 목)은 implementation-test, 판정 소유(정렬·구별은 도메인)는 architecture-ddd §5, 테스트 파일 위치(test/=lib 미러·sparse)는 discipline-houserules §1·§3, green 래칫·테스트 산출 의무는 coder로 위임. |
-| use 기준 | Flutter 공식 테스트 정전(many unit+widget·enough integration)·flutter_test matcher API(findsOneWidget·findsWidgets≡findsAny·find.descendant)·package:matcher(orderedEquals·isA().having)·Fowler(non-determinism·behaviors not implementation)·업계 합의(SWE@Google·dcm.dev) — 2026-06-17 확인. |
-| core criteria | 회귀 안전망(개발 드라이버 아님·옳은 명세 상태를 가둠)·디코이-불가 FORM 우선(보장이 형태에서)·5차 양판 실패(FC-2 M1/M3/M4 vacuity·FC-1/3 색충돌·codex 디코이)를 형태로 직격·날짜 주입(시간 의존 테스트 금지). |
-| P1 classification | sufficient(가이드 기준) — 단 비-vacuity *기계* floor는 §3.1 집합-크기(색-단독 단위)뿐이고 나머지 FORM 실효는 coder 사용 + reviewer 감사에 의존(정직 표기·기계 보장 아님). 재발 시 작성자 분리·정적 분석 승격(measure-first·009 후보). |
-
 > **출처:** Flutter 공식 테스트 정전(docs.flutter.dev/testing/overview — "many unit and widget tests ... enough integration tests")·flutter_test matcher API(api.flutter.dev/flutter/flutter_test — `findsOneWidget`·`findsWidgets`≡`findsAny`·`find.descendant`)·package:matcher(dart.dev — `orderedEquals`·`isA().having`)·Martin Fowler(Eradicating Non-Determinism·test behaviors not implementation)·업계 합의(SWE@Google·dcm.dev) — 2026-06-17 확인 · dddart 5차 양판 라이브런(FC-2 vacuity·FC-1/3 색충돌·codex 디코이) 트리거.
 > 본문 속 `(검증 §N)`은 작업장 자료조사(`workspace/design/2026-06-17-test-strategy-design.md`)의 출처 표기이며 로드 대상이 아니다. Flutter 메커니즘·결정성·더블은 implementation-test, 판정 소유는 architecture-ddd로 위임한다.
 
@@ -61,7 +50,7 @@ test('6개 condition의 listColor가 서로 다르다', () {
 });
 ```
 
-**판정단위는 색 *단독* N-distinct로 고정한다**(그래야 5차 색충돌을 형태로 막는다). `(아이콘, 색)` *쌍*의 Set으로 단위를 바꾸면 색이 충돌해도 아이콘이 달라 통과하는 우회가 생긴다 — 명세/골든이 색-단독을 정했으면 색만 `toSet`한다. 명세가 명시적으로 `(아이콘,색)` 쌍 단위를 정한 경우에만 record의 Set을 쓴다(단위 *선택*은 별도 eval 트랙·grader A13).
+**판정단위는 명세/골든이 정한 구별 축(색·아이콘·코드·라벨 등) *단독* N-distinct로 고정한다**(예: weather는 색 단독 — 그래야 5차 색충돌을 형태로 막는다). 여러 축의 *쌍*(예 `(아이콘, 색)`)의 Set으로 단위를 바꾸면 한 축이 충돌해도 다른 축이 달라 통과하는 우회가 생긴다 — 명세/골든이 단일 축을 정했으면 그 축만 `toSet`한다. 명세가 명시적으로 다축 쌍 단위를 정한 경우에만 record의 Set을 쓴다(단위 *선택*은 별도 eval 트랙·grader A13).
 
 색 매핑이 `ui_extension`에 살면(architecture-ui §5 — 색·아이콘 매핑의 *유일한 자리*) `c.listColor`가 그 extension getter다 — 이 거주는 정당하므로 discipline-reviewer는 이를 판정 빈혈(§2 blocker)로 오판하지 않는다(UI 매핑 ≠ 도메인 판정).
 

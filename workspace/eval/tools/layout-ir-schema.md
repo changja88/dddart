@@ -103,6 +103,8 @@ L2 게이트 비교 시:
 ```
 (daily-detail = `areas`=[appbar, section"히어로"(children: block.slots=[text,icon,text,group[text,text]]), section"지표"(children: repeat-group unit.slots=[icon,text,text]), bottomnav]. 검산 = `fidelity-eval-design.md §8.1`.)
 
+> **표본 일반성(2026-06-20)**: §4 예시(weekly-list·daily-detail)는 **weather 1종 실표본**이다. 노드 트리(§1)·번역표(§2)·평탄화(§3)는 *언어중립*(§0 불변)이라 시나리오 무관이나, **§6 4파라미터의 거짓-FAIL 반증(positive-control)은 현재 이 weather morphology 1종으로만 수행**됐다 — 폼/그리드/탭 셸 등 다른 화면류 교차 검산은 **2번째 실시나리오 라이브런 산출물로 보강한다**(measure-first·이론 표본 창작 금지). 어휘·평탄화 규칙 자체는 화면류 무관이나, 4파라미터 *확정*은 표본 다양성 위에서다.
+
 ## 5. 대조 예시 — 8차 claude *수기 구조 대조* vs 위 시안 (스키마 **설계 예시**·도구 구현 전 작성)
 
 > ⚠️ 아래는 **사람이 수기로 짠 예시**다(스키마 설계 시 작성). 이후 도구(`extract_layout`·`dump_probe`+`dump_to_ir`·`compare_layout`)가 구현돼 8차 실물로 자동 실증됐고 **FID 게이트는 활성(2026-06-19·`§7`·`RUBRIC §H`)**. 이 절은 "스키마가 무엇을 잡는가"의 *설계 의도*로 보존한다.

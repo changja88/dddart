@@ -62,3 +62,5 @@ bash workspace/eval/tools/positive-control/fid/fixture/run.sh
 ## 결론
 
 ✅ FID-L2 평탄화가 등가 재구성을 흡수하고 진짜 차이만 잡음 실증(`run.sh` 7케이스·8차 실물 등가 흡수·false regression 0) + 표준 pump 진입점 규약 `screenProbes` 충족 → **FID-L1·L2 치명 게이트 활성(2026-06-19·치명 18→20)**. 9차가 `screenProbes` 자동 덤프 경로 첫 운용·effect size·false regression율 첫 실측(N=1·확정 ≥2런).
+
+> **표본 morphology 한계(2026-06-20)**: A~J 변종은 전부 **weekly-list card `[text,icon,text]` 1 morphology**(weather)를 위젯으로 다르게 묶은 것이다 — 평탄화·§6 4파라미터의 거짓-FAIL 0이 *이 구조*에서만 실증됐다. 폼/그리드/다중 section/중첩 repeat/탭 셸 등 **다른 화면류 거짓-FAIL 반증은 2번째 실시나리오 라이브런 산출물로 보강**한다(measure-first·이론 표본 창작 금지). 따라서 §6 4파라미터는 "이 morphology 잠정 확정"이며 화면류 일반 확정은 표본 다양성 후다.

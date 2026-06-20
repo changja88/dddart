@@ -1,16 +1,5 @@
 # 상태 아키텍처 — ViewModel 3변종·State 계약·생명주기
 
-## P1 Source Sufficiency
-
-| field | value |
-|---|---|
-| purpose | dddart가 생성하는 Flutter 코드에서 "들어온 데이터가 앱 안에서 화면들 사이에 어떻게 살아 있는가"의 단일 출처 — VM 3변종, State 계약, 에러 2채널, SharedState, keepAlive 수명 결정, 합성 루트의 상태 동작. |
-| use when | VM·State·SharedState·Service를 설계·작성·검수할 때, 에러 표시 경로를 결정할 때, 상태의 수명(keepAlive)·공유 범위를 결정할 때, root의 상태 동작을 만들 때. |
-| exclude/handoff | 파일·폴더·명명·import 사실은 discipline-houserules, 데이터가 앱 바깥과 오가는 방식(Either 계약·safeApiCall·캐시 저장)은 architecture-data, view 3단 판별·dumb 규율은 architecture-ui, UseCase 명명·판정 소유는 architecture-ddd, @riverpod·keepAlive 표기법은 implementation-riverpod으로 위임. |
-| core criteria | 제1 규약 §3.3·§3.6 전문 + §10-5 ① 확정 5건(State 계약·에러 2채널·컨트롤러 View 소유·전 VM freezed State·base VM 없음) + §9-11 폐지 처방 + 본설계 §8 lens 경계. HaffHaff-App 실측 관례("플래그→listen→표시→리셋" 33파일)의 표준화. |
-| source priority | 1 제1 규약(2026-06-12 §10-5 ① 본문 승격 반영) 2 본설계 §8(lens 경계·귀속) 3 HaffHaff-App 실물(BadRequestResponse 필드 철자 등 — 2026-06-12 확인) . |
-| P1 classification | sufficient — 예제 코드는 규약 명시 요소(표준 필드·listen·isShow·consumeError·조회 throw)의 조립이며 신규 규칙 발명 없음. BadRequestResponse 필드는 HaffHaff 실물 철자(errorType·msg·isShow). 스크롤톱 상세는 §10-5 ④ 미결로 implementation-flutter 전방 위임. |
-
 > **출처:** 제1 규약(dddart 표준 파일트리, 2026-06-11~12) §3.3·§3.6·§8·§9·§10-5 ① · dddart 파이프라인 본설계(2026-06-12) §8 · HaffHaff-App 실물 대조(2026-06-12).
 > 본문 속 `(규약 §N)`·`(본설계 §N)`은 **출처 표기**(설계 문서의 절 번호)이며 로드 대상이 아니다 — 규칙 자체는 본문에 자족적으로 서술된다. 로드 가능한 위임은 "스킬명 + §번호(또는 주제)"와 공유 reference(`undecidable.md`)뿐.
 
@@ -192,7 +181,7 @@ HaffHaff의 `refresh_notifier`(8개 BC의 VM 12개를 import해 `ref.refresh`를
 root의 위치·폴더 구조·`root_` 접두 사실은 discipline-houserules §1 소유다. 이 절은 root 구성물의 **상태 동작 규율**이다 (규약 §3.6 "root 내부 협력 규칙"):
 
 - **root_vm은 "거의 빈 VM"이다** — 탭·뱃지·강제업데이트 같은 앱 전역 표시 상태만 갖는다. 탭 인덱스 자체는 go_router의 `StatefulNavigationShell`이 보유하므로 그보다도 가볍다. 특정 도메인 기능이 자라기 시작하면 그 화면은 root가 아니다 — 판별은 공유 reference `undecidable.md` §6.
-- **handler 3종은 ViewModel의 Service 변종이다** — `@Riverpod(keepAlive: true)` Notifier로 작성하고, **root_vm이 `build()`에서 ref.watch로 활성화**한다. plain class로 두면 ref가 없어 WidgetRef 필드 보유 안티패턴(HaffHaff `RootLifecycleHandler` 실측)이 재발한다.
+- **root handler들은 ViewModel의 Service 변종이다**(앱에 필요한 플랫폼 이벤트 handler 수만큼 — 예: 푸시 목적지 분배·앱 라이프사이클; **개수는 닫힌 목록 아님**) — `@Riverpod(keepAlive: true)` Notifier로 작성하고, **root_vm이 `build()`에서 ref.watch로 활성화**한다. plain class로 두면 ref가 없어 WidgetRef 필드 보유 안티패턴(HaffHaff `RootLifecycleHandler` 실측)이 재발한다.
 - **root_initializer는 부수효과만 책임진다**(SDK 초기화·hive 엔진·어댑터 조립) — 결과 객체를 반환하지 않는다. 자동로그인 성패·강제업데이트 여부 같은 **시동 질문은 root_vm이 `build()`에서 UseCase를 호출해 직접 획득**한다 — ProviderScope 이전/이후 간극을 전달이 아니라 재조회로 해소한다(이미 열린 로컬 box 조회라 사실상 무비용).
 - **rootRouter는 plain 전역 변수다**(provider 아님) — redirect의 상태 확인은 UseCase를 직접 생성·호출한다. DI 없음 덕분에 ref가 필요 없다(HaffHaff redirect의 TokenManager 직행 교정).
 - **게이트의 상태 주인**: 게이트 표시 여부는 root_vm이, 게이트 화면 내부 상태는 게이트 자신의 VM(`root_<게이트>_vm`)이 갖는다. 차단 메커니즘은 root_router 최상위 redirect + scaffold의 게이트 라우트 — 탭 프레임 밖 라우트까지 덮는다.

@@ -189,4 +189,4 @@
 - **적대 검증**: 워크플로우 `wf_81f22781-657` — 6 구조축 검증(53항목·**drop 0**·근거 슬립 3 교정·치명 promote 3/demote 2·누락 14 흡수).
 - 합성·작성·판정 소유: 메인 루프. 검증 입력 노트 `_synthesis-dimensions.md`(폐기).
 
-(채점 절차·집계·등급·완료 = `EVAL-METHOD.md` · 결과지 = `rubric-metrix.md` · 고정 입력 = `tools/SCENARIO-S1.md`)
+(채점 절차·집계·등급·완료 = `EVAL-METHOD.md` · 결과지 = `rubric-metrix.md` · 고정 입력 = `tools/SCENARIO-<시나리오>.md`〔라이브런 시나리오 정본 — 예: `SCENARIO-WEATHER`·`SCENARIO-S1`〕)

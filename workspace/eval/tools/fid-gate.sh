@@ -35,7 +35,19 @@ dart run "$EXTRACT" "$DREF" --out "$WORK/ref.json" || { echo "❌ extract_layout
 # 시안 화면 이름 수집(bash 3.2 호환) · role 분류
 SCREENS=()
 while IFS= read -r line; do [ -n "$line" ] && SCREENS+=("$line"); done < <(python3 -c "import json;[print(s['screen']) for s in json.load(open('$WORK/ref.json'))['screens']]")
-classify() { case "$(printf '%s' "$1" | tr 'A-Z' 'a-z')" in *detail*|*day*) echo detail;; *list*|*week*) echo list;; *) echo other;; esac; }
+# 코드 role ↔ 시안 화면명 매칭(시나리오별 명명 휴리스틱 금지·임의 화면쌍 대조 차단):
+#   ① role==screen 정확  ② role⊂screen 또는 screen⊂role 부분(유일할 때만)  ③ 시안·코드 각 1화면이면 단일 특례  ④ 불일치=미검증
+match_screen() {  # $1=code role → 시안 screen명 또는 빈값
+  local role="$1" s hit="" n=0
+  for s in "${SCREENS[@]}"; do [ "$s" = "$role" ] && { printf '%s' "$s"; return; }; done
+  for s in "${SCREENS[@]}"; do
+    case "$s" in *"$role"*) hit="$s"; n=$((n+1)); continue;; esac
+    case "$role" in *"$s"*) hit="$s"; n=$((n+1));; esac
+  done
+  [ "$n" = 1 ] && { printf '%s' "$hit"; return; }
+  { [ "${#SCREENS[@]}" = 1 ] && [ "$NTREE" = 1 ]; } && { printf '%s' "${SCREENS[0]}"; return; }
+  printf ''
+}
 
 # ── 2. 표준 pump 규약 준수(screenProbes 노출)? ──
 SUP="$(find "$OUT/test" -name _support.dart 2>/dev/null | head -1)"
@@ -58,12 +70,12 @@ fi
 ls "$WORK"/code-tree-*.json >/dev/null 2>&1 || { echo "⚠️ code-tree 산출 0 → A1 폴백"; exit 3; }
 
 # ── 4. 코드 layout-ir(dump_to_ir) → 시안 이름으로 라벨(compare 이름매칭) → 대조 ──
+NTREE=$(ls "$WORK"/code-tree-*.json 2>/dev/null | wc -l | tr -d ' ')
 FAIL=0; CMP=0
 for tree in "$WORK"/code-tree-*.json; do
   role="$(basename "$tree" .json)"; role="${role#code-tree-}"
-  cls="$(classify "$role")"
-  sc=""; for s in "${SCREENS[@]}"; do [ "$(classify "$s")" = "$cls" ] && { sc="$s"; break; }; done
-  [ -n "$sc" ] || { echo "⚠️ 코드 role '$role'($cls)에 대응하는 시안 화면 없음 — 건너뜀"; continue; }
+  sc="$(match_screen "$role")"
+  [ -n "$sc" ] || { echo "⚠️ 코드 화면 '$role'에 대응하는 시안 화면명 없음 — 임의 매칭 금지·이 화면 미검증(screenProbes role 키를 design-ref screen명 기반으로 — implementation-test §7)"; continue; }
   dart run "$DUMP2IR" "$tree" --screen "$sc" --out "$WORK/got-$role.json" || { FAIL=1; continue; }
   echo "── 대조: 코드 role '$role' ↔ 시안 '$sc' ──"
   dart run "$COMPARE" --ref "$WORK/ref.json" --got "$WORK/got-$role.json" --screen "$sc" --gate; e=$?

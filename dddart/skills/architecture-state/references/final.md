@@ -181,7 +181,7 @@ HaffHaff의 `refresh_notifier`(8개 BC의 VM 12개를 import해 `ref.refresh`를
 root의 위치·폴더 구조·`root_` 접두 사실은 discipline-houserules §1 소유다. 이 절은 root 구성물의 **상태 동작 규율**이다 (규약 §3.6 "root 내부 협력 규칙"):
 
 - **root_vm은 "거의 빈 VM"이다** — 탭·뱃지·강제업데이트 같은 앱 전역 표시 상태만 갖는다. 탭 인덱스 자체는 go_router의 `StatefulNavigationShell`이 보유하므로 그보다도 가볍다. 특정 도메인 기능이 자라기 시작하면 그 화면은 root가 아니다 — 판별은 공유 reference `undecidable.md` §6.
-- **handler 3종은 ViewModel의 Service 변종이다** — `@Riverpod(keepAlive: true)` Notifier로 작성하고, **root_vm이 `build()`에서 ref.watch로 활성화**한다. plain class로 두면 ref가 없어 WidgetRef 필드 보유 안티패턴(HaffHaff `RootLifecycleHandler` 실측)이 재발한다.
+- **root handler들은 ViewModel의 Service 변종이다**(앱에 필요한 플랫폼 이벤트 handler 수만큼 — 예: 푸시 목적지 분배·앱 라이프사이클; **개수는 닫힌 목록 아님**) — `@Riverpod(keepAlive: true)` Notifier로 작성하고, **root_vm이 `build()`에서 ref.watch로 활성화**한다. plain class로 두면 ref가 없어 WidgetRef 필드 보유 안티패턴(HaffHaff `RootLifecycleHandler` 실측)이 재발한다.
 - **root_initializer는 부수효과만 책임진다**(SDK 초기화·hive 엔진·어댑터 조립) — 결과 객체를 반환하지 않는다. 자동로그인 성패·강제업데이트 여부 같은 **시동 질문은 root_vm이 `build()`에서 UseCase를 호출해 직접 획득**한다 — ProviderScope 이전/이후 간극을 전달이 아니라 재조회로 해소한다(이미 열린 로컬 box 조회라 사실상 무비용).
 - **rootRouter는 plain 전역 변수다**(provider 아님) — redirect의 상태 확인은 UseCase를 직접 생성·호출한다. DI 없음 덕분에 ref가 필요 없다(HaffHaff redirect의 TokenManager 직행 교정).
 - **게이트의 상태 주인**: 게이트 표시 여부는 root_vm이, 게이트 화면 내부 상태는 게이트 자신의 VM(`root_<게이트>_vm`)이 갖는다. 차단 메커니즘은 root_router 최상위 redirect + scaffold의 게이트 라우트 — 탭 프레임 밖 라우트까지 덮는다.

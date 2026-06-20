@@ -1,16 +1,5 @@
 # 데이터 아키텍처 — Either 계약·실패의 단일 출구·계약 스냅샷
 
-## P1 Source Sufficiency
-
-| field | value |
-|---|---|
-| purpose | dddart가 생성하는 Flutter 코드에서 "데이터가 앱 바깥(서버·디스크)과 어떻게 오가는가"의 단일 출처 — safeApiCall 정규화, Repo Either 계약, DataSource 직반환, 로컬 2층, 계약 스냅샷 체계, 계약 위험 행위. |
-| use when | DataSource·Repo·infra service를 설계·작성·검수할 때, 실패 처리 경로를 만들 때, 로컬 캐시 위치를 결정할 때, 서버 계약(OpenAPI 스냅샷)을 인용·검증할 때. |
-| exclude/handoff | 파일·폴더·명명 사실은 discipline-houserules, 에러를 State에 담아 표시·소비하는 방식과 메모리 수명은 architecture-state, 도메인 엔티티 모델링·판정 소유는 architecture-ddd, retrofit·dio·hive 표기법은 implementation-flutter로 위임. |
-| core criteria | 제1 규약 §3.4 전문 + §9-9(로컬 2층) + §10-5 ①(실패의 단일 출구)·②(Right=성공) + 본설계 §2·§4·§5(계약 스냅샷 산출물·동결·사용 규율) + 백스톱 설계 §7(extract_contract.dart — 도구 사양 단일 근거). |
-| source priority | 1 제1 규약(2026-06-12) 2 본설계 §2·§4·§5·§9 3 백스톱 설계 §7 4 HaffHaff-App 실물(safeApiCall·BadRequestResponse 철자 — 2026-06-12 확인). |
-| P1 classification | sufficient — safeApiCall 골격 예제는 규약 계약(전 예외 정규화·errorType 3어휘·Right=성공)의 직역. BadRequestResponse는 실물 필드 3개(errorType·msg·isShow)만 사용, 추가 필드 발명 없음. 클라 생성 에러 `isShow: true`는 규약 §3.4 *왜*("isShow:false 무음"을 고장으로 진단)의 직접 함의로 도출(2026-06-12 fidelity 렌즈 P1 교정 — 초안의 isShow:false는 고장의 재성문화였다). 페이지네이션·인증 등 API 관례는 원료에 없어 비서술 — 스냅샷 밖 가정은 §8 계약 위험으로 처리된다. |
-
 > **출처:** 제1 규약(dddart 표준 파일트리, 2026-06-11~12) §3.4·§6·§9·§10-5 · dddart 파이프라인 본설계(2026-06-12) §2·§4·§5·§9 · 백스톱 스크립트 설계(2026-06-12) §7 · HaffHaff-App 실물 대조(2026-06-12).
 > 본문 속 `(규약 §N)`·`(본설계 §N)`·`(백스톱 설계 §N)`은 **출처 표기**이며 로드 대상이 아니다 — 규칙 자체는 본문에 자족적으로 서술된다. 로드 가능한 위임은 "스킬명 + §번호(또는 주제)"와 공유 reference(`undecidable.md`)뿐.
 
@@ -50,9 +39,9 @@ infra_layer는 종류 3폴더다 (규약 §3.4 — 폴더·명명 사실은 disc
 
 - *왜* — HaffHaff 실측: 기존 safeApiCall은 DioException만 잡아 파싱 실패가 그물 밖으로 탈출해 미정의 동작(크래시·무한 로딩)이 됐고, 타임아웃은 `isShow:false`로 무음, 좋아요류 에러는 Either 통째 폐기 — **실패의 절반이 사용자에게 도달하지 못했다.**
 - 서버가 에러 바디를 주면 `BadRequestResponse.fromJson`으로 그대로 싣고(서버가 보낸 `isShow`를 그대로 존중), 클라에서 생긴 실패는 `errorType`으로 기인을 구분해 생성한다 — 어휘는 `timeout`·`parse`·`unknown`.
-- `BadRequestResponse`는 freezed 모델로 필드 3개다(HaffHaff 실물 철자): `errorType`(JSON `error_type`)·`msg`(`msg`)·`isShow`(`is_show`). **클라 생성 에러는 `isShow: true`로 만든다** — 위 *왜*가 "타임아웃은 isShow:false로 무음"을 고장으로 진단했으므로, 정규화가 그 무음을 재생산하지 않는다(표시·소비 정책 자체는 architecture-state §4 소유).
+- `BadRequestResponse`의 **역할 계약** = 정규화된 에러(기인 `errorType` + 메시지 `msg` + 표시여부 `isShow`). **클라 생성 에러는 `isShow: true`로 만든다** — 위 *왜*가 "타임아웃은 isShow:false로 무음"을 고장으로 진단했으므로, 정규화가 그 무음을 재생산하지 않는다(표시·소비 정책 자체는 architecture-state §4 소유). **필드 철자(`error_type`/`msg`/`is_show`)는 HaffHaff 봉투 *예시*다** — 대상 서버 에러 봉투가 다르면(예: `{code, message}`·RFC7807 `{type, title, status, detail}`) 그 스키마로 `BadRequestResponse`를 모델링하고 `fromJson`을 맞춘다(기존 서버에 확립된 봉투 우선 — `§3` Either 방향 규약과 평행).
 
-표준 골격 — 계약의 직역이다(dio·retrofit 표기법 상세는 implementation-flutter §4 소유):
+표준 골격 — 계약의 직역이다(아래 코드의 `error_type`/`msg`/`is_show`는 **HaffHaff 봉투 기준 예시**·대상 서버 봉투에 맞춰 `fromJson`·필드 조정; dio·retrofit 표기법 상세는 implementation-flutter §4 소유):
 
 ```dart
 // common/network/safe_api_call.dart — 파일명 = 주 선언명 snake_case. Right=성공 (§3)
