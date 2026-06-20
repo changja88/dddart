@@ -25,7 +25,7 @@
 - **D-License = 고려 일절 없음**(D-License 결정·§7 라이선스 잔여·"Track A 보류" 분기 **전부 삭제**). 이미지 즉시 다운로드·번들. **라이선스 고려 코퍼스 추가 절대 금지(속도 우선·사용자 명시).**
 - **D-Floor = 대기**(induce 우선 → 육안 확인 → 미달이면 그때 floor). 속도·육안과 정합. ⚠️ 적대 리뷰 경고: 산문 induce는 screenProbes가 런별 실패 N=2 입증 → 첫 런 미달 가능·육안 포착 후 floor 추가.
 - **D-Split = Track B(layout) 먼저·A(image) 다음** 권장(육안이라 동시도 무방 — 사용자 눈이 둘을 분별).
-- **D1=asset/ · D4=layout-ir 노드 SSOT(extract_design 무수정) · D7=도구가 구조위치 키 산출 · D-Own=architecture-ui · 나머지 = 추천대로.**
+- **D1=assets/(Flutter 표준·HaffHaff 모방 회피) · D4=layout-ir 노드 SSOT(extract_design 무수정) · D7=도구가 구조위치 키 산출 · D-Own=architecture-ui · 나머지 = 추천대로.**
 
 > 위 확정으로 이번 iteration은 **순수 induce + 육안**(자동게이트·floor·라이선스 로직 0). 죽은 이음매 봉합(§2.1d Coordinator 배선·§2.3 coder 명세참조·AppAsset const 등재)과 양판 미러는 그대로 필수(이건 "느림"이 아니라 작동 전제).
 
@@ -53,7 +53,7 @@
 | F2 | **7번째 토큰 `app_asset`(class `AppAsset`) 슬롯 예약** — 백스톱 ST10 foundation7(`check_structure.dart:172-174`)·ST4 필수(`:323`). **단 의미·규율은 미문서**(houserules는 `:85` 트리 파일명만·의미는 설계원장 `2026-06-11-dddart-file-tree.md:85,372`·architecture-ui 0건). | 렌즈1·4·6·7 정정 | architecture-ui 문서화 = **첫 의미 정의**(가정보다 무거움). 의미 소유 결정 = D-Own. |
 | F3 | **신규 백스톱 불필요(정합성용)** — 이미지 4산출물이 57검사 비매치. **단 에셋은 lib 밖 project-root**(lib 안이면 ST 디렉터리 화이트리스트 거짓 FAIL). | 맵6·렌즈3·6 확인 | 동전 뒷면 = asset-presence 검사도 부재 = missing-asset 안전망 공백(F-net). |
 | F4 | **AppAsset floor 부재** — NM10(`check_naming.dart:231`)은 `Color(0x`·생 `TextStyle(`만, `common.dart:175`가 문자열 *내용* 마스킹 → Image.asset 경로 리터럴 불검출. | 렌즈 전원 확인 | 산문만으론 raw 리터럴 도망(HaffHaff 216 Image.asset+6 AssetImage 전부 raw·named const 0). D-Floor. |
-| **F5(정정)** | HaffHaff 실측: `asset/`(단수)·`asset/img/{icon,logo,lottie}`·pubspec **디렉터리 등록**(`- asset/img/`)·`Image.asset('asset/img/...', width:, height:)` 216건·**AssetImage 6건**(둘 다 raw·named const 부재). 서버 이미지는 `Image.network` 아니라 **cached_img 컴포넌트군**. | 렌즈1·4·6 정정 | named const(AppAsset)가 dddart 신규 종류. §7은 *정적 번들*에 한정(서버=cached_img·범위 밖). |
+| **F5(정정)** | HaffHaff 실측: `asset/`(단수)·`asset/img/{icon,logo,lottie}`·pubspec **디렉터리 등록**(`- asset/img/`)·`Image.asset('asset/img/...', width:, height:)` 216건·**AssetImage 6건**(둘 다 raw·named const 부재). 서버 이미지는 `Image.network` 아니라 **cached_img 컴포넌트군**. | 렌즈1·4·6 정정 | **HaffHaff 실측 *인용*일 뿐 dddart 기준 아님**(dddart 디렉터리=Flutter 표준 `assets/`·D1·모방 회피). named const(AppAsset)는 dddart foundation 토큰 규약(HaffHaff엔 없음=반면교사). §7 정적 번들 한정(서버=cached_img·범위 밖). |
 | **F-FID(신규)** | **FID-L1·L2 게이트는 이미 active**(RUBRIC §H·치명 20·2026-06-19). dump_probe가 *렌더된* Image만 `img:true`→`role:image`, compare_layout L1이 누락 FAIL. **막힌 건 screenProbes 노출뿐**. | 렌즈8 critical | "deferred"는 신규 게이트 신설에 적용·이미 active한 게이트 작동까지 미루면 측정 자해. |
 | **F-net(신규)** | **missing-asset 안전망 증발** — 백스톱 asset 미검사 + `flutter build`는 환경 조건부(`dddart.md:158`·sub user-driven). **미채택(0건)은 grep이 잡음**(11차 D-2 실증)·build는 "선언+파일누락"만. | 렌즈6·8 정정 | 채택 판정 = grep + L1 image role(결정론)·A1은 L4 미관만. |
 | **F-arch(자료조사)** | dddart "입력 유도(자연어 명세) + 출력 게이트(결정론 백스톱)" 아키텍처가 **학술 정답 3중 확증**: CRANE(2502.09061·decoupling **+7~9%p**·구문100%)·"Let Me Speak Freely"(2408.02442·출력 JSON강제 **−10~30%** format tax)·Kamoi(2406.01297·자기교정은 *reliable external feedback*일 때만). | 자료조사 4갈래 | **새 메커니즘 발명 불필요**·하드 제약/VLM 채점 루프 명시 기각. layout-ir 게이트 = Kamoi "신뢰 외부 신호". |
@@ -84,14 +84,14 @@
 ### 2.3 coder + implementation-flutter ↔ codex (수동/자동)
 
 - **implementation-flutter/references/final.md** [자동 미러·배포본 편집]: 신규 §7 "이미지 — Image.asset 번들"(현 §7 테스트→§8·**TOC `:10-15`에 §7+§8 둘 다 정비**·codex SKILL.md `:30/42` §7→§8 참조도 동반):
-  - 판별 = **출처**: design-ref/images 번들 → `Image.asset(AppAsset.x, width:, height:)` (정적·Track A 범위). 서버 콘텐츠는 **HaffHaff cached_img 컴포넌트군 처리·범위 밖**(Image.network 직참조는 방언 아님).
+  - 판별 = **출처**: design-ref/images 번들 → `Image.asset(AppAsset.x)` (정적·Track A 범위). **치수(width/height)는 시안 명시값 있을 때만 부여**(없으면 레이아웃 제약 Expanded/AspectRatio에 맡김 — 자료조사 §2-A "상대 기하·픽셀 절대 금지[Anima 함정]" 정합·**HaffHaff "Image.asset에 항상 width/height" 습관 비채택**). 서버 콘텐츠는 **HaffHaff cached_img 컴포넌트군 처리·범위 밖**(Image.network 직참조는 방언 아님).
   - **errorBuilder는 비-Image 폴백(Icon/Container)** 권장(다른 Image 반환 시 FID 게이트 `img:true` 우회=거짓양성·렌즈8).
   - mockNetworkImages 함정은 **implementation-test 소유**(cross-ref·이 파일 §6은 위젯수명).
 - **coder.md** [수동]:
   - 스킬 라우팅 불릿(`:43`): Image/asset → implementation-flutter.
-  - **pubspec `assets:` 선언 + project-root `asset/` 복사 = presentation 슬라이스 정상 산물**(계층-밖 반송 예외·`:41` 긴장 해소·둘 다 묶어 면책·"빌드 자원이라 계층 트리 밖"). 의존성 핀(`:60`)과 구분.
+  - **pubspec `assets:` 선언 + project-root `assets/` 복사 = presentation 슬라이스 정상 산물**(계층-밖 반송 예외·`:41` 긴장 해소·둘 다 묶어 면책·"빌드 자원이라 계층 트리 밖"). 의존성 핀(`:60`)과 구분.
   - **AppAsset const 등재 단계**(렌즈5 누수 봉합): 명세 image 항목의 경로를 `foundation/app_asset.dart` AppAsset static const로 등재 → 위젯은 `Image.asset(AppAsset.x)`. raw 경로 리터럴 금지(D-Floor 시 기계 강제).
-  - **복사 순서**: 명세 image 항목 → `cp design-ref/images/<f>` → 프로젝트 `asset/...` → AppAsset const → Image.asset → pubspec assets:. Image.asset 직후 `test -f asset/...`로 cp 성공 검증(missing-asset 안전망·F-net).
+  - **복사 순서**: 명세 image 항목 → `cp design-ref/images/<f>` → 프로젝트 `assets/...` → AppAsset const → Image.asset → pubspec assets:(**파일 개별 등록**·디렉터리 통째 등록 금지=앱 크기·D6·D7 평면 파일명 정합·**HaffHaff 디렉터리 등록 비답습**). Image.asset 직후 `test -f assets/...`로 cp 성공 검증(missing-asset 안전망·F-net).
   - **§7 판별 근거 = "명세 화면 절의 image 항목"**(layout-ir 직참 아님 — coder는 명세만 받음·렌즈7 critical).
   - **구조 plan echo(자료조사 §2-A·self-planning)**: coder가 presentation 슬라이스 생성 *직전* 명세 L1·L2 골격(§2.2가 명세 화면 절에 박은 area 트리·coder는 명세만 받음)을 한 번 자기 말로 재진술하고 그에 맞춰 view/section 분해. 앵커 = coder.md **"작업 방식" 절 bottom-up 순서 불릿 앞**(키워드 앵커·줄번호 X·미러 규약 §2). self-planning 2303.06689는 **코드 Pass@1 +11.9~25.4%**(*시각 충실* 효과크기 미측정·메커니즘 차용·효과 약속 아님).
 
@@ -124,7 +124,7 @@
 ### 기존 결정(정정):
 | ID | 결정 | 권장 |
 |---|---|---|
-| **D1** 에셋 루트 | `asset/`(HaffHaff 단수·[[haffhaff-reference-app]]) vs `assets/` 표준 | **`asset/`** |
+| **D1** 에셋 루트 | `assets/`(Flutter 표준) vs `asset/`(HaffHaff 단수=**모방**·기각) | **`assets/`** — dddart 규약은 AppAsset *클래스*(foundation 토큰)만 정하고 디렉터리명 미정·산출물 표본 0 → Flutter 표준 따름([[haffhaff-reference-app]] 모방 회피) |
 | **D4** 이미지 src 출처 | ~~extract_design images[]~~ → **layout-ir image 노드 SSOT**(extract_design 무수정·D4 모순 해소) | 확정 |
 | **D5** 다운로드 실패 | **결정론 래퍼+매니페스트**(LLM 재량 최소) 또는 "전부 성공 아니면 false" | — |
 | **D6** stock/placeholder | 첫 iteration 무차별+L4 눈(단 디렉터리 등록이라 폴더 통째 번들=앱 크기 비용 명시) | — |
@@ -168,7 +168,8 @@
 
 - **산문 무효(관통)** — screenProbes 자체가 산문(미floor)이라 회귀 원인. D-SP/D-Floor가 floor화. review-ui L1 대조도 산문(약함) → active 게이트가 진짜 닫힘.
 - **양판 비대칭 재생산** — 수동분 기계 가드 0. 한쪽만 시술=이 작업이 줄이려는 분기를 코퍼스가 재생산. grep 교차+diff 0.
-- **이미지 잔여**: 라이선스(D-License hard) · 손상/0바이트/콘텐츠타입 위장(curl -f는 HTTP만·무결성 미검증·런타임 깨짐) · git 운명(asset/ 신규파일 coder가 git add 안 하면 미커밋 합치기 누락) · pubspec 멱등(디렉터리 중복 등록 방지).
+- **이미지 잔여**: 라이선스(D-License hard) · 손상/0바이트/콘텐츠타입 위장(curl -f는 HTTP만·무결성 미검증·런타임 깨짐) · git 운명(assets/ 신규파일 coder가 git add 안 하면 미커밋 합치기 누락) · pubspec 멱등(디렉터리 중복 등록 방지).
+- **이미지 방언 HaffHaff 의존(measure-first·[[haffhaff-reference-app]])** — dddart 산출물 앱 이미지 표본 0이라 이미지 규약(복사·에셋 구조)을 HaffHaff 관찰로 *임시 참조*. **강제 방언으로 굳히지 않음** — Track A 첫 라이브런 산출물로 확정(진실원천=dddart·HaffHaff 모방 금지). **모방 회피 확정**: 디렉터리=Flutter 표준 `assets/`(D1) · 치수=시안 명시값만(HaffHaff "항상 width/height" 비채택·§2.3) · pubspec=파일 개별 등록(HaffHaff 디렉터리 등록 비답습) · AppAsset=dddart foundation 토큰. ⚠️ **시술 PR에서 이 자기억제가 코드로 지켜지는지가 다음 게이트**(코퍼스는 현재 이미지 영역 미시술이라 깨끗).
 - **AppAsset 골격 vs 내용** — ST4가 app_asset.dart 존재는 강제하나 빈 클래스도 통과(Image.asset 참조 시 컴파일 실패) → coder가 const 등재 필수(§2.3).
 - **효과크기(자료조사 갱신)** — ScreenCoder +3.6%p 웹 외삽 우려는 **DeclarUI(2409.11667)로 Flutter+Claude 실측**(CLIP0.85·웹 외삽 해소). "+3.6%p"는 실측 **+3~14%p**로 정정(지표마다 상이·`2026-06-20-layout-enforce-research.md` 갈래4). **효과크기 약속 금지 → dddart FID 게이트가 자체 Flutter 코퍼스에서 주입 ON/OFF A/B 실측**(DeclarUI도 안 한 Flutter ablation = dddart 신규 기여). ⚠️ 같은 IR의 *형식* A/B(JSON vs 관용구골격) 직접 벤치는 부재(中신뢰·9시스템 수렴 추론).
 - **compare_layout L2 hard-gate(D-SP 승격 시만)** — `--gate` 시 L2 불일치=치명(exit 2)·review-ui "L2 약신호"와 비대칭. **D-SP 보류 동안엔 게이트 미발화**(review-ui 산문 L1 대조만)·승격 시 첫 iteration L1만.
