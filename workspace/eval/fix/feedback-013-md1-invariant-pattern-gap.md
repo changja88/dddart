@@ -9,7 +9,7 @@
 - **트리거**: 10차 양판(`~/Desktop/dddart-run/dddart-20260619-2248-{claude,codex}`)·ultracode RCA(사실수집 6 + 적대검증 12·`wf_298fba27`) + 처방 적대 리뷰(6관점·`wf_e67d0daf`)·2026-06-20
 - **베이스 코퍼스**: `d30cd85`(feedback-012 R1~R7 머지본)
 - **검증 런**: 11차(양판)
-- **상태**: **R6+R1~R4 시술 완료(2026-06-20·양판·`run_fixtures` 31/0·diff 0·커밋 `60a63aa`)**. §1·§2 라이브런 준비 완료(런폴더 `dddart-20260620-1206`·양엔진 재동기·설치본 R6+R1~R4 적재 실증). R5(명세 dry-run 린터) 미시술 = 11차 결과 후 판단. 적대 리뷰 6/6 partial 반영·상세 설계 v2 = `workspace/design/2026-06-20-md1-invariant-pattern-remediation-plan.md`.
+- **상태**: **R6+R1~R4 시술 완료(2026-06-20·양판·`run_fixtures` 31/0·diff 0·커밋 `60a63aa`)** → **11차 채점 완료(2026-06-20·결과지 `results/20260620-1405-weather-*`): 표적(plain 도망) 차단 작동 확정**(양 엔진 컬렉션 루트 @freezed+named factory·plain 탈출 0·백스톱 최종 0). **R5 보류 유지**(런중 NM 클러스터 미측정·최종 NM 0). 적대 리뷰 6/6 partial 반영·상세 설계 v2 = `workspace/design/2026-06-20-md1-invariant-pattern-remediation-plan.md`.
 
 ## RCA — 3축의 곱 (적대검증·적대 리뷰로 정교화)
 
@@ -65,6 +65,20 @@
 - **종합 게이트**: 막판 백스톱 11·14 → **0~2** · 소요 2h → **1h**.
 - **막판수술 측정(적대 Q4·Q5)**: "**첫 커밋(슬라이스)부터 올바름 — 막판 fix-pass(VO→String·plain→@freezed) 0회**"(최종상태 아닌 과정). **NM 클러스터(NM2/4/5/12)·formatter-NM3를 MD1 클러스터와 별도 카운트** — R2/R5 산문↔기계 바닥의 실효 분리 관찰("0~2 회복"의 낙관/근거 판별).
 - N=1(10차 폭발) → ≥2 런(11차 회복)로 인과 확정.
+
+## 11차 검증 실측 (2026-06-20 채점 — 예상효과↔실측 대조)
+> 결과지 `results/20260620-1405-weather-{claude,codex,graders-raw,compare}.md`. 채점 = EVAL v3.2(결정∥의미 6 blind grader·만장일치 κ1.0).
+
+| 예상효과 | 실측 | 판정 |
+|---|---|---|
+| **plain class 탈출 차단**(R1+R6 핵심) | 양 엔진 컬렉션 루트 **@freezed+named factory** — claude `WeeklyForecast.fromDays(..sort)`·codex `WeatherForecast.fromUnorderedSummaries(..sort)`·plain 탈출 **0** | ✅ **작동 확정** |
+| 백스톱 최종 0(종료상태 올바름) | 양 엔진 `--diff-base abee26d` blocker **0**(58종) | ✅ |
+| NM 클러스터 별도 카운트(R2 산문 실효) | 최종 산출물 NM 위반 0이나 **런중 발화는 미관측**(트랜스크립트 부재) | ⏸ 미측정 |
+| 막판 11·14→0~2·소요 2h→1h | **런 트랜스크립트 필요·산출물 부재**(사용자 드라이브 세션) | ⏸ 미측정 |
+
+- **verdict**: R6+R1~R4 **직접 표적(plain 도망→막판 대수술) 차단 확정**(10차 plain 어트랙터 재발 0·정렬 불변식이 도메인 루트 @freezed named factory에 거주). **단 "평균 2배→1배" 정량 확정은 런중 막판 적발 수·소요 실측 필요** — 이번은 종료상태 정성 신호까지. N=1(10차)→≥2(11차) 인과는 종료상태로만 부분 확정.
+- **R5 보류 유지**: 런중 NM 클러스터 미측정이라 산문(R2)↔기계(R5) 바닥 실효 분리 미판별. 다음 런에서 코디네이터가 막판 적발을 클러스터별 카운트해야 R5 필요 확정.
+- **부수 발견(처방 표적 밖)**: ① ~~claude 색 매핑 게으름→FC-1/FC-3 FAIL~~ → **정정(2026-06-20 골든 개정)**: claude 색 6종→4색(cloudy=overcast=#9B9B9B·snow=thunderstorm=#4A90E2)은 **디자인 4색 팔레트 정확 사용(완전 충실)**이고, 구판 골든이 **디자인 소스 미열람**으로 작성돼 충실을 FAIL 오판 → 골든 G-7/N4/§68 개정·**claude FC-1/FC-3 PASS·codex와 무승부**. 디자인 충실도는 오히려 **claude 우위**(codex는 디자인 4색 미사용·theme 토큰+인디고 임의 6색=이탈). ② **양 엔진 screenProbes 미노출**(implementation-test §7 규약)→FID 게이트 2런 미작동·9차 claude 대비 회귀. ③ ~~claude 테스트 역-오라클~~ → **정정**: `expect(colors.length,4)`는 디자인 4색을 올바로 핀하는 정상 단언(역-오라클 비판은 4색이 정답이라 소멸). ④ **이미지/레이아웃 북극성**: 양 엔진 Stitch 삽입 이미지 미반영(`Image.asset` 0·pubspec `assets:` 주석)·단 **생성측 지시 코퍼스 미구현(불복종 아님)**·claude 레이아웃 Stitch 충실/codex 자기변형(영역 drop 의심). 다음 작업 = 생성측(Image.asset 번들·layout-ir 강제) 코퍼스 구현.
 
 ## 미확정 / 후속
 - **R5 구현 비용**: 명세 파일목록 정형화 범위(architect 출력 형식 — 경량 컬럼 파싱 vs 완전 트리). 시술 단계 평가.
