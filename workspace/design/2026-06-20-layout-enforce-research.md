@@ -79,7 +79,7 @@
 §2.6(위젯 매핑표) 없이, 두 레버로:
 
 ### A. 입력 유도 (design-architect 명세에 layout-ir 주입)
-- **형식**: layout-ir.json을 raw로 붙이지 않는다. 받은 L1·L2를 **area 어휘 트리 골격**(코드 근접 pseudocode·ScreenCoder/Athena 패턴)으로 명세에 박는다 — 예: `screen → [ appbar(slots: icon,text), image(hero), section "Featured"(repeat-group: unit[...]), section "Categories"(...), bottomnav(slots: button×N) ]`. ⚠️**위젯 클래스명(AppBar·BottomNavigationBar 등) 금지** — "관용구"=*어휘를 코드 근접 트리로 직렬화*이지 위젯 지정 아님(위젯 선택은 coder 자율·직교 보존). **형식 A/B(골격 vs raw JSON)는 작은 레버·직접 벤치 부재(中·§3)** — 큰 레버는 *구조 주입 유무*(layout-ir 주입 자체가 확보).
+- **형식**: layout-ir.json을 raw로 붙이지 않는다. 받은 L1·L2를 **area 어휘 트리 골격**(코드 근접 pseudocode·ScreenCoder/Athena 패턴)으로 명세에 박는다 — 예: `screen → [ appbar(slots: icon,text), image(src,alt), section "Featured"(repeat-group: unit[...]), section "Categories"(...), bottomnav(slots: button×N) ]`. ⚠️**위젯 클래스명(AppBar·BottomNavigationBar 등) 금지** — "관용구"=*어휘를 코드 근접 트리로 직렬화*이지 위젯 지정 아님(위젯 선택은 coder 자율·직교 보존). **형식 A/B(골격 vs raw JSON)는 작은 레버·직접 벤치 부재(中·§3)** — 큰 레버는 *구조 주입 유무*(layout-ir 주입 자체가 확보).
 - **어휘**: 닫힌 어휘 = **dddart layout-ir-schema 실제 토큰**(area role `appbar/image/section/bottomnav`·block kind `block/repeat-group`·slot `text/icon/image/button/group`·width `fixed/flex/auto`). **입력 유도·출력 게이트·extract_layout 파서가 이 한 어휘 공유 — 가장 중요한 구조 결정**(schema 1:1). ⚠️LayoutCoder류 *방향* 어휘(row/column/atomic)는 dddart 스키마에 없음(block에 방향축 미부여)·보강은 스키마 별건(동결).
 - **반복**: enumeration 금지·construct로(`repeat: <Unit> ×N`) → 단일 재사용 위젯+builder 강제(dddart "상속보다 반복" 정합·MLS).
 - **기하**: 상대만(순서·중첩·flex/portion). 픽셀좌표 절대 금지(Anima 함정·Flutter엔 HTML-ism).

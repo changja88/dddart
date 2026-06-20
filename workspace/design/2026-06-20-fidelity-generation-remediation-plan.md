@@ -77,7 +77,7 @@
 
 - **design-architect 입력 절**(design-ref 불릿 부근): layout-ir.json 1급 입력(has_layout_ir).
 - **화면(ui) 절**(design-tokens 박는 문장 옆): L1 골격(존재·종류·순서)·L2 섹션 구성을 명세에 *강제* 박음 + **image 노드(src/alt)를 명세에 박아** coder가 Image.asset. "어떻게"(view/section/widget·MVVM·NM17)는 직교(layout-ir이 위젯 분해 강제 안 함). architect는 **"무엇을"만**(L1 골격 존재·종류·순서·image src·section 분해·ui_extension 산출물) 명세에 박고, **위젯 선택("어떻게")은 명세에 박지 않는다**(직교 보존 — 위젯 선택은 coder가 implementation-flutter 현행 규범으로 자율; 엔진이 dddart 규약대로 이미 산출).
-- **입력 유도 *형식*(자료조사 §2-A·신규)**: L1·L2를 **raw JSON으로 명세에 붙이지 않는다** — **area 어휘 트리 골격**(코드 근접 pseudocode·ScreenCoder/Athena 패턴)으로 박는다. 예: `screen → [ appbar(slots: icon,text), image(hero), section "Featured"(repeat-group: unit[...]), section "Categories"(...), bottomnav(slots: button×N) ]`. ⚠️**위젯 클래스명(AppBar·BottomNavigationBar 등) 금지** — "관용구"=*어휘를 코드 근접 트리로 직렬화*이지 위젯 지정 아님(위젯 선택은 coder 자율·위 직교 원칙 보존). ⓐ**닫힌 어휘 = layout-ir-schema 실제 토큰**(area `appbar/image/section/bottomnav`·block `block/repeat-group`·slot `text/icon/image/button/group`·width `fixed/flex/auto`) — **입력 유도·출력 게이트·extract_layout 파서가 이 한 어휘 공유**(가장 중요한 구조 결정·schema 1:1). ⚠️LayoutCoder류 방향 어휘(row/column/atomic)는 스키마에 없음·보강 별건(동결) ⓑ**반복은 construct**(`repeat-group: unit`·enumeration 금지 → 단일 위젯+builder·MLS·"상속보다 반복") ⓒ**기하는 상대만**(순서·중첩·flex)·픽셀 금지(Anima 함정) ⓓ**소형 예시 1~2개**만(POSIX: 1개로 민감도↓·5~20 초과 역효과) ⓔ⚠️**design-architect가 JSON 추론/출력 금지**(format tax·관통원칙④) ⓕ**형식 A/B(골격 vs JSON)는 작은 레버·직접 벤치 부재(中·§7)** — 큰 레버는 *구조 주입 유무*(layout-ir 주입 자체가 확보).
+- **입력 유도 *형식*(자료조사 §2-A·신규)**: L1·L2를 **raw JSON으로 명세에 붙이지 않는다** — **area 어휘 트리 골격**(코드 근접 pseudocode·ScreenCoder/Athena 패턴)으로 박는다. 예: `screen → [ appbar(slots: icon,text), image(src,alt), section "Featured"(repeat-group: unit[...]), section "Categories"(...), bottomnav(slots: button×N) ]`. ⚠️**위젯 클래스명(AppBar·BottomNavigationBar 등) 금지** — "관용구"=*어휘를 코드 근접 트리로 직렬화*이지 위젯 지정 아님(위젯 선택은 coder 자율·위 직교 원칙 보존). ⓐ**닫힌 어휘 = layout-ir-schema 실제 토큰**(area `appbar/image/section/bottomnav`·block `block/repeat-group`·slot `text/icon/image/button/group`·width `fixed/flex/auto`) — **입력 유도·출력 게이트·extract_layout 파서가 이 한 어휘 공유**(가장 중요한 구조 결정·schema 1:1). ⚠️LayoutCoder류 방향 어휘(row/column/atomic)는 스키마에 없음·보강 별건(동결) ⓑ**반복은 construct**(`repeat-group: unit`·enumeration 금지 → 단일 위젯+builder·MLS·"상속보다 반복") ⓒ**기하는 상대만**(순서·중첩·flex)·픽셀 금지(Anima 함정) ⓓ**소형 예시 1~2개**만(POSIX: 1개로 민감도↓·5~20 초과 역효과) ⓔ⚠️**design-architect가 JSON 추론/출력 금지**(format tax·관통원칙④) ⓕ**형식 A/B(골격 vs JSON)는 작은 레버·직접 벤치 부재(中·§7)** — 큰 레버는 *구조 주입 유무*(layout-ir 주입 자체가 확보).
 - **백스톱 정합/자기점검 스캔**(claude `:62`자기모순/`:64`백스톱정합 ↔ codex `:61/:63` — *제목으로 앵커*): "layout-ir L1·L2 명세 반영·image 노드 박힘" 대조 1항.
 - **design-review-ui**: 입력 절에 layout-ir.json(§2.1d Coordinator 전달과 *쌍*) + 점검 항목에 **L1 누락만 발견**(L2는 미도입 — false regression·deferral 정합). ⚠️ review-ui는 Read/Grep 리뷰어라 산문 대조 = 약함(진짜 닫힘은 active FID 게이트).
 
@@ -93,7 +93,7 @@
   - **AppAsset const 등재 단계**(렌즈5 누수 봉합): 명세 image 항목의 경로를 `foundation/app_asset.dart` AppAsset static const로 등재 → 위젯은 `Image.asset(AppAsset.x)`. raw 경로 리터럴 금지(D-Floor 시 기계 강제).
   - **복사 순서**: 명세 image 항목 → `cp design-ref/images/<f>` → 프로젝트 `asset/...` → AppAsset const → Image.asset → pubspec assets:. Image.asset 직후 `test -f asset/...`로 cp 성공 검증(missing-asset 안전망·F-net).
   - **§7 판별 근거 = "명세 화면 절의 image 항목"**(layout-ir 직참 아님 — coder는 명세만 받음·렌즈7 critical).
-  - **구조 plan echo(자료조사 §2-A·self-planning)**: coder가 presentation 슬라이스 생성 *직전* 명세 L1·L2 골격(§2.2가 명세 화면 절에 박은 area 트리·coder는 명세만 받음)을 한 번 자기 말로 재진술하고 그에 맞춰 view/section 분해. 앵커 = coder.md 층별 래칫(`:36` bottom-up) 앞 1줄. self-planning 2303.06689는 **코드 Pass@1 +11~25%**(*시각 충실* 효과크기 미측정·메커니즘 차용·효과 약속 아님).
+  - **구조 plan echo(자료조사 §2-A·self-planning)**: coder가 presentation 슬라이스 생성 *직전* 명세 L1·L2 골격(§2.2가 명세 화면 절에 박은 area 트리·coder는 명세만 받음)을 한 번 자기 말로 재진술하고 그에 맞춰 view/section 분해. 앵커 = coder.md **"작업 방식" 절 bottom-up 순서 불릿 앞**(키워드 앵커·줄번호 X·미러 규약 §2). self-planning 2303.06689는 **코드 Pass@1 +11.9~25.4%**(*시각 충실* 효과크기 미측정·메커니즘 차용·효과 약속 아님).
 
 ### 2.4 architecture-ui — references/final.md(자동) + SKILL.md(수동) — **2종으로 절단**(렌즈5)
 
@@ -133,7 +133,7 @@
 
 ---
 
-## §4. 측정 (정정 — active 게이트 활용·A1 후퇴 아님)
+## §4. 측정 (게이트는 active[능력] ≠ 이번 사용[배치] — 이번 iteration은 A1 육안 1차·D-SP 승격 시 게이트)
 
 - **채택(미채택 0건) = grep**(`Image.asset lib`·`pubspec assets:`)이 결정론으로 잡음(11차 D-2 실증) — A1 아님.
 - **렌더(거짓양성 "코드 있는데 안 뜸") = active FID 게이트**(D-SP 포함 시): dump_probe가 *렌더된* Image만 `img:true`→compare_layout L1이 누락 FAIL. grep('박았나')과 L1 image role('떴나')의 차이가 거짓양성을 가른다.
