@@ -25,7 +25,7 @@ user-invocable: false
 - 성장하면 단을 옮긴다: 두 번째 화면→widget으로, 상태 발생→view+vm으로, BC 어휘 탈피→design_system으로 (§4)
 - 도메인 enum·VO→UI 매핑(색·아이콘·라벨)은 ui_extension이 유일한 자리 — extension만, 위젯·상태 금지 (§5)
 - 라우트 path·name 리터럴은 `<bc>_router.dart` 안에서만 — navigator는 이름만 참조(pushNamed), View import 금지 (§6)
-- 시각 값은 foundation 토큰만 — Color·생 TextStyle·매직 duration 리터럴 금지 (§7)
+- 시각 값·정적 에셋 경로는 foundation 토큰만 — Color·생 TextStyle·매직 duration·raw 이미지 경로 리터럴 금지, 정적 래스터 경로는 `AppAsset` const (§7)
 - design_system 컴포넌트에 전역 키 static show() 경로 금지 — 표시는 View가 context로 호출한다 (§7)
 - BC 어휘를 벗은 부품만 design_system 승격 — 부품군 폴더로, 정크드로어 금지 (§4·§7)
 
