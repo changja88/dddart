@@ -22,6 +22,7 @@ Coordinator가 다음을 준다:
 - 이번에 구현할 **슬라이스**(명세 파일 목록의 부분집합 + 행위).
 - `server-contract.json`(G1 직후 기계 절단된 서버 계약 경량본) — 없으면 명세의 가정 계약 절이 대신한다. 필드·타입·페이징은 이 경량본이 단일 근거다.
 - (있으면) `design-ref/` — 화면 구현 시 시각 근거.
+- (있으면·`has_design_images`) `asset-manifest.json` — 시안 이미지의 `src`→`local_path`→`token` 매핑(단일 SSOT). 명세가 `src`로 가리킨 이미지를 이 manifest에서 **같은 src 행으로 조인**해 `token`·`local_path`를 정확히 가져온다(server-contract를 경량본에서 인용하듯 — 추정·눈대중 금지). 조인한 이미지마다 `app_asset.dart`에 `static const String <token> = '<local_path>';`를 추가(foundation 토큰과 동형)하고 pubspec `flutter: assets:`에 `- assets/images/`를 멱등 선언(없으면 추가·있으면 보존)하며 위젯에 `Image.asset(AppAsset.<token>)`로 배선한다(raw 경로 금지 — implementation-flutter §8). `has_design_images`가 없으면 이 전체를 건너뛴다(없는 이미지를 placeholder로 조용히 채우지 않는다).
 - (기존 BC 수정 시) **기존 BC 트리 요약** — 기존 파일을 중복 생성하지 않기 위한 현황.
 - **골격 생성 포함 여부 플래그** — 너는 무기억이라 자신이 첫 호출인지 모른다. 플래그가 켜져 있으면 이번 작업이 신설하는 모든 골격 단위(BC·개념 폴더·root·design_system)의 골격 완비를 코드 작성 전에 먼저 만든다(완비 범위는 `discipline-houserules`의 골격 완비 규칙 — 종류 폴더 `.gitkeep` + 애그리거트 루트 `<aggregate>.dart` + **생성영역 루트(BC·root·design_system)마다 `analysis_options.yaml`**(타입 전면강제 국소 lint — houserules §3·백스톱 ST4가 누락을 차단) 항상 생성).
 - **analyze 베이스라인**(Phase 2 진입 시 Coordinator가 캡처) — green 판정의 기준.

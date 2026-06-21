@@ -8,7 +8,7 @@ user-invocable: false
 
 ## 언제 쓰나
 
-라우트·내비게이션·탭 셸 코드를 쓸 때, DataSource(retrofit)·dio 설정을 쓸 때, hive 캐시·어댑터를 쓸 때, StatefulWidget 컨트롤러·async 콜백을 다룰 때 로드한다. 전문을 읽지 말고 아래 라우팅 표로 필요한 절만 부분 적재한다. 경계:
+라우트·내비게이션·탭 셸 코드를 쓸 때, DataSource(retrofit)·dio 설정을 쓸 때, hive 캐시·어댑터를 쓸 때, StatefulWidget 컨트롤러·async 콜백을 다룰 때, 정적 이미지(Image.asset)를 배선할 때 로드한다. 전문을 읽지 말고 아래 라우팅 표로 필요한 절만 부분 적재한다. 경계:
 
 - 라우팅 짝의 역할·리터럴 단일 출처 규율 → `architecture-ui`
 - root 동작 규율·refresh 처방 → `architecture-state`
@@ -27,6 +27,7 @@ user-invocable: false
 - **@GenerateAdapters 비채택**(패키지 1파일 강제 — BC 분산 선언과 빌드 충돌): @HiveType per-class를 저장 전용 Box 모델에 붙인다 — 엔티티 무어노테이션 보존 (§5)
 - typeId는 앱 전역 유일 — BC별 대역 주석으로 조정, 등록 함수는 isAdapterRegistered 가드 (§5)
 - 컨트롤러는 State가 생성·dispose가 해제(쌍 규율), await 뒤 context는 mounted 체크 — lint가 집행 (§6)
+- 정적 이미지 에셋은 Image.asset(AppAsset.<token>) — raw 경로 금지·토큰/경로는 asset-manifest(src 조인)·pubspec assets 디렉터리 선언 (§8)
 - **테스트는 전용 스킬로 이전**: 무엇을/오라클/비-vacuity/단언 FORM은 `discipline-test`, Flutter 메커니즘(provider override 가짜 주입·`ProviderContainer.test`·NoSplash/Timer 회피·mocktail 더블·날짜 주입)은 `implementation-test` (§7)
 
 ## 상세 레퍼런스
@@ -40,5 +41,6 @@ user-invocable: false
 | hive 어댑터·box·초기화 표기 | final.md §5 |
 | 컨트롤러 보유·async gap의 context | final.md §6 |
 | 테스트 표기는 어디로 이전했나(discipline-test·implementation-test) | final.md §7 |
+| 정적 이미지 에셋·Image.asset·pubspec assets 표기 | final.md §8 |
 
 각 절은 필요한 절만 읽는다(`## §N.` 헤더로 grep 가능 — 전체 로드 불필요).

@@ -13,6 +13,7 @@
 - §4. dio·retrofit 표기 — DioException 8종·@RestApi
 - §5. hive_ce — @HiveType 방식·등록 함수·@GenerateAdapters 비채택
 - §6. 위젯 수명·BuildContext 안전 — 컨트롤러 쌍·mounted
+- §8. 정적 이미지 에셋 — Image.asset·pubspec assets
 
 ---
 
@@ -226,3 +227,12 @@ onPressed: () async {
 ## §7. 테스트 표기 → discipline-test·implementation-test로 이전
 
 테스트 표기는 전용 스킬 2종으로 이전했다(2026-06-17 — feedback-008). **무엇을 테스트할지·오라클·비-vacuity·단언 FORM(구별·순서·위치·탭)은 `discipline-test`**, **Flutter 메커니즘(provider override 가짜 주입·`ProviderContainer.test`·셰이더(NoSplash)/Timer 회피·mocktail 더블·날짜 주입·네트워크 이미지 목)은 `implementation-test`** 소유다. coder는 행위 검증 테스트를 쓸 때 이 두 스킬을 로드한다(green 래칫·신규 BC TG1 차단은 coder 산출 규율). 위젯 수명·async gap의 context는 §6.
+
+## §8. 정적 이미지 에셋 — Image.asset·pubspec assets
+
+시안의 `<img>`(로고·일러스트 등 정적 래스터)는 Phase 0 `fetch_images`가 `assets/images/`로 다운로드하고 `asset-manifest.json`(src→`local_path`→`token` 매핑·단일 SSOT)으로 절단한다. coder는 명세가 가리킨 이미지를 manifest의 **같은 `src` 행**으로 조인해 정확 값을 가져온다(추정·눈대중 금지 — server-contract를 경량본에서 인용하듯).
+
+- **토큰화**: 정적 래스터 경로는 `AppAsset`(foundation 7토큰의 7번째) static const에서 온다 — `app_asset.dart`에 `static const String <token> = '<local_path>';`를 추가한다(manifest의 `token`·`local_path`를 그대로 — 발명 금지). raw 경로 문자열을 위젯에 직접 박지 않는다(`Image.asset('assets/logo.png')` 금지 — architecture-ui §7 사용 규율·`Color(0x…)`→`AppColor`와 평행).
+- **pubspec 멱등 선언**: `pubspec.yaml`의 `flutter: assets:`에 `- assets/images/`(디렉터리·평면)가 없으면 추가하고 있으면 그대로 둔다(기존 항목 보존). 디렉터리 1줄이면 이미지가 늘어도 pubspec을 다시 고치지 않는다(파일별 나열 불요). 하위 디렉터리는 만들지 않는다(평면 — "직속 파일만 포함" 함정 회피).
+- **배선**: `Image.asset(AppAsset.<token>)`로 쓴다. **치수는 강제하지 않는다** — `width`·`height`는 시안이 명시한 경우에만 박는다(글리프 아이콘 `Icons.*`[architecture-ui §5]와 정적 래스터는 다른 트랙·이미지 *크기*는 크기연결 트랙[architecture-ui §8]이지 에셋 *경로* 트랙이 아니다).
+- `has_design_images`가 없으면(manifest 부재) 이 절은 적용되지 않는다 — 없는 이미지를 placeholder로 조용히 채우지 않는다.
