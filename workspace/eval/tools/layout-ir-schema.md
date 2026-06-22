@@ -77,6 +77,8 @@ L2 게이트 비교 시:
 예: `[날짜, group[아이콘,상태], 기온]` → 평탄화 `[날짜, 아이콘, 상태, 기온]`. (묶음 흡수·순서 보존)
 예2(collapse): 코드 hero `[text,icon,text,text,text]`(기온 `Text`×2) vs 시안 `[text,icon,text,text]`(기온 div→text1) → 양쪽 collapse `[text,icon,text]` → PASS(8차 hero false regression 차단·실측 확인).
 
+> **image는 L1/L2 게이트 비교에서 제외**(위치=생성측 형상 §9·측정=FID-L4 육안·2026-06-22). extractor·dump는 image area/slot을 *계속 방출*(노드 트리 §1 동결·`ref.json` SoT·육안 대조 재료)하고 `compare_layout`만 게이트 시퀀스에서 무시한다.
+
 ## 4. 실물 예시 — weekly-list layout-ir (사양 검증용)
 
 ```json
@@ -111,7 +113,7 @@ L2 게이트 비교 시:
 
 ```
 area appbar     ✓ (BackAppBar → [icon,text])
-area image      ❌ FID-L1 대상 — 코드에 Image 노드 없음 (사용자 지적 ②·도구 후 게이트)
+area image      ❌ FID-L1 대상 — 코드에 Image 노드 없음 (사용자 지적 ②·도구 후 게이트) [현재 image는 L4 육안 이관·2026-06-22 — §5는 8차 설계 예시]
 area section    ✓ (WeatherListForecastSection → ListView = repeat-group)
   unit slots    ✓ FID-L2 [text(fixed,left),icon(flex,center),text(fixed,right)] 일치(평탄화 후)
 area bottomnav  ❌ FID-L1 대상 — 코드에 BottomNav 노드 없음 (도구 후 게이트)

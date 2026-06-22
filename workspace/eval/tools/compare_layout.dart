@@ -4,7 +4,7 @@
 /// 평가측 단일출처(workspace/eval/tools/·eval). 시안 파서(extract_layout.dart)와
 /// 코드 렌더 덤프(dump_probe + dump_to_ir)가 산출한 같은 스키마 두 layout-ir을 받아
 /// 구조 충실도를 대조한다. 스키마(동결본): workspace/eval/tools/layout-ir-schema.md
-///   L1(골격): areas role 시퀀스(존재·종류·순서).
+///   L1(골격): areas role 시퀀스(존재·종류·순서·image 제외[위치=§9·L4 육안]).
 ///   L2(섹션 구성): section children 평탄화 시퀀스(block 펼침·repeat-group 경계 보존·group 펼침·§3).
 ///   L3(말단 슬롯): slot type·width·align(약신호 ⚠·게이트 아님).
 ///
@@ -54,9 +54,9 @@ void main(List<String> argv) {
       continue;
     }
 
-    // ---- L1: 영역 골격 ----
-    final refRoles = _areas(r).map((Map<String, dynamic> a) => a['role'] as String).toList();
-    final gotRoles = _areas(g).map((Map<String, dynamic> a) => a['role'] as String).toList();
+    // ---- L1: 영역 골격 (image 제외 — 위치=생성측 §9·측정=L4 육안) ----
+    final refRoles = _areas(r).map((Map<String, dynamic> a) => a['role'] as String).where((String x) => x != 'image').toList();
+    final gotRoles = _areas(g).map((Map<String, dynamic> a) => a['role'] as String).where((String x) => x != 'image').toList();
     final l1 = _seqDiff(refRoles, gotRoles);
     if (l1.equal) {
       stdout.writeln('  L1 영역 ✓ [${refRoles.join(', ')}]');
@@ -146,8 +146,8 @@ List<String> _flattenSlots(List<Map<String, dynamic>> slots) {
   for (final s in slots) {
     if (s['type'] == 'group') {
       out.addAll(_flattenSlots((s['slots'] as List? ?? const <dynamic>[]).cast<Map<String, dynamic>>()));
-    } else {
-      out.add(s['type'] as String);
+    } else if (s['type'] != 'image') {
+      out.add(s['type'] as String); // image는 게이트 비교 제외(위치=§9·L4 육안)
     }
   }
   return _collapse(out);

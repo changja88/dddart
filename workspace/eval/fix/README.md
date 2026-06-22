@@ -31,6 +31,8 @@
 | [013](feedback-013-md1-invariant-pattern-gap.md) | 10차 양판 백스톱 폭발 | `60a63aa`(R6+R1~R4) | ✅11차 검증(plain 차단 확정·R5 보류) | 막판 백스톱 폭발(claude11·codex14)·1h→2h 회귀 = MD1×명세격상×엔진plain 곱·기계 floor(R6 MD1메시지·R5 명세린터 보류) |
 | [014](feedback-014-layout-size-asset-supply.md) | 12차 양판 | `8fe3800` | ✅13차 검증완료(L·A 2/2 적중) | 북극성=생성측: 레이아웃 크기연결(architect triage+ui §8) + 에셋 공급(fetch_images·manifest SSOT·Image.asset). **13차 실측: 양판 hero 120(claude 32→회복·codex 유지)·에셋 token=배선·둘 다 작동**. 부수: claude FC-2 자발해소·codex DT-2 신규치명 |
 | [015](feedback-015-layout-stitch-sot.md) | 13차 양판(사용자 육안) | `e49b4fe` | 🔧적용·14차 육안 검증대기 | **feedback-014 "L 적중"=거짓성공 RCA**: size-link(점값) 적중했으나 번들된 축맹 area-tree가 형상(축) 회귀(세로→가로·양엔진·claude 강제전>후). 공리=코퍼스 레이아웃 어휘 0·**Stitch HTML=형상 SoT**(impl §9·coder 승격·architect 분해전담·area-tree 철거)·측정=육안. codex DT-2 1순위 유지 |
+| [016](feedback-016-fid-measurement-dt2.md) | 14차 양판(`20260622-1636`) | `<미커밋>` | ⏳15차 검증대기 | **DT-2 단일출구 누수**(safeApiCall `on DioException` 절 *내부* `fromJson` throw를 형제 `on TypeError`·말미 catch-all이 못 잡고 샘·N=2 swap) 골든 try/on Object 가드 + **screenProbes green 강제**(6회 게이트 미발동 종결·헬퍼 아닌 별도 `render_smoke_test.dart`+isNotEmpty). image set-membership은 017로 분리 |
+| [017](feedback-017-image-fidelity-eye.md) | 14차 후속(게이트 활성 부작용) | `<미커밋>` | ⏳15차 검증대기 | feedback-016가 FID 게이트 실발동시키며 **image area↔slot 레벨차 거짓 FAIL 위험** → `compare` L1/L2에서 image 제외(위치=L4 **육안**)·`§9` "`<img>`도 형상" 제자리 재현 유도(생성측 단독·coder/architect/review-ui 불변)·positive-control ⓐⓑ 반증. fetch_images 통째빠짐은 014 후속 분리 |
 
 ## 규약
 

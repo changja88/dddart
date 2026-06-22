@@ -35,6 +35,8 @@ check "A 동일"       "pass"  0  "변형 없음"
 check "C group 흡수" "u=sec('list')['children'][0]['unit']['slots']; u[1]={'type':'group','slots':[u[1]]}"  0  "icon→group[icon]·평탄화 흡수"
 check "D block 펼침" "sec('hero')['children']=[{'kind':'block','slots':[{'type':'text'},{'type':'icon'},{'type':'text'}]}]"  0  "hero 2블록→1블록·평탄화 동일"
 check "G hero text 흡수" "sec('hero')['children'].append({'kind':'block','slots':[{'type':'text'}]})"  0  "hero 끝 text 추가(코드 Text 분리 모사)·연속 동종 collapse 흡수"
+check "ⓐ image 섹션내부" "img=next(a for a in areas if a['role']=='image'); areas.remove(img); sec('hero')['children'].append({'kind':'block','slots':[{'type':'image'}]})"  0  "image area→hero slot(area↔slot 레벨 차이)·image 제외로 PASS"
+check "ⓑ image 다른섹션" "img=next(a for a in areas if a['role']=='image'); areas.remove(img); sec('list')['children'].insert(0,{'kind':'block','slots':[{'type':'image'}]})"  0  "image area→list slot(위치 차이)·image 제외로 PASS"
 
 echo "== 진짜 차이 → FAIL(2) · 정탐 =="
 check "E icon 누락"  "u=sec('list')['children'][0]['unit']['slots']; del u[1]"  2  "card에서 icon 제거"

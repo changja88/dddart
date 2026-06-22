@@ -134,17 +134,17 @@
 ## H. TIER-S — 시각 충실도 (구조) (S-FID)
 표준: `tools/layout-ir-schema.md`(동결본) · `EVAL-METHOD.md §2.3 FID·§2.5`
 
-> **성격**: Stitch 시안(동결 `design-ref/*.html`)을 "그대로" 옮겼는지의 **구조 충실도**를 시안 layout-ir vs 생성 코드 렌더 덤프의 결정론 대조로 잰다. 토큰(색·타이포)은 VW-4가, 기능(정렬·매핑)은 FC가 보지만 *레이아웃 골격·섹션 구성*은 어느 차원도 안 봐 8차에서 image·bottomnav 누락·섹션 이탈이 기능 PASS로 통과했다(사용자 지적). **미관·픽셀·아이콘 심볼은 비측정(A1·사용자 눈)** — FID는 *구조*만.
+> **성격**: Stitch 시안(동결 `design-ref/*.html`)을 "그대로" 옮겼는지의 **구조 충실도**를 시안 layout-ir vs 생성 코드 렌더 덤프의 결정론 대조로 잰다. 토큰(색·타이포)은 VW-4가, 기능(정렬·매핑)은 FC가 보지만 *레이아웃 골격·섹션 구성*은 어느 차원도 안 봐 8차에서 image·bottomnav 누락·섹션 이탈이 기능 PASS로 통과했다(사용자 지적·현재 image는 L4 육안 이관·2026-06-22). **미관·픽셀·아이콘 심볼은 비측정(A1·사용자 눈)** — FID는 *구조*만.
 > **✅ 게이트 활성(2026-06-19·feedback-011)**: FID-L1·L2 **치명 게이트 활성 조건 3선결 전부 충족** — ① 판정원 도구 구현(시안 파서 `dddart/scripts/extract_layout.dart` + 렌더 덤프 `tools/dump_probe.dart.txt`+`tools/dump_to_ir.dart` + 대조 `tools/compare_layout.dart`) ② `tools/positive-control/fid/` 거짓-FAIL 0 반증(`run.sh` 7케이스·8차 실물 등가 흡수·false regression 0) ③ 표준 pump 진입점 규약(`implementation-test §7 screenProbes`·코퍼스 양판 미러·승인 2026-06-19). **활성 상태**: L1·L2=치명 게이트(치명 18→**20**)·L3=약신호(⚠)·L4=A1. ⚠️ **정직 단서**: `screenProbes` 자동 덤프 경로의 *산출물 준수*는 **9차가 첫 운용**(8차는 규약 전 수동 dump 손질로 갭 실증)·effect size·false regression율은 9차 1차 실측·확정 ≥2런(N=1). **산출물이 `screenProbes`를 노출하지 않으면**(코더 규약 미준수)=렌더 덤프 불가 → 그 런만 A1 폴백 + 규약 위반을 결과지에 기록(coordinator가 수기로 게이트 흉내 내 거짓 PASS/FAIL 도장 금지·blind 보존) — coder.md가 screenProbes + 별도 `render_smoke_test.dart`(isNotEmpty + role별 단언)를 **필수 산출**로 강제하므로(green 경로), 미노출은 단순 측정 불능이 아니라 **코더 픽스처 흠**(반복 시 산출물 품질 결함으로 결과지 명기)이다. coordinator는 A1 폴백을 "정상 면제"로 읽지 말고 흠으로 기록한다. (exit-3의 *기계* BLOCKER 격상은 작업 B 측정 재설계 회차에서 검토 — 이번엔 green 강제 + 이 산문이 1·2차 방어.)
 
 | ID | 항목 | §근거 | PASS | FAIL | 레인 | 치명 |
 |---|---|---|---|---|---|---|
-| **FID-L1** 구조 골격 충실도 | 화면 영역(appbar/image/section/bottomnav)의 존재·종류·순서가 시안과 일치 | schema §1·§2(번역표)·§5 | 시안 layout-ir `areas`의 role 집합·순서가 렌더 덤프와 일치(영역 누락·종류오인·순서변경 0) | image·bottomnav·section 등 영역 누락, 종류 오인(section↔appbar), 순서 뒤바뀜 | 결정(대조 도구) | ✅(활성·9차 첫 운용) |
+| **FID-L1** 구조 골격 충실도 | 화면 영역(appbar/section/bottomnav)의 존재·종류·순서가 시안과 일치 | schema §1·§2(번역표)·§5 | 시안 layout-ir `areas`의 role 집합·순서가 렌더 덤프와 일치(영역 누락·종류오인·순서변경 0) | bottomnav·section 등 영역 누락, 종류 오인(section↔appbar), 순서 뒤바뀜 | 결정(대조 도구) | ✅(활성·9차 첫 운용) |
 | **FID-L2** 섹션 구성 충실도 | section children의 의미노드 순서·존재·반복(`repeat-group`)이 **평탄화 후** 일치 | schema §1·§3(평탄화) | section children 평탄화 슬롯 시퀀스가 시안과 순서보존 일치, repeat-group 존재 일치(횟수 제외) | 노드 누락·순서 뒤집힘(평탄화 후에도), repeat-group↔단일 혼동 | 결정(대조 도구·평탄화) | ✅(활성·9차 첫 운용) |
 | **FID-L3** 말단 슬롯 정합 | repeat unit/block 안 슬롯 type·width·align이 시안과 일치 | schema §1(Slot)·§4 슬롯 원칙 | slot의 type/width/align이 시안 unit과 일치 | 슬롯 타입·배치 추상 불일치 | 결정(약신호 ⚠) | — |
-| **FID-L4** 픽셀·미관 | 패딩·정렬 정확값·그림자·실제 색·아이콘 심볼·미관 | (design-tokens·눈) | (자동 비측정 — VW-4가 토큰 거주만 봄) | (자동 판정 없음) | A1 인간(사용자 눈) | — |
+| **FID-L4** 픽셀·미관 | **이미지 존재·위치**·패딩·정렬 정확값·그림자·실제 색·아이콘 심볼·미관 | (design-tokens·눈) | (자동 비측정 — VW-4가 토큰 거주만 봄) | (자동 판정 없음) | A1 인간(사용자 눈) | — |
 
-> **FID 주의(거짓 FAIL·경계)**: ① **L4는 자동 판정 없음** — 결과지 구조·FID PASS를 '화면이 시안대로'로 오독 금지(미관은 사용자 눈·A1). ② **아이콘 *심볼* 차이는 FID 밖**(L3는 "icon 슬롯 존재·배치"만, 심볼 `humidity_percentage`↔`water_drop`은 design-tokens.icons 매핑·A1 — fidelity-eval-design §8.1 경계). ③ **repeat 횟수는 데이터 의존이라 비교 제외**(존재만). ④ **평탄화로 등가 묶음 흡수**(`[날짜,(아이콘+상태),기온]`=`[날짜,아이콘,상태,기온]`=시안 → PASS) — 묶음 깊이로 거짓 FAIL 금지(EVAL §2.5·fidelity-eval-design §5.1 3겹 통제). ⑤ **VW-4/5와 직교**: VW-4=토큰 거주, VW-5=매핑 거주, FID=시안 구조 일치 — 이중 채점 금지.
+> **FID 주의(거짓 FAIL·경계)**: ① **L4는 자동 판정 없음** — 결과지 구조·FID PASS를 '화면이 시안대로'로 오독 금지(미관은 사용자 눈·A1). ② **아이콘 *심볼* 차이는 FID 밖**(L3는 "icon 슬롯 존재·배치"만, 심볼 `humidity_percentage`↔`water_drop`은 design-tokens.icons 매핑·A1 — fidelity-eval-design §8.1 경계). ③ **repeat 횟수는 데이터 의존이라 비교 제외**(존재만). ④ **평탄화로 등가 묶음 흡수**(`[날짜,(아이콘+상태),기온]`=`[날짜,아이콘,상태,기온]`=시안 → PASS) — 묶음 깊이로 거짓 FAIL 금지(EVAL §2.5·fidelity-eval-design §5.1 3겹 통제). ⑤ **VW-4/5와 직교**: VW-4=토큰 거주, VW-5=매핑 거주, FID=시안 구조 일치 — 이중 채점 금지. ⑥ **이미지 존재·위치는 L4 육안**(생성측 §9가 시안 자리에 재현 유도·fetch_images 담보)·L1/L2 비측정(2026-06-22) — image area↔slot 레벨 차이가 거짓 FAIL을 내던 것을 제거. "통째 빠짐"도 자동 미검출(육안·fetch_images 별도).
 
 ---
 
