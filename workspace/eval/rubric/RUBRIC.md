@@ -39,12 +39,12 @@
 | **VW-1** Fat Widget 금지 | build는 표시·위임만 | cc §9.1 / ui | build/위젯 콜백이 표시·이벤트 위임만 | 권한·상태전이·가격 등 정책이 build에 | 의미 | ✅ |
 | **VW-2** 3단 판별·과승격 금지 | view/section/widget 책임 배치 | ui §1·§4 | section/widget이 ref·자기 VM 없이 prop·콜백으로 성립, view 삼총사는 자기 상태·로직(ref 사유)이 실재할 때만; widget은 화면 State 미수신 | 자기상태·ref 0인데 _vm 과승격, widget이 화면 State 수신 | 의미 | — |
 | **VW-3** dumb 조각 계약 | section/widget = ref·provider 금지 | ui / HR IM8·IM9 | section/widget에 ref·provider import 0, 데이터=prop·동작=콜백 | ref 보유, dumb 조각이 화면 전속 데이터를 prop 우회로 받음 | 결정+의미 | — |
-| **VW-4** 시각 토큰 단일 출처 | foundation 토큰만·VM 시각 getter 금지 | ui §7 / HR NM10 | 색·타이포·duration이 App* 토큰(foundation 7파일) 참조, VM/State에 시각 반환 getter·design_system import 0 | 토큰 밖 시각 리터럴(`Color(0x…)`·생 TextStyle·`Colors.*`·생 Duration) 또는 VM/State 시각 매핑 | 결정+의미 | — |
+| **VW-4** 시각 토큰 단일 출처 | foundation 토큰만·VM 시각 getter 금지 | ui §7 / HR NM10 | 색·타이포·duration이 App* 토큰(foundation 7파일) 참조, VM/State에 시각 반환 getter·design_system import 0 | 토큰 밖 시각 리터럴(`Color(0x…)`·생 TextStyle·`Colors.*`·생 *시각* Duration[전환·애니메이션 등 연출] — 단 네트워크 timeout·디바운스 등 *비시각* duration과 `Colors.transparent` 류 비브랜드 구조 상수는 제외·architecture-ui §7) 또는 VM/State 시각 매핑 | 결정+의미 | — |
 | **VW-5** ui_extension = 도메인→UI 매핑 유일 자리 | 색·아이콘·라벨 매핑 거주 | ui §5 | 도메인 enum/VO→UI 매핑이 `*_ui_extension.dart` extension에만 | 매핑이 VM·State getter·design_system에 누수 | 의미 | — |
 | **VW-6** 표시 소유·show() 금지 | 컴포넌트 자기표시 경로 차단 | ui §7 | design_system 컴포넌트가 전역키/전역 context로 자기를 띄우는 static 경로 0; 다이얼로그·시트는 View가 자기 BuildContext로 호출 | 컴포넌트가 전역키/context로 자기표시 static 메서드(이름 무관 show/present/display) 노출 | 의미 | ✅ |
 | **VW-7** 라우트 단일 출처·navigator 분업 | 리터럴 router 안만·이름 참조 | ui §6 / HR | 라우트 path/name 리터럴이 `<bc>_router.dart`의 `abstract final class <Bc>Routes`에만, navigator는 pushNamed로 상수만·view import 0, BC는 GoRoute만 export(셸 조립은 root_router)·**내비 인자(path-param) 도메인값 직렬화는 VO/VM 소유**(뷰 onTap은 도메인 값을 VM에 위임하거나 VO 노출 키만 navigator에 전달) | 리터럴 산개(상수 우회·문자열 조립), navigator가 view import, BC가 StatefulShell 조립, **뷰 onTap·navigator·repo가 도메인값을 인라인 *포맷·변환***(`toIsoDate(date)`·`DateFormat().format(date)`·다필드 path 조립 류 — VO/VM 소유 위반·거주처 무관; 단순 식별자 `'$id'`·이미 String인 값 전달은 *변환 로직* 아님·제외) | 결정+의미 | — |
 
-> **VW-7 주의**: 동일 BC 내 `navigator→router→view` import 사슬은 순환 아님(FAIL 금지). **정적 view(약관·안내)는 VM·State 없이 합법** — VW-2 삼총사 미완을 거짓 FAIL 내지 않는다.
+> **VW-7 주의**: 동일 BC 내 `navigator→router→view` import 사슬은 순환 아님(FAIL 금지). **정적 view(약관·안내)는 VM·State 없이 합법** — VW-2 삼총사 미완을 거짓 FAIL 내지 않는다. **navigator의 context 획득 수단은 VW-7/HR-7 감점 사유 아님** — `architecture-ui §6`이 전역 navigatorKey(`GoRouter.of(<전역키>.currentContext!).pushNamed`·common 소속 BC 무관 키·`discipline-houserules §6`)를 정식 패턴으로 강제한다(BuildContext 없는 VM도 전환 가능케 하는 §6 의도·`:166` `rootRouter.go` 면제와 동형). 전역 키 사용·`common/util` 거주를 "구조 약점"으로 감점하지 않는다(VW-6의 *컴포넌트 self-show* 금지와 구분 — navigator는 컴포넌트가 아니다). view가 context를 명시 주입하는 변형도 라우트 단일출처·import 규칙을 지키면 동일하게 합법(둘 중 하나를 우위로 채점 금지 — in-family 스타일 선호 차단).
 > **VW vs SD 이중계상 금지**: build 내 정책 위반은 표현층(VW-1)·도메인층(SD-1) 중 한 번만 감점한다.
 
 ---
@@ -102,6 +102,7 @@
 | **HR-8** 화면 삼총사·section/widget 접두 | VM 기준 동거·전속 접두 | hr | `<x>_vm`이 있으면 `<x>_view`·`<x>_state` 동거(정적 view 면제), section 소속 화면 접두, widget 화면명 금지(BC명=화면명 겹침은 예외) | VM 있는데 삼총사 미완, section 무접두, widget이 화면명 보유 | 결정+의미 | — |
 | **HR-9** 개념 1차·종류 2차 성장 | 분할 후 직속 동결 | hr §2 | 단일 개념 BC는 종류 폴더 직속이 정상, 둘째 개념 확정 시 개념 폴더 분할·이후 신규는 개념 폴더(infra 미분할) | 분할 후에도 직속 폴더에 신규 파일, infra를 개념 분할 | 결정+의미 | — |
 
+> **HR-7 주의(navigator 전역키)**: navigator가 `common/util` 전역 navigatorKey(`appNavigatorKey`)로 context를 얻는 것은 BC 어휘 침범이 아니다 — 전역 키는 BC 무관(architecture-ui §6·VW-7 주의 carve-out). HR-7 구조 약점 감점 금지.
 > **HR 결정 PASS ≠ 실질 보증(교차 의존)**: HR-3 빈 골격·HR-8 빈 삼총사·HR-5 채널④ 경로-only는 *구조·이름만* 본다 — 빈혈/디코이 실질은 SD-1·ST-1·의미 레인이 막는다(교차 표기). **@riverpod 허용 위치**(VM·SharedState·service·root 2변종) 닫힌 열거는 houserules 소유이나 ST-5와 같은 규칙(채점은 ST-5에서, HR이 위치 권위). **백스톱 러너는 added/신규 단위만 발화** — 레거시 불발화·codegen(.g/.freezed)·exception.dart 다중 클래스를 결함 오판 금지.
 
 ---
@@ -181,6 +182,7 @@
 - VO 도메인 형태: **SD-4** · 유입 변환계층 부재: **DT-4**.
 - Either Left 비폐기: **DT-1** · 표시·소비(consumeError·isShow): **ST-2**.
 - show()/표시 소유: **VW-6** · 라우트 단일출처: **VW-7** · @riverpod 위치: **ST-5**(HR 권위).
+- navigator의 전역 navigatorKey context 획득(`GoRouter.of(<전역키>.currentContext!)`·`rootRouter.go`): **`architecture-ui §6` 정식 패턴** — VW-6/VW-7/HR-7 어디서도 구조 약점 감점 금지(VW-6은 *컴포넌트 self-show*만·navigator 제외).
 - HR 결정 PASS는 실질(빈혈·디코이) 보증 아님 → SD-1·ST-1·의미 레인 교차.
 - 시각 *구조* 충실도: **FID**(L1 골격·L2 섹션·L3 슬롯) · 토큰 거주: **VW-4** · 매핑 거주: **VW-5** · 미관·픽셀·아이콘 *심볼*: **A1 인간**(FID-L4) — FID는 시안 *구조 일치*, VW-4/5는 *거주 위치* — 직교(이중 채점 금지).
 

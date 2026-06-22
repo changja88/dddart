@@ -266,7 +266,7 @@ linter:
 
 **design_system — BC 어휘도 도메인 어휘도 모르는 시각 요소**:
 
-- `foundation/` 7토큰이 시각 값의 **단일 출처** — BC presentation·root scaffold·component에서 `Color(0x…)`·생 `TextStyle(…)` 리터럴 금지.
+- `foundation/` 7토큰이 시각 값의 **단일 출처** — BC presentation·root scaffold·component에서 `Color(0x…)`·생 `TextStyle(…)`·연출 `Duration(…)`(전환·애니메이션·press 피드백은 `AppDuration` 토큰) 리터럴 금지. *비시각* duration(네트워크 timeout·디바운스)·구조 명명 상수(`Colors.transparent` 같은 리플 호스트 배경 등 브랜드 시각값 아닌 것)는 제외 — 상세 경계는 architecture-ui §7.
 - `component/`는 부품군 1차 — **부품군 폴더 = 파일 접미사 = 클래스 접미사**(`button/` 안은 `*_button.dart` → `*Button`). 축약(btn)·직속 파일·정크드로어 군(`widget/`·`etc/`) 금지. 분류 안 되는 부품이 생기면 새 부품군 폴더를 만든다.
 - 컴포넌트 표시 경로 규율(전역 navigator 키 static `show()` 금지 포함)은 architecture-ui §7 소유 — 규칙 본문은 그 스킬에만 둔다.
 

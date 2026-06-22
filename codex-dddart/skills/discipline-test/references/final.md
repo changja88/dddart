@@ -85,7 +85,7 @@ testWidgets('기온: 최고/최저가 각자 슬롯에', (WidgetTester tester) a
 });
 ```
 
-high ≠ low(비대칭)·하나는 음수다. 대칭/양수 fixture는 스왑을 못 잡는다. **단언은 `formatTemp(7)` 정확 일치**다 — `contains('7')`는 부분문자열이라 `'17'`·`'27'`에도 통과해 스왑을 놓친다. 슬롯은 `Key`로 고정한다(텍스트 위치 추정 금지) — 단언이 `Key('temp-high')`를 집으므로 *생성 코드가 그 Key를 달아야* 한다(짝 규약은 architecture-ui — keyed-slot 단언 위젯은 안정 `Key` 부착). `formatTemp`는 SUT 포맷터 재사용(implementation-test §7).
+high ≠ low(비대칭)·하나는 음수다. 대칭/양수 fixture는 스왑을 못 잡는다. **단언은 `formatTemp(7)` 정확 일치**다 — `contains('7')`는 부분문자열이라 `'17'`·`'27'`에도 통과해 스왑을 놓친다. 슬롯은 `Key`로 고정한다(텍스트 위치 추정 금지) — 단언이 `Key('temp-high')`를 집으므로 *생성 코드가 그 Key를 달아야* 한다(짝 규약은 architecture-ui — keyed-slot 단언 위젯은 안정 `Key` 부착). `formatTemp`는 SUT 포맷터 재사용(implementation-test §7). **적용 범위**: 같은 수치 슬롯(기온·가격·수량 등)이 목록 타일·상세 등 *여러 화면에 반복*되면 *각 화면*에서 이 형태(keyed-slot + 비대칭·음수 fixture)를 적용한다 — 위 예제는 상세지만 그 슬롯이 사는 모든 화면이 대상이며, 한 화면만 덮고 다른 화면을 비우면 그 화면 슬롯 단언이 vacuous다.
 
 ### §3.4 탭→상세 인자 전달 — non-edge 탭 + 날짜-echo fake + subtree `findsOneWidget`  *(FC-2 M4 탭날짜 직격 · codex 디코이의 정체)*
 
