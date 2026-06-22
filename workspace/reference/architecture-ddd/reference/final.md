@@ -81,6 +81,7 @@ abstract class Money with _$Money {
 
 - **직파싱(필수 형태)**: 엔티티·VO는 **`@freezed`로 선언**한다 — 서버 JSON을 직파싱하는 모델은 `json_serializable`의 `factory X.fromJson(Map<String, Object?> json) => _$XFromJson(json)` 생성 위임만 둔다(DTO 없음 — 규약 §9-2). **모델 클래스 자신의 수기 `fromJson`·수기 타입 리더(`_readString`/`_readInt`/`_readDouble` 류)·모델 클래스 안 `FormatException` throw는 금지** — 직렬화는 생성 companion이 전담하고, 파싱 실패 정규화는 safeApiCall의 몫이다(architecture-data §2). *이 금지의 예외*: `enum`은 freezed 대상이 아니라 `@JsonValue` 매핑을 쓴다(수기 `parse` 불요) · `@JsonKey(fromJson:)` 커스텀 컨버터(top-level/static 함수 또는 fromJson 전용 factory 생성자 — 그 안의 `FormatException` 등 parse-throw는 safeApiCall이 정규화하므로 허용)와 도메인 `*Exception`(불변식 위반 — §4 3규칙-2)은 금지 대상이 아니다. 유입 경로 계약은 architecture-data §4 소유.
 - **송신 직렬화도 도메인 단위 거주**: 도메인 값을 전송 표현으로 바꾸는 *변환 로직*(날짜→API path 문자열·`toApiPath()`·다필드 path 조립 등)은 역직파싱과 대칭으로 **VO 메서드(우선)·VM 변환**에 단일 거주한다 — navigator·view·repo에 `DateFormat().format(date)`를 인라인·중복하지 않는다(navigator는 VO가 만든 문자열을 path-param에 *전달만* — architecture-ui §6). 단순 식별자 전달(`'$id'`·이미 String인 값)은 변환 로직이 아니라 navigator가 그대로 실어도 된다. *왜* — 인라인·중복 직렬화는 테스트로 두드리기 어렵고(navigator는 실 라우터 배선 없이 위젯테스트로 미경유) 같은 포맷이 두 곳(navigator·repo)에 갈리면 DRY가 깨져 회귀가 샌다.
+- **router·navigator의 공개 메서드 인자·GoRoute builder가 view에 넘기는 path-param은 String 타입이다** — 도메인 VO를 *인자 타입*으로 받지 않는다. VO를 받으면 그 파일(`<bc>_navigator.dart`·`<bc>_router.dart`)이 domain을 import해 백스톱 IM21(navigator)·IM22(router) 위반이다. 호출자(VM)가 `vo.toApiPath()`로 직렬화해 String을 넘기고, 수신 view가 `VO.fromApiPath(String)`로 복원한다(복원은 presentation→domain import라 매트릭스 허용). *왜* — router/navigator는 라우팅 배선이라 도메인 어휘를 보유하지 않는 경계다(carrier는 문자열만 흐른다).
 - 의도를 드러내는 인터페이스: 메서드 이름은 "무엇을 하는가"(도메인 어휘)를 말하고 "어떻게"를 숨긴다 — `order.cancel()`이지 `order.setStatus(canceled)`가 아니다. 부작용 없는 함수(조회는 상태를 바꾸지 않음)는 freezed 불변이 구조로 보장한다.
 
 ## §4. 애그리거트 — 일관성 경계의 클라 번역 (§10-5 ③)
@@ -121,6 +122,22 @@ abstract class Order with _$Order {
     if (!status.isCancelable) throw OrderNotCancelableException();
     return copyWith(status: OrderStatus.canceled);
   }
+}
+```
+
+- **컬렉션 불변식은 named factory가 정규화한다 — `@freezed`를 유지한다**: 정렬·중복 제거·필터 같은 *컬렉션 불변식*은 공개 `const factory X(...)`를 그대로 열어두고 **named factory**(`fromDays`·`fromUnordered…`)가 정규화해 반환한다. "비정렬 인스턴스를 *타입 수준에서 생성 불가*하게" 봉인하려고 plain class로 가지 않는다 — 3규칙-2(생성 검증 비강제)대로 정규화 진입점이면 충분하고, 직파싱(`fromJson`은 생성 코드라 정렬을 끼울 수 없다)·freezed 3.x union 헬퍼(private-named 생성자가 `map`/`when` 생성과 충돌해 컴파일 불가) 때문에 타입 봉인은 무의미하거나 불가하다. **entity·VO·애그리거트 루트·State를 plain class로 쓰면 백스톱 MD1 위반**이다(enum·`exception.dart`·common util은 MD1 비대상이라 plain 정상).
+
+```dart
+// domain_layer/weekly_forecast/weekly_forecast.dart — 정렬 불변식을 가진 루트
+@freezed
+abstract class WeeklyForecast with _$WeeklyForecast {
+  const WeeklyForecast._();
+  const factory WeeklyForecast({required List<DailyForecast> days}) = _WeeklyForecast;
+
+  factory WeeklyForecast.fromDays(List<DailyForecast> days) =>   // 정규화 진입점 — 생성 시 정렬
+      WeeklyForecast(days: <DailyForecast>[...days]..sort((DailyForecast a, DailyForecast b) => a.date.compareTo(b.date)));
+
+  factory WeeklyForecast.fromJson(Map<String, Object?> json) => _$WeeklyForecastFromJson(json);
 }
 ```
 

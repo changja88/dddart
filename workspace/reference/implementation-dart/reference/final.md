@@ -103,6 +103,7 @@ abstract class Order with _$Order {        // ① 단일 생성자 모델 = abst
 - **copyWith의 null 의미론**: `copyWith(error: null)`은 **실제로 null을 대입한다**(공식 지원) — consumeError 패턴(architecture-state §4)의 성립 근거.
 - **컬렉션은 unmodifiable**(3.0 기본): freezed 모델의 List·Map·Set은 제자리 변경(mutate) 시 **런타임 에러** — 갱신은 항상 새 컬렉션 합성 + copyWith: `copyWith(lines: [...lines, newLine])` (§6).
 - `@JsonKey`는 **생성자 파라미터에** 붙인다(§7). fromJson 시그니처는 `Map<String, Object?>`(`Map<String, dynamic>`과 호환).
+- **정렬·정규화가 필요한 컬렉션 루트도 plain class로 빠지지 않는다**: 공개 `const factory X(...)`를 열어두고 named factory(`X.fromDays(...)`)가 정렬·중복 제거해 반환한다(예제·*무엇*은 architecture-ddd §4). freezed 3.x는 **private-named 값 생성자를 union 헬퍼(`map`/`when`) 생성과 충돌**해 표현 못 하고 `fromJson`은 생성 코드라 정렬을 끼울 수 없으므로 — "비정렬을 타입 수준에서 봉인"하려 plain으로 가면 백스톱 MD1 위반이다(plain 금지 스코프 = entity·VO·루트·State; enum·`exception.dart`는 비대상).
 - 모델·State의 *무엇*(어떤 클래스를 어디에)은 architecture-ddd §3·§4·architecture-state §3 소유 — 여기는 표기.
 
 ## §5. union 분기 — when/map 대신 switch 패턴 매칭
@@ -152,6 +153,7 @@ const factory BadRequestResponse({
 - enum 값 매핑: `@JsonValue('paid')`.
 - `explicitToJson: true` — 중첩 freezed 모델을 서버로 보낼 때(toJson이 중첩 객체의 toJson을 실제 호출).
 - 일괄 `fieldRename: FieldRename.snake`보다 **명시 @JsonKey가 dddart 실물 방식**이다 — 서버 키가 코드에 보이는 쪽이 계약 대조(architecture-data §7)에 유리하다.
+- **커스텀 컨버터·표시 변환 헬퍼는 별 파일**: `JsonConverter` 구현 클래스와 표시용 변환 헬퍼(`*DisplayText`·formatter) 클래스는 모델/VO 파일에 동거시키지 않는다 — 한 파일 한 클래스(백스톱 NM3). `@JsonKey(fromJson:)` top-level 함수나 VO 내부 static 메서드는 예외(추가 public 클래스가 아니다 — VO 내부 static 컨버터가 권장 형태).
 
 ## §8. dartz Either — 최소 표면·fold 통일
 

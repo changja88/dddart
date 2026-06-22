@@ -169,7 +169,7 @@ linter:
 
 1. **파일명 = 주 클래스명의 snake_case.** 한 파일에 주 클래스 하나 (codegen part 파일 `.g.dart`·`.freezed.dart`와 도메인 `exception.dart`는 예외).
 2. **종류는 폴더가 결정하고, 접미사가 그것을 재확인한다.** 접미사 판별은 긴 것 우선 — `_shared_state.dart`는 shared_state 종류이지 state 종류가 아니다.
-3. **화면 삼총사는 같은 접두**: `<화면>_view.dart` ↔ `<화면>_vm.dart` ↔ `<화면>_state.dart` 1:1:1 대응. 위젯 단위 VM도 동일(`chat_request_btn_view` ↔ `chat_request_btn_vm`). 검사 방향은 **VM 기준** — VM이 존재하면 같은 접두의 view·state가 대응해야 하며, VM이 필요 없는 정적 view(약관·안내)는 VM·State 없이 허용.
+3. **화면 삼총사는 같은 접두**: `<화면>_view.dart` ↔ `<화면>_vm.dart` ↔ `<화면>_state.dart` 1:1:1 대응. 위젯 단위 VM도 동일(`chat_request_btn_view` ↔ `chat_request_btn_vm`). 검사 방향은 **VM 기준** — VM이 존재하면 같은 접두의 view·state가 대응해야 하며, VM이 필요 없는 정적 view(약관·안내)는 VM·State 없이 허용. **접두 `<화면>`은 view 파일 stem에서 `_view`를 뗀 것이다** — view=`weekly_forecast_view.dart`면 접두는 `weekly_forecast`이고 VM·State는 `weekly_forecast_vm.dart`·`weekly_forecast_state.dart`(클래스 `WeeklyForecastVM`·`WeeklyForecastState`)다. 접두에 `_view`를 끼운 `weekly_forecast_view_vm.dart`·`weekly_forecast_view_state.dart`(클래스 `…ViewVM`·`…ViewState`)는 **금지** — `_view_state.dart`는 백스톱 NM2 deny 접미사이고 `…_view_vm`은 짝 view 부재로 NM4가 발화한다.
 4. **UseCase는 화면이 아니라 도메인 개념 단위로 짓는다** — 여러 VM이 하나의 UseCase를 공유한다 (판별 배정은 `undecidable.md` §8).
 5. **도메인 종류 명명은 dddjango 원형과 동일** — specification은 풀네임 `_specification`(`_spec` 축약 금지), 도메인 서비스는 `_service`. specification의 평가·조합은 Model(UseCase 이하)에서만 — VM이 도메인 판정을 직접 수행하지 않는다(판정 소유 상세는 architecture-ddd §5·`undecidable.md` §8).
 6. **`@riverpod` provider는 ViewModel 3변종(VM·SharedState·Service)과 root의 2변종(root_vm·root handler)에만.** UseCase·Repo·DataSource는 plain class — 사용처에서 직접 생성(DI 없음, 규약 §9-13).
