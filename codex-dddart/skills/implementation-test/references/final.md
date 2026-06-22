@@ -132,7 +132,7 @@ discipline-test §3 FORM이 쓰는 헬퍼의 *계약*을 여기서 정의한다(
 | `String formatDate(DateTime d)` · `String formatTemp(int celsius)` | 화면 표기와 *동일한* 포맷 — §3.4 날짜-echo·§3.3 기온 정확 일치. **SUT 포맷터를 재사용**한다(별도 포맷을 만들면 디코이). |
 | `final Map<String, ScreenProbe> screenProbes` (`typedef ScreenProbe = Future<Finder> Function(WidgetTester)`) | **FID 렌더 덤프 진입점**(eval 평가측이 소비). role 문자열(`'list'`·`'detail'`…)→그 화면을 *대표 fixture로* 펌프하고 루트 finder를 반환하는 함수. view 클래스명·헬퍼명·fixture명을 전부 *맵 값 안에* 가둬 외부 덤프 프로브가 BC 이름에 의존하지 않게 한다 — 화면마다 한 항목, 화면 추가 시 여기 등록. 기존 `pumpList`/`pumpDetail`·`detailState` 위에 얇게 얹는다(중복 펌프 정의 금지). |
 
-`screenProbes`는 §7에서 **유일하게 discipline-test FORM이 직접 소비하지 않는** 헬퍼다(테스트 단언이 부르지 않음) — eval FID 평가측 렌더 덤프가 이 한 맵만 상대 import해 산출물의 모든 화면을 *배선 추론 0*으로 일관 덤프한다. "모든 화면이 대표 데이터로 펌프된다"는 render-smoke 시드를 겸한다. 키는 화면 role로 고정하고, 값에서 BC별 view·헬퍼 이름을 환언한다(그 이름들이 밖으로 새지 않는 게 핵심):
+`screenProbes`는 discipline-test §3 FORM이 직접 부르지는 않지만 **별도 render-smoke 테스트 파일(`render_smoke_test.dart`)이 직접 소비한다**(아래) — 그 단언이 맵을 펌프하므로 `screenProbes` 미작성·빈 맵이면 green이 깨진다(coder 필수 산출·green 경로 강제). 이 render-smoke는 *헬퍼(`_support.dart`)가 아니라 `*_test.dart`*라야 `flutter test`가 수집·실행한다. eval FID 평가측 렌더 덤프도 이 한 맵만 상대 import해 산출물의 모든 화면을 *배선 추론 0*으로 일관 덤프한다. "모든 화면이 대표 데이터로 펌프된다"는 render-smoke 시드를 겸한다. 키는 화면 role로 고정하고, 값에서 BC별 view·헬퍼 이름을 환언한다(그 이름들이 밖으로 새지 않는 게 핵심):
 
 ```dart
 typedef ScreenProbe = Future<Finder> Function(WidgetTester tester);
@@ -143,6 +143,25 @@ final Map<String, ScreenProbe> screenProbes = <String, ScreenProbe>{
   'detail': (WidgetTester t) async { await pumpDetail(t, detailState(high: 28, low: 19)); return find.byType(ForecastDetailView); },
 };
 ```
+
+```dart
+// test/<bc>/render_smoke_test.dart — 헬퍼가 아니라 *_test.dart라야 flutter test가 수집한다.
+// 단언이 screenProbes를 소비해 green 경로로 강제(coder.md 필수 산출).
+import 'package:flutter_test/flutter_test.dart';
+import '_support.dart';
+
+void main() {
+  test('screenProbes는 화면을 등록한다(비어있지 않음)', () {
+    expect(screenProbes, isNotEmpty); // 빈 맵 도망 차단(forEach 0회 green 방지)
+  });
+  screenProbes.forEach((String role, ScreenProbe probe) {
+    testWidgets('renders $role', (WidgetTester tester) async {
+      expect(await probe(tester), findsOneWidget);
+    });
+  });
+}
+```
+`screenProbes`를 `_support.dart`(헬퍼·import 대상)에 정의하고 이 `main`은 별도 `render_smoke_test.dart`에 둔다 — `_support.dart`의 `main`은 `flutter test`가 호출하지 않는다(저장소 `dump_probe.dart.txt`와 동일 패턴).
 
 `_FakeRepo`·`readListVM`(구 repo-seam 헬퍼)은 폐기한다 — dddart엔 repo provider가 없다(§2). 정렬은 도메인 단위를 직접 호출하므로(§3.2) VM 격리 헬퍼가 불요하다.
 

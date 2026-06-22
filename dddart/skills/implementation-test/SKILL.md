@@ -26,7 +26,7 @@ dddart 테스트의 **Flutter 메커니즘·결정성·더블 표기**가 여기
 - 위젯 펌프 결정성: `splashFactory: NoSplash.splashFactory`(잉크리플 셰이더 회피)·loading은 완료되는 `Completer` 후 settle(Timer 누수 회피)·미완료 future를 펌프한 채 두지 않는다 (§4)
 - **날짜 주입**: 도메인 판정은 기준일을 *인자로* 받는 순수 함수·'지금'은 오버라이드 가능 provider/인자로 격리·테스트는 고정 `DateTime`을 주입한다(실시각 안 읽음·게이트 없음) (§5)
 - 네트워크 이미지 view는 펌프를 `mockNetworkImages`로 감싼다 — 테스트 환경의 HTTP 400 함정(`Image.network` 크래시) 회피(아이콘이 `IconData`면 미해당) (§6)
-- 헬퍼 계약(`d()`·`fc()`·`detailState`/`listState`·`_FakeListVM`/`_FakeDetailVM`·`pumpList`/`pumpDetail`·`formatDate`/`formatTemp`·`screenProbes`)은 §7 단일 정의 — discipline-test FORM이 이 이름·계약을 쓴다. `screenProbes`만 예외로 FORM이 아니라 eval FID 렌더 덤프가 소비하는 화면 진입점 맵이다(view·헬퍼 이름을 맵 안에 가둬 프로브가 BC 이름에 비의존) (§7)
+- 헬퍼 계약(`d()`·`fc()`·`detailState`/`listState`·`_FakeListVM`/`_FakeDetailVM`·`pumpList`/`pumpDetail`·`formatDate`/`formatTemp`·`screenProbes`)은 §7 단일 정의 — discipline-test FORM이 이 이름·계약을 쓴다. `screenProbes`만 예외로 FORM이 아니라 **별도 render-smoke 테스트(`render_smoke_test.dart`·§7)와 eval FID 렌더 덤프가 소비**하는 화면 진입점 맵이다(view·헬퍼 이름을 맵 안에 가둬 프로브가 BC 이름에 비의존·green 경로 강제) (§7)
 
 ## 상세 레퍼런스
 

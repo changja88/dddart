@@ -53,7 +53,14 @@ Future<Either<BadRequestResponse, T>> safeApiCall<T>(
   } on DioException catch (e) {
     final data = e.response?.data;
     if (data is Map<String, Object?>) {
-      return Left(BadRequestResponse.fromJson(data)); // 서버 에러 바디 그대로 — isShow도 서버 값
+      try {
+        return Left(BadRequestResponse.fromJson(data)); // 서버 에러 바디 그대로 — isShow도 서버 값
+      } on Object {
+        // 정규화기 자신이 throw(봉투 스키마 불일치) — 이 throw는 이미 진입한 on DioException 절 내부라
+        // 형제 on TypeError(아래)도 말미 catch-all(맨 끝 catch (e))도 못 잡는다(전부 같은 try의 형제).
+        // 그래서 여기서 직접 단일출구로 수렴시킨다.
+        return Left(BadRequestResponse(errorType: 'unknown', msg: 'unexpected error body', isShow: true));
+      }
     }
     final isTimeout = e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout ||
@@ -72,6 +79,8 @@ Future<Either<BadRequestResponse, T>> safeApiCall<T>(
   }
 }
 ```
+
+> **에러바디 정규화기(`fromJson`)도 throw할 수 있다** — 대상 서버 봉투가 골든 가정과 다르면(필수 필드 누락 등) `fromJson`이 `TypeError`를 던진다. 그 호출은 *이미 `on DioException` 절 내부*라 **형제 `on TypeError`는 물론 맨 끝 `catch (e)` catch-all도 못 잡는다**(Dart: 진입한 catch 절 내부의 새 예외는 같은 try의 다른 on절·catch-all로 가지 않고 바깥으로 전파) → `safeApiCall` 밖으로 샌다 = 단일출구 누수. 그래서 `fromJson` 호출만 try/on Object로 감싸 그 throw도 `Left`로 수렴시킨다. (위 "대상 서버 봉투에 맞춰 `fromJson` 조정"은 *설계 시점* 대응이고, 이 가드는 *런타임 throw* 대응 — 둘은 보완.)
 
 ## §3. Repo Either 계약 — Right=성공, 전 실패 Either
 
