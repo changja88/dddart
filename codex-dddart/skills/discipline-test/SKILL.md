@@ -23,7 +23,7 @@ coder가 슬라이스의 행위 검증 테스트를 쓸 때, 또는 discipline-r
 - **오라클은 코드가 아니라 명세에서**: 기대값을 구현에서 베끼지 않는다 — LLM 생성 테스트의 구현-미러링이 디코이의 뿌리다(코드가 틀리면 테스트도 같이 틀린다) (final.md §2).
 - **무게중심 = thick domain**: domain 판정·UseCase·Either 양갈래를 두텁게 → state/VM 상태전이·정렬/필터/매핑 → UI는 핵심 행위(탭→이동)만 얇게. 정렬·구별은 *도메인* 판정이라 도메인에서 두드린다 (final.md §1).
 - **비-vacuity 자가점검**: "단언이 의존하는 로직을 한 곳 지웠다고 가정하면 red인가?" — '아니오'면 행위를 안 두드린 헛테스트다. §3 FORM으로 교체한다(존재만으론 닫히지 않는다) (final.md §2).
-- **단언 형태로 디코이를 막는다**(§3.1만 충돌 시 자동 red·나머지는 형태 *가이드*·final.md §5 정직): 구별=집합 크기(`toSet().length == N` — 충돌 시 자동 red) / 순서=뒤섞은 입력(≠기대)+`orderedEquals`+양끝 echo / 위치=keyed-slot finder+비대칭·음수 fixture / 탭=non-edge(`.at(n)`·리스트 ≥3)+날짜-echo+상세 subtree `findsOneWidget`(`findsWidgets`·`findsAny`는 "≥1"이라 금지). 셋업은 도메인 직접/VM override(repo provider 없음 — implementation-test §2). 4형 verbatim은 final.md §3.
+- **단언 형태로 디코이를 막는다**(§3.1만 충돌 시 자동 red·나머지는 형태 *가이드*·final.md §5 정직): 구별=집합 크기(`toSet().length == N` — 충돌 시 자동 red) / 매핑=case별 값 핀(`expect(e.prop, 기대)` 전수·getter 직접 — swap 직격·distinct와 별개 축) / 순서=뒤섞은 입력(≠기대)+`orderedEquals`+양끝 echo / 위치=keyed-slot finder+비대칭·음수 fixture / 탭=non-edge(`.at(n)`·리스트 ≥3)+날짜-echo+상세 subtree `findsOneWidget`(`findsWidgets`·`findsAny`는 "≥1"이라 금지). 셋업은 도메인 직접/VM override(repo provider 없음 — implementation-test §2). 5형 verbatim은 final.md §3.
 - **생략한다**(테스트하지 않는다): getter·조건 없는 위임·private·위젯 트리 형태·시각 스타일·golden·프레임워크 내부 — 자명/구현-미러는 헛테스트를 부른다 (final.md §4).
 - **반송 규율**: 명세-고정(spec-anchored) 테스트가 red면 *코드가 틀린* 것 — 코드를 고친다. 테스트를 약화·삭제해 green 만들지 않는다(discipline-reviewer FORM-감사 대상). 시도 한도 내 green 불가면 보고한다 (final.md §5).
 - **날짜 결정성**: 도메인 판정은 기준일을 *인자로 받는 순수 함수*로 두고, 테스트는 고정 날짜를 주입한다 — `DateTime.now()` 실시각에 의존하는 테스트는 pre-commit에서 무관한 날 깨진다(주입 메커니즘은 implementation-test) (final.md §1).
@@ -34,7 +34,7 @@ coder가 슬라이스의 행위 검증 테스트를 쓸 때, 또는 discipline-r
 |---|---|
 | 왜 테스트하나·회귀 안전망·무게중심·날짜 결정성 | [`references/final.md`](references/final.md) §1 |
 | 오라클을 명세에서 끄는 법·비-vacuity 자가점검 | final.md §2 |
-| 단언 FORM 4형 verbatim(구별·순서·위치·탭)·Either 양갈래 | final.md §3 |
+| 단언 FORM 5형 verbatim(구별·매핑·순서·위치·탭)·Either 양갈래 | final.md §3 |
 | 무엇을 생략하나 | final.md §4 |
 | red일 때 코드 vs 테스트·reviewer FORM-감사 | final.md §5 |
 | 펌프 결정성·더블·ProviderContainer·날짜 주입 셋업 | `implementation-test` |

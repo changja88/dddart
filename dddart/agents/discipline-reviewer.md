@@ -89,7 +89,7 @@ Coordinator가 감사 범위와 시점을 정해 호출한다 — 너는 받은 
 
 테스트가 *명세 행위를 실제로 두드리는가*를 본다 — 금지 패턴 적발이 아니라 **올바른 FORM을 썼는지 확인**이다(디코이 방법은 열려 있어 블랙리스트는 불완전하다):
 
-- **핵심 행위마다 §3 FORM**: 구별 = 집합 크기(`toSet().length == N`·색-단독 단위) · 순서 = 뒤섞은 입력(≠기대) + `orderedEquals` + 양끝 echo · 위치 = keyed-slot finder + 비대칭·음수 fixture(같은 수치 슬롯이 목록·상세 등 여러 화면에 있으면 *각 화면* 확인) · 탭 = non-edge(`.at(n)`) + 날짜-echo + 상세 subtree `findsOneWidget`. 이 형태를 안 쓰고 통과만 하는 단언은 vacuous 의심.
+- **핵심 행위마다 §3 FORM**: 구별 = 집합 크기(`toSet().length == N`·색-단독 단위) · 매핑 = 분류 enum case별 표시값(아이콘·색·라벨) 전수 핀(`expect(e.prop, 기대)`·getter 직접 — swap 직격·distinct와 별개 축) · 순서 = 뒤섞은 입력(≠기대) + `orderedEquals` + 양끝 echo · 위치 = keyed-slot finder + 비대칭·음수 fixture(같은 수치 슬롯이 목록·상세 등 여러 화면에 있으면 *각 화면* 확인) · 탭 = non-edge(`.at(n)`) + 날짜-echo + 상세 subtree `findsOneWidget`. 이 형태를 안 쓰고 통과만 하는 단언은 vacuous 의심. **분류 enum→표시값 매핑이 있는데 case별로 두드리는 테스트가 *부재*(파일 누락 포함)하면 M2 swap이 green 생존 — 부재를 vacuity로 보고 important로 올린다.**
 - **오라클이 명세에서 왔는가**: 기대값을 구현에서 베낀 흔적(코드의 버그를 "정답"으로 단언)이 디코이다 — 명세 행위 목록과 단언을 대조한다(5차 codex가 색 충돌을 distinct로 단언한 사례).
 - **비-vacuity**: 단언이 의존하는 로직을 한 곳 깼을 때 red인가 — getter 단언·`findsWidgets`/`findsAny`(≥1)·대칭 fixture·`.first`·이미 정렬된 입력·한쪽 Either 갈래만 단언은 약한 신호다. 코드가 명세-정확인데 테스트가 안 잡으면 important, 코드가 틀렸는데 green이면 blocker.
 - **test/ 한정 1차 스캔(우선순위 신호)**: `.first`·`findsWidgets`·`findsAny`·`unorderedEquals`·`contains(`로 한 자리 단언·대칭/양수-only fixture는 test/에서 정당 용도가 드무니 *먼저* 훑어 의심 후보로 올린 뒤 위 FORM·오라클을 본다(전역 grep의 오탐 우려가 test/엔 약하다 — 백스톱 게이트가 아니라 네 감사의 진입점).
