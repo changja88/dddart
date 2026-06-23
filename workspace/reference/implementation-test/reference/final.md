@@ -172,7 +172,7 @@ void main() {
   });
 }
 ```
-`screenProbes`를 `_support.dart`(헬퍼·import 대상)에 정의하고 이 `main`은 별도 `render_smoke_test.dart`에 둔다 — `_support.dart`의 `main`은 `flutter test`가 호출하지 않는다(저장소 `dump_probe.dart.txt`와 동일 패턴).
+`screenProbes`를 `_support.dart`(헬퍼·import 대상)에 정의하고 이 `main`은 별도 `render_smoke_test.dart`에 둔다 — `_support.dart`의 `main`은 `flutter test`가 호출하지 않는다(저장소 `dump_probe.dart.txt`와 동일 패턴). **render_smoke는 probe 반환 finder를 *소비*하는 형태(`expect(await probe(tester), findsOneWidget)`)라야 한다** — `await probe(...)`로 반환을 버리고 `find.byKey` 등 별도 finder 단언으로 대체하면 probe를 `Future<void>`로 흘려도 green이 통과해 FID 평가측 진입점(`dump_probe.dart.txt`가 `ScreenProbe`=`Future<Finder>` 반환을 소비)을 깬다. typedef 이름 `ScreenProbe`·반환 `Future<Finder>` 고정(`ScreenPump`·`Future<void>` 등 변형 금지).
 
 `_FakeRepo`·`readListVM`(구 repo-seam 헬퍼)은 폐기한다 — dddart엔 repo provider가 없다(§2). 정렬은 도메인 단위를 직접 호출하므로(§3.2) VM 격리 헬퍼가 불요하다.
 
