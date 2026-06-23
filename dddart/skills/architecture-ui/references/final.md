@@ -71,7 +71,7 @@ view는 VM과 1:1로 바인딩되는 루트다 — `ConsumerWidget`으로 `ref.w
 
 ## §5. ui_extension — 도메인→UI 매핑의 유일한 자리
 
-도메인 enum·VO를 UI 값(색·아이콘·라벨)으로 매핑하는 extension의 자리다 (규약 §3.5): 도메인은 flutter 금지·design_system은 BC 어휘 금지라 **여기가 유일한 자리**다.
+도메인 enum·VO를 UI 값(색·아이콘·라벨)으로 매핑하는 extension의 자리다 (규약 §3.5): 도메인은 flutter 금지·design_system은 BC 어휘 금지라 **여기가 유일한 자리**다. 단 라벨 *텍스트*는 도메인 유비쿼터스 언어다(architecture-ddd §2) — task가 표시 라벨을 열거하면 그 정본 문자열을 verbatim 따르고(왕복 번역·발명·누락 금지), 도메인 enum이 표시명을 소유하면 여기선 인용한다; 이 extension이 신규로 결정하는 시각값은 색·아이콘이다.
 
 - extension만 — 위젯·상태 금지. `<개념>_ui_extension.dart` → `extension <개념>UiExtension`.
 - 시각 토큰 매핑이 VM·State getter로 새면 이 "유일한 자리" 규칙이 무너진다 — application_layer의 design_system import 금지(사실은 discipline-houserules §5)와 한 몸.
