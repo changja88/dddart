@@ -326,6 +326,20 @@ void _collectIcons(String html, String screen, Map<String, String> iconMap, Map<
 final _classAttr = RegExp(r'class="([^"]*)"');
 final _arbitrary = RegExp(r'^[a-zA-Z][\w-]*-\[[^\]]+\]$');
 final _negMargin = RegExp(r'^-m[trblxyse]?-');
+// plain Tailwind 치수 유틸 → px 정규화(arbitrary와 동형 — w-24→w-[96px]·text-4xl→text-[36px]).
+// Tailwind 기본 스케일 하드코딩(spacing 1스텝=4px·아래 fontSize 테이블)은 Stitch가 theme.extend로
+// named 토큰만 더하고 spacing/fontSize base를 전체교체하지 않음을 전제한다(base 교체 시 무효).
+// 충실도 직결 *치수*만: w·h·size(폭·높이)·헤딩 폰트(lg↑). 본문 크기(text-xs/sm/base ≤16px)는 가치 낮아 제외.
+// 미세 간격(gap·p·m)은 §7 app_spacing이, *형상* 유틸(min-h-screen·max-w·flex 등 "어떻게 놓이나")은
+// §8 form/size 직교상 coder·design-ref 소관이라 의도적 제외(무의미 토큰 양산 방지).
+// 추출 트랙에 합류하면 architecture-ui §8이 전수 핀해 결정론 채널을 복원한다.
+final _sizingDim = RegExp(r'^(w|h|size)-(\d+)$'); // 정수 spacing 스텝만(비율 w-1/2·키워드 w-full·w-px 제외)
+final _sizingFont = RegExp(r'^text-(lg|xl|[2-9]xl)$'); // 헤딩 스케일만(본문 xs/sm/base 제외)
+const _twFontPx = <String, int>{
+  'lg': 18, 'xl': 20,
+  '2xl': 24, '3xl': 30, '4xl': 36, '5xl': 48, '6xl': 60,
+  '7xl': 72, '8xl': 96, '9xl': 128,
+};
 
 void _collectClassTokens(String html, Set<String> arbitrary, Set<String> negativeMargins) {
   for (final m in _classAttr.allMatches(html)) {
@@ -334,6 +348,10 @@ void _collectClassTokens(String html, Set<String> arbitrary, Set<String> negativ
       final bare = tok.contains(':') ? tok.split(':').last : tok; // hover:/active:/md: 변형 제거
       if (_arbitrary.hasMatch(bare)) arbitrary.add(bare);
       if (_negMargin.hasMatch(bare)) negativeMargins.add(bare);
+      final dim = _sizingDim.firstMatch(bare); // w-24→w-[96px] (Tailwind 기본 스케일 N×4px)
+      if (dim != null) arbitrary.add('${dim.group(1)}-[${int.parse(dim.group(2)!) * 4}px]');
+      final font = _sizingFont.firstMatch(bare); // text-4xl→text-[36px]
+      if (font != null) arbitrary.add('text-[${_twFontPx[font.group(1)!]}px]');
     }
   }
 }
