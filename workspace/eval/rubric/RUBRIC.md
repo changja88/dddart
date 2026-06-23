@@ -75,7 +75,7 @@
 |---|---|---|---|---|---|---|
 | **DT-1** Either 실패 계약 | Repo Future<Either>·Left 비폐기 | data §3 | Repo 공개 시그니처 `Future<Either<BadRequestResponse,T>>`(기존 프로젝트가 Left=성공이면 그 방향 존중), 모든 소비처가 Left를 폐기 않고 상위 전달 | Either 미사용 / Left를 fold·map에서 무시하고 성공만(텍스트상 fold 있어도 Left 분기 no-op이면 FAIL) | 의미(+결정) | ✅ |
 | **DT-2** 단일 출구·throw 금지 | safeApiCall | data §2·§6 / fl §4 | Repo·infra service throw/rethrow 0, 외부 호출은 safeApiCall로 감싸 Either, safeApiCall이 DioException·FormatException·TypeError 개별+catch-all, 인터셉터 onError는 통과(정규화 안 함) | throw 탈출·rethrow·Future.error 우회, 인터셉터가 에러 정규화(단일 출구 깨짐) | 의미(+결정) | ✅ |
-| **DT-3** BadRequestResponse 계약 | 3필드·어휘·isShow | data §2 | **(신규 도입 시)** freezed 3필드 errorType/msg/isShow(JSON error_type 등), 어휘 timeout·parse·unknown, 클라 생성 isShow:true·서버 바디 fromJson isShow 보존 | 필드·철자·어휘 일탈, 클라 생성 무음(isShow:false) | 결정+의미 | — |
+| **DT-3** BadRequestResponse 계약 | 3필드·어휘·isShow | data §2·impl §7 | **(신규 도입 시)** freezed 3필드 errorType/msg/isShow(JSON 키는 서버 에러봉투 명세 시[= `server-contract.json` 동결본 error 응답 스키마에 실재] 그 철자로 `@JsonKey` 매핑·미규정 시 클라 철자/케이싱 무관 — §2 "봉투 철자는 예시·서버 맞춤"), 어휘 timeout·parse·unknown, 클라 생성 isShow:true·서버 바디 fromJson isShow 보존 | 필드(역할계약 3필드)·어휘 일탈, 서버 봉투가 명세됐는데 그 철자와 불일치(봉투 미규정 시 케이싱은 DT-3 비대상 — 가정 봉투 계약위험 표기는 DT-8 소관), 클라 생성 무음(isShow:false) | 결정+의미 | — |
 | **DT-4** DTO 없음·엔티티 직반환 | 유입 변환 계층 부재 | data §4 | DataSource 반환이 도메인 엔티티(컬렉션), dto/·DTO·매퍼 0, 서버 JSON은 엔티티 freezed 직파싱 | DTO 계층 또는 **이름 바꾼 변환 계층**(Model/Response/Mapper/extension)으로 직반환 우회 | 의미(+결정) | — |
 | **DT-5** Repo/DataSource 형태 | 구체·무상태·직접 생성 | data §1 | Repo가 인터페이스 없는 단일 구체 클래스(원격+로컬 조합), Repo·DataSource 무상태 plain·직접 생성(DI 없음) | 추상 인터페이스, 가변 상태 필드, DI 컨테이너 | 결정+의미 | — |
 | **DT-6** retrofit DataSource 표기 | @RestApi·factory·part·엔티티 직반환 | fl §4 | @RestApi() abstract+factory(Dio,{baseUrl})+part, @GET/@POST/@Path/@Query/@Body, 반환 Future<엔티티>/Future<List>/Future<void> | HttpResponse<T> 원시 반환, 어노테이션 누락 | 결정 | — |
@@ -83,7 +83,7 @@
 | **DT-8** 계약 스냅샷 운용 | 동결본 대조·계약 위험 표기 | data §7·§8 | 산출물 인용 path가 `server-contract.json` 동결본에 실재(extract_contract exit 0), 스냅샷 밖 의미 가정은 명세에 "계약 위험" 명시하고 그 표기가 실제 미확인 가정과 일치 | 없는 엔드포인트 인용, 가정 무표기, "계약 위험" 글자만 박고 실제 위험 누락 | 결정+의미 | — |
 | **DT-9** infra service = 수동 어댑터 | 무상태·UseCase 모름·실패 Either | data §6 | **(SDK 어댑터 둘 때)** infra service가 무상태(가변·keepAlive·상태 노출 0)·UseCase import 0·실패 Either 정규화; 능동(상태·이벤트 반응·UseCase 호출)은 application service | infra service가 능동·throw 탈출 | 결정+의미 | — |
 
-> **DT-1 vs ST-2 직교**: DT-1은 *Left 비폐기·소비처 전달*(생산·계약면)까지, *표시·consumeError·isShow*(소비면)는 ST-2 단독. **DT-4 vs SD-4 직교**: SD-4는 "VO에 도메인 연산 거주", DT-4는 "유입 변환 계층 부재" — 같은 코드를 다른 기준으로 본다(이중 감점 금지).
+> **DT-1 vs ST-2 직교**: DT-1은 *Left 비폐기·소비처 전달*(생산·계약면)까지, *표시·consumeError·isShow*(소비면)는 ST-2 단독. **DT-4 vs SD-4 직교**: SD-4는 "VO에 도메인 연산 거주", DT-4는 "유입 변환 계층 부재" — 같은 코드를 다른 기준으로 본다(이중 감점 금지). **DT-3 vs DT-8 직교**: DT-3은 *역할계약(3필드·어휘·isShow)·명세된 봉투와 철자 불일치*(봉투 명세 시), DT-8은 *미규정 봉투를 가정하고 계약위험 미표기* — 봉투 명세 여부로 갈린다(이중 감점 금지).
 
 ---
 
