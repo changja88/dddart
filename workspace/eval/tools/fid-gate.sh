@@ -50,8 +50,11 @@ match_screen() {  # $1=code role → 시안 screen명 또는 빈값
 }
 
 # ── 2. 표준 pump 규약 준수(screenProbes 노출)? ──
-SUP="$(find "$OUT/test" -name _support.dart 2>/dev/null | head -1)"
-if [ -z "$SUP" ] || ! grep -q "screenProbes" "$SUP"; then
+# _support.dart는 여럿일 수 있다(application_layer·presentation_layer 등 계층별 테스트 지원 파일) —
+# screenProbes는 그 중 하나(화면 펌프 진입점이 있는 쪽)에만 산다. 위치(find 순서·알파벳)가 아니라
+# *내용*으로 고른다: screenProbes를 담은 첫 _support.dart. 하나도 없으면 진짜 미노출 → A1.
+SUP="$(find "$OUT/test" -name _support.dart -exec grep -l "screenProbes" {} + 2>/dev/null | head -1)"
+if [ -z "$SUP" ]; then
   echo "⚠️ screenProbes 미노출 → 렌더 덤프 불가·A1 폴백(코더 표준 pump 규약 미준수·RUBRIC §H·❌ 도장 금지)"
   cp "$WORK/ref.json" "$(dirname "$DREF")/ref-layout.json" 2>/dev/null \
     && echo "   시안 layout-ir → $(dirname "$DREF")/ref-layout.json (사용자 눈 대조 재료로 보존)"
