@@ -232,7 +232,7 @@ linter:
 - **root → BC는 자유**(전부 아는 것이 존재 이유 — 4채널 면제). 단 Model 방향 규율은 동일: root도 BC의 **UseCase만** 호출(Repo·box 직행 금지). 유일 예외: `root_initializer` → `<bc>_hive_adapters.dart`(데이터 접근이 아니라 시동 배선 — root가 import할 수 있는 유일한 BC infra 파일).
 - **`common/`은 `application/`·`root/`를 import하지 않는다.** common은 모두가 아는 곳, root는 모두를 아는 곳.
 - **`design_system/`은 `application/`·`root/`를 import하지 않는다.**
-- **main.dart는 엔트리포인트 최소형** — `runZonedGuarded` + `root_initializer` 시동 + `runApp(ProviderScope(...))`. 테마는 `app_theme` 한 줄, 라우터는 `root_router` 한 줄 참조. import 화이트리스트: root/·flutter·riverpod 계열·`design_system/theme/app_theme.dart`(+`dart:`·l10n 산출물) — 정확한 경계는 러너가 단일 출처(§8). 역방향(`application/`·`common/`·`design_system/`이 main.dart를 import) 금지 — BC 무관 전역 인스턴스(logger·routeObserver·내비게이터 전역 키)는 common 소속이다.
+- **main.dart는 엔트리포인트 최소형** — `runZonedGuarded`(onError는 `root_error_handler`로 위임 — 빈 `(e, s){}` 바디로 전역 에러를 침묵 삼키지 않는다; `root_error_handler`도 받은 에러를 침묵 삼키지 않고 최소한 관찰 가능하게 둔다 — 외부 크래시리포트 SDK 연결은 앱 소관·§7 반송표) + `root_initializer` 시동 + `runApp(ProviderScope(...))`. 테마는 `app_theme` 한 줄, 라우터는 `root_router` 한 줄 참조. import 화이트리스트: root/·flutter·riverpod 계열·`design_system/theme/app_theme.dart`(+`dart:`·l10n 산출물) — 정확한 경계는 러너가 단일 출처(§8). 역방향(`application/`·`common/`·`design_system/`이 main.dart를 import) 금지 — BC 무관 전역 인스턴스(logger·routeObserver·내비게이터 전역 키)는 common 소속이다.
 - domain_layer는 `package:flutter` import 금지 — freezed·json_annotation·dartz 등 순수 패키지만.
 - BC 엔티티의 hive 어댑터 등록 함수는 `data_source/<bc>_hive_adapters.dart` 한 파일에 모은다 — 도메인 엔티티에 storage 어노테이션을 붙이지 않는다.
 

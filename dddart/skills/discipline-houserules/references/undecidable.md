@@ -91,7 +91,7 @@
 
 ## §11. main.dart "최소형"
 
-**절차** (규약 §3.6): main.dart는 `runZonedGuarded` + `root_initializer` 시동 + `runApp(ProviderScope(...))` 조립 **만**. 위반 신호: 테마 조립(→ `app_theme`), 초기 라우트 분기(→ root_router redirect), 전역 인스턴스 보유(logger·routeObserver → common), BC import. 1차 판정자가 **coder**인 유일한 행 — main.dart는 명세가 아니라 구현 단계에서 자라기 때문이다.
+**절차** (규약 §3.6): main.dart는 `runZonedGuarded` + `root_initializer` 시동 + `runApp(ProviderScope(...))` 조립 **만**. 위반 신호: 테마 조립(→ `app_theme`), 초기 라우트 분기(→ root_router redirect), 전역 인스턴스 보유(logger·routeObserver → common), BC import, **빈 `runZonedGuarded` onError 핸들러**(`(e, s){}` — 전역 에러를 `root_error_handler`로 위임하지 않고 침묵 삼킴·final.md §7 반송표). 1차 판정자가 **coder**인 유일한 행 — main.dart는 명세가 아니라 구현 단계에서 자라기 때문이다.
 
 ## §12. '계약 위험 행위' 표기 — tracer 앵커
 

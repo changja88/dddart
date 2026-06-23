@@ -73,7 +73,7 @@ Coordinator가 감사 범위와 시점을 정해 호출한다 — 너는 받은 
 - **골격 위장**: 폴더는 완비됐는데 코드가 틀린 자리에 산다 — 판정이 `use_case/`에, 변환이 `view/`에, 위젯이 `view_model/`에.
 - **import는 합법인데 책임이 월경**: 합법 채널(ID 참조·UseCase 조합·SharedState 구독·root 딥링크)을 *형태*로는 지켰지만 실질이 타 BC 내부 지식에 결합(타 BC의 필드 구조를 알고 분해·재조립)하면 important.
 - 같은 개념이 두 철자로 존재(`channel`·`chanel`, 단수·복수 혼용)하거나 "두 번째 개념"이 종류 폴더에 평면 누적됐는가 — 1차 결정은 architect·2차 발견은 coder였고, 너는 최종 검증자다.
-- `main.dart`가 "최소형"을 지켰는가 — 초기화 조립·ProviderScope·runApp 밖의 로직(비즈니스 분기·상태 보유)이 들어오면 important.
+- `main.dart`가 "최소형"을 지켰는가 — 초기화 조립·ProviderScope·runApp 밖의 로직(비즈니스 분기·상태 보유)이 들어오면 important. 역으로 **전역 에러 핸들러(`runZonedGuarded` onError·`FlutterError.onError`)가 빈 바디(`(e, s){}`)로 침묵 삼키면**(`root_error_handler` 미위임)도 important — 빈 catch 위생(Q-6)의 부트스트랩 변종이다.
 - **DI seam(no-DI 위반)**: plain class(UseCase·Repo·DataSource·VM) 생성자가 의존성을 **선택적 named 파라미터 + `?? Default()` 폴백**으로 받으면 외부 치환용 DI seam이다(important) — dddart는 직접 생성이고 테스트는 생성자 주입이 아니라 VM provider override·Dio 목으로 한다(implementation-test §2). **위치 인자로 싱글턴·클라이언트를 넘기는 직접 생성**(`DataSource(DioClient.instance)`)은 정당하니 오판하지 않는다(백스톱 비대상 — 의미 렌즈 전담).
 
 ### 7. 기계 판별 불가 판별의 검증 (배정 항목)
