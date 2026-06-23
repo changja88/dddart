@@ -76,6 +76,7 @@ Coordinator가 감사 범위와 시점을 정해 호출한다 — 너는 받은 
 - 같은 개념이 두 철자로 존재(`channel`·`chanel`, 단수·복수 혼용)하거나 "두 번째 개념"이 종류 폴더에 평면 누적됐는가 — 1차 결정은 architect·2차 발견은 coder였고, 너는 최종 검증자다.
 - `main.dart`가 "최소형"을 지켰는가 — 초기화 조립·ProviderScope·runApp 밖의 로직(비즈니스 분기·상태 보유)이 들어오면 important. 역으로 **전역 에러 핸들러(`runZonedGuarded` onError·`FlutterError.onError`)가 빈 바디(`(e, s){}`)로 침묵 삼키면**(`root_error_handler` 미위임)도 important — 빈 catch 위생(Q-6)의 부트스트랩 변종이다.
 - **DI seam(no-DI 위반)**: plain class(UseCase·Repo·DataSource·VM) 생성자가 의존성을 **선택적 named 파라미터 + `?? Default()` 폴백**으로 받으면 외부 치환용 DI seam이다(important) — dddart는 직접 생성이고 테스트는 생성자 주입이 아니라 VM provider override·Dio 목으로 한다(implementation-test §2). **위치 인자로 싱글턴·클라이언트를 넘기는 직접 생성**(`DataSource(DioClient.instance)`)은 정당하니 오판하지 않는다(백스톱 비대상 — 의미 렌즈 전담).
+- **시각 토큰 부분 오버라이드 (VW-4·백스톱 NM10 사각)**: 기존 App* 시각 토큰(`AppTypography` 등)을 `copyWith`로 받으며 typography 수치 prop(`fontSize`·`letterSpacing`·`TextStyle`의 `height`(행간))을 리터럴로 덮으면(`AppTypography.headlineX.copyWith(fontSize: 18)`) 그 크기가 토큰 밖에 거주하는 VW-4 위반이다(important) — 추출된 크기면 `app_typography` 토큰으로 정의해 참조해야 한다(NM10은 `Color(0x`·생 `TextStyle(`만 보므로 이 변종은 네가 본다). **면제**: `copyWith(color: AppColor.x)`(토큰 인용)·`copyWith(fontWeight: …)`(비수치)·위젯 박스 `height`·`width`·아이콘 `size` 직접 인용(비-typography·§8 정식)·SD-2 도메인 필드 `copyWith`(§2).
 
 ### 7. 기계 판별 불가 판별의 검증 (배정 항목)
 
