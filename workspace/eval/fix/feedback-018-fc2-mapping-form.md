@@ -6,9 +6,9 @@
 - **회차**: 018
 - **트리거**: `results/20260623-0322-weather-claude.md`(FC-2 vacuous 치명 FAIL·M2 매핑 swap 주입 시 17/17 green) + `-compare.md` + `-graders-raw.md`(조정자 M2 실주입 green 확증)
 - **베이스 코퍼스**: `06a30ff`
-- **시술 커밋**: (적용 후 채움)
-- **검증 런**: (16차 라이브런 후 채움)
-- **상태**: 제안
+- **시술 커밋**: `7c28c13`(처방)·`615796a`(결과지)
+- **검증 런**: 16차(`dddart-20260623-1331`·결과지 `20260623-1331`)
+- **상태**: **검증됨**(✅ 적중 1/1 — claude M2 red·15차 vacuous 해소)
 
 ## RCA 요약 (본세션 4렌즈 적대검증)
 - **회귀 판별**: FC-2 vacuous는 **12차 동형 재발**(13·14차 자발 PASS 후 15차 재발). git 증거로 13→15차 코퍼스 매핑 불변·feedback-014가 3회 "FC-2 미시술" 명시 → 13·14차 PASS = N=1 자발(처방 아님).
@@ -40,6 +40,6 @@
 - **미러 파일(8)**: `discipline-test/{final.md,SKILL.md}`×2(claude·codex)+소스 · `coder`(claude `agents/coder.md` ∥ codex `dddart-coder/SKILL.md`) · `discipline-reviewer`(claude `agents/` ∥ codex `dddart-discipline-reviewer/SKILL.md`). 양판 byte-diff IDENTICAL·mirror in-sync 검증.
 
 ## 회차 요약 (16차 후)
-- 예상 적중 **N/1** · 무효 **N** · ⚠️역효과 **N**
-- **한 줄 결론**:
-- ⚠️ N=1 인과 단정 금지 — "처방 018이 M2 red를 *유발*"이 아니라 "018 적용 후 16차 M2 red 관찰(동시발생)"로 기록. 자발 해소(13·14차)처럼 엔진 변동 가능성 상존 — 처방은 *자유변수를 코퍼스가 핀*하는 것이라 표적은 확실하나 N=1 효과는 실측 확인.
+- 예상 적중 **1/1** · 무효 **0** · ⚠️역효과 **0**
+- **한 줄 결론**: claude가 §3.6 매핑 정확성 FORM(B3·B4 case별 값핀 + distinct)을 채택(`weather_condition_ui_extension_test.dart`)·조정자 M2(clear↔thunderstorm 아이콘 swap) 주입→**매핑 테스트 red**(distinct 3건은 swap이라 green = §3.6 표적 정확: distinct 못 잡는 swap을 값핀이 잡음). **15차 vacuous(매핑 테스트 파일 부재)→16차 비-vacuous·claude FC-2 FAIL→PASS 역전.** 강제력 길목 보완(coder/reviewer FORM 5형)이 매핑 테스트 *파일 작성* 유도(15차 부재→16차 존재). codex도 case별 `_ExpectedConditionUi` 값핀·M2 red(양판 견고).
+- ⚠️ N=1 인과 단정 금지 — "018이 M2 red를 *유발*"이 아니라 "018 적용 후 16차 M2 red 관찰(동시발생)". 자발 해소(13·14차)처럼 엔진 변동 가능성 상존. ★강제력 길목(coder:35/reviewer:92)까지 닫은 것이 15차 파일 부재 재발을 막은 핵심(렌즈 B 보완 적중).
