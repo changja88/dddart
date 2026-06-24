@@ -1,9 +1,11 @@
 {
   "name": "dddart",
-  "version": "0.1.1",
-  "description": "기존 Flutter 프로젝트에 간소화 DDD + 철저한 MVVM으로 기능을 추가하는 파이프라인 플러그인",
-  "author": {
-    "name": "hyun",
-    "email": "dev@numchida.com"
-  }
+  "displayName": "dddart",
+  "version": "1.0.0",
+  "description": "간소화 DDD + 철저한 MVVM으로 Flutter 기능을 설계·구현하는 오케스트레이터. /dddart로 요구→설계→구현을 단계별 게이트로 빌드한다.",
+  "author": { "name": "changja88", "email": "dev@numchida.com" },
+  "license": "MIT",
+  "homepage": "https://github.com/changja88/dddart",
+  "repository": "https://github.com/changja88/dddart",
+  "keywords": ["flutter", "dart", "ddd", "mvvm", "riverpod", "orchestrator", "subagents", "clean-code", "claude-code"]
 }

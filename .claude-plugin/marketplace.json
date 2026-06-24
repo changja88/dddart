@@ -1,14 +1,17 @@
 {
-  "name": "dddart-dev",
-  "description": "dddart 개발 마켓플레이스 — 간소화 DDD+MVVM Flutter 파이프라인 플러그인",
-  "owner": {
-    "name": "hyun",
-    "email": "dev@numchida.com"
+  "name": "changja88",
+  "owner": { "name": "changja88", "email": "dev@numchida.com" },
+  "metadata": {
+    "description": "changja88's Claude Code plugins"
+  },
+  "interface": {
+    "displayName": "changja88 Plugins"
   },
   "plugins": [
     {
       "name": "dddart",
       "source": "./dddart",
+      "category": "Coding",
       "description": "기존 Flutter 프로젝트에 간소화 DDD + 철저한 MVVM으로 한 기능을 요구→설계→구현 게이트로 빌드하는 파이프라인"
     }
   ]
