@@ -4,7 +4,7 @@
 ///
 /// 사용:
 ///   dart run backstop.dart <대상 프로젝트 루트> [--diff-base <commit>] [--all]
-///                          [--only st,im,nm,cy,tg,pj|<검사ID>…] [--update-baseline]
+///                          [--only st,im,nm,cy,tg,pj,rv|<검사ID>…] [--update-baseline]
 ///
 /// 종료코드: 0=clean / 1=사용·내부 오류 / 2=blocker(발견 일괄 출력 — fail-fast 금지).
 /// 게이트: 구조·명명=added, import=touched의 added 줄, 골격=신규 단위, 순환=전역+베이스라인.
@@ -18,11 +18,12 @@ import 'src/check_imports.dart';
 import 'src/check_models.dart';
 import 'src/check_naming.dart';
 import 'src/check_pubspec.dart';
+import 'src/check_riverpod.dart';
 import 'src/check_structure.dart';
 import 'src/check_tests.dart';
 import 'src/common.dart';
 
-const _totalChecks = 57; // ST12 + IM22 + NM17 + CY1 + TG1 + PJ2 + MD2
+const _totalChecks = 58; // ST12 + IM22 + NM17 + CY1 + TG1 + PJ2 + MD2 + RV1
 
 void main(List<String> argv) {
   String? targetPath;
@@ -52,7 +53,7 @@ void main(List<String> argv) {
   }
   if (targetPath == null) {
     stderr.writeln('사용: dart run backstop.dart <대상 프로젝트 루트> '
-        '[--diff-base <commit>] [--all] [--only st,im,nm,cy,tg,pj] [--update-baseline]');
+        '[--diff-base <commit>] [--all] [--only st,im,nm,cy,tg,pj,rv] [--update-baseline]');
     exit(1);
   }
 
@@ -90,6 +91,7 @@ void main(List<String> argv) {
     if (familyOn('cy')) findings.addAll(runCycles(ctx, updateBaseline: updateBaseline));
     if (familyOn('tg')) findings.addAll(runTests(ctx));
     if (familyOn('pj')) findings.addAll(runPubspec(ctx));
+    if (familyOn('rv')) findings.addAll(runRiverpod(ctx));
   } catch (e, st) {
     stderr.writeln('[backstop] 내부 오류: $e\n$st');
     exit(1);
