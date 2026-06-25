@@ -6,7 +6,7 @@
 `/dddart` 커맨드(Coordinator)가 기존 Flutter 프로젝트의 한 기능을 간소화 DDD +
 철저한 MVVM 방식으로 요구→설계→구현까지 단계별 게이트로 빌드하도록 오케스트레이션한다.
 **Claude Code(`dddart/`)와 Codex(`codex-dddart/`) 양 런타임을 지원**하며, 둘 다
-같은 GitHub 레포에서 마켓으로 배포한다(Claude `dddart@changja88` · Codex `dddart@changja88`).
+같은 GitHub 레포에서 마켓으로 배포한다(Claude `dddart@changja88-dddart` · Codex `dddart@changja88-dddart`).
 정본은 `dddart/`이고 `codex-dddart/`는 byte-identical 미러(`corpus_mirror_sync`로 동기 검증).
 
 ## 저장소 구조
