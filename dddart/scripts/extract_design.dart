@@ -709,6 +709,9 @@ void _runDsManifestMode(
           icons,
         );
       }
+    } else {
+      // screen-jsx-dir가 주어졌으나 디렉터리가 없으면 경고 — 오타 경로 디버그 지원
+      stderr.writeln('[extract-design] screen-jsx-dir 없음: $screenJsxDir — 경로 오타를 확인하라.');
     }
   }
 
@@ -731,6 +734,8 @@ void _runDsManifestMode(
     'typography': _sortedNested(typography),
     'icons': _emitIcons(icons),
     'arbitraryValues': arbitraryValues..sort(),
+    // 스키마 호환 위해 빈 값(Claude Design manifest엔 음수마진 개념 없음)
+    'negativeMargins': <String>[],
     'unmappedIcons': unmapped,
   };
 

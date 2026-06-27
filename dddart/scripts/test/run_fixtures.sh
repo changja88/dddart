@@ -578,6 +578,7 @@ grep -q '"--shadow-card"' <<<"$C" || ok=0                    # shadow→arbitrar
 grep -q '"--ignored"' <<<"$C" && ok=0                        # other→drop(버림) 확인
 grep -q '"name": "sunny"' <<<"$C" || ok=0                    # window.BrkIcon 스캔
 grep -q '"flutter": "Icons.sunny"' <<<"$C" || ok=0           # icon_map 룩업
+grep -q '"negativeMargins"' <<<"$C" || ok=0                  # 스키마 키 존재 확인
 if [ $ok = 1 ]; then PASS=$((PASS+1)); echo "PASS F19 extract_design --from-ds-manifest(kind 버킷·var()해소·BrkIcon 스캔·icon_map 룩업)"; else
   FAIL=$((FAIL+1)); echo "FAIL F19 (exit=$E)"; echo "$C" | head -40 | sed 's/^/    /'; echo "$OUT" | sed 's/^/    /'
 fi
