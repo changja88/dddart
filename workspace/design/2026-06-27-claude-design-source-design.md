@@ -99,7 +99,7 @@ claude 판 dddart가 Flutter 기능을 빌드할 때, 디자인 출처를 **Clau
 
 - **목적 충실**: `agents/coder.md`·`implementation-flutter/final.md`의 **숨은 HTML 결합** 추가 발견 → 빠뜨리면 화면 충실도 미달.
 - **정확성/vacuous**: naive `Stitch→Claude Design` 치환은 Tailwind 어휘(`text-[..]` 등)의 referent를 dangling시켜 **충실도 검사가 조용히 헛통과(always-pass)**. → CSS-var+inline-style로 재표현 강제.
-- **양판 대칭**: `architecture-ui/final.md`·스크립트는 byte-exact 미러(`corpus_mirror_sync` inv2 + Makefile release step) → 한쪽만 바꾸면 **릴리즈 exit 2 차단**. 엔진중립화 + 3사본 전파 / 스크립트 ADD-A-MODE로 해소.
+- **양판 대칭**: `architecture-ui/final.md`(`corpus_mirror_sync` inv2)·스크립트·`icon_map.json`(Makefile release `[2/7]`의 `diff -q` 게이트)은 byte-exact 미러 → 한쪽만 바꾸면 **릴리즈 exit 2 차단**. 엔진중립화 + 3사본 전파 / 스크립트 ADD-A-MODE로 해소.
 - **회귀**: `has_stitch_html` 7참조 동시 개명(누락 시 게이트 silent off), DesignSync 읽기전용 규율, codex Stitch 무손상.
 
 ## 9. 구현 시 확인할 기술 세부 (사용자 결정 불필요)

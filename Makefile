@@ -80,7 +80,7 @@ release:
 		done; \
 		echo ""; echo "[dry-run] 실제 실행 시 수행할 단계 (미실행):"; \
 		echo "    [1] claude plugin validate $(PLUGIN) --strict"; \
-		echo "    [2] python3 workspace/tools/corpus_mirror_sync.py --check"; \
+		echo "    [2] 미러 검사: corpus_mirror_sync --check + 스크립트 3종·icon_map diff -q"; \
 		echo "    [3] 두 manifest에 v$$V 기록 (위 미리보기)"; \
 		echo "    [4] git commit -m 'release: v$$V' (manifest 2곳)"; \
 		echo "    [5] git tag -a $$TAG -m '$(NAME) v$$V'"; \
@@ -90,8 +90,12 @@ release:
 	else \
 		echo "[1/7] manifest 검증 (claude --strict)"; \
 		claude plugin validate $(PLUGIN) --strict; \
-		echo "[2/7] corpus mirror 검사"; \
+		echo "[2/7] 미러 검사 (corpus final.md + 스크립트·icon_map diff -q)"; \
 		python3 workspace/tools/corpus_mirror_sync.py --check; \
+			for f in extract_design fetch_images extract_layout; do \
+				diff -q dddart/scripts/$$f.dart codex-dddart/skills/dddart/scripts/$$f.dart || { echo "ERROR: $$f.dart 미러 drift — codex와 불일치"; exit 2; }; \
+			done; \
+			diff -q dddart/scripts/icon_map.json codex-dddart/skills/dddart/scripts/icon_map.json || { echo "ERROR: icon_map.json 미러 drift"; exit 2; }; \
 		echo "[3/7] 버전 기록 (Claude·Codex)"; \
 		sed -i '' "s/\"version\": *\"[^\"]*\"/\"version\": \"$$V\"/" $(CLAUDE_MANIFEST); \
 		sed -i '' "s/\"version\": *\"[^\"]*\"/\"version\": \"$$V\"/" $(CODEX_MANIFEST); \

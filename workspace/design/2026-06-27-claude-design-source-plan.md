@@ -13,7 +13,7 @@
 
 모든 태스크에 암묵 적용:
 
-- **양판 미러 byte-identical**: claude `dddart/` ↔ codex `codex-dddart/`의 미러 파일은 `diff -q`로 동일해야 한다(스크립트 3종·`architecture-ui/references/final.md` 등). `corpus_mirror_sync.py`/Makefile release가 이를 강제(inv2).
+- **양판 미러 byte-identical**: claude `dddart/` ↔ codex `codex-dddart/`의 미러 파일은 `diff -q`로 동일해야 한다(스크립트 3종·`icon_map.json`·`architecture-ui/references/final.md` 등). `final.md`는 `corpus_mirror_sync.py` inv2가, 스크립트·`icon_map.json`은 Makefile release `[2/7]`의 `diff -q` 게이트가 강제한다(한쪽만 바뀌면 exit 2로 릴리즈 차단).
 - **ADD-A-MODE**: `extract_design`·`fetch_images`·`extract_layout`의 기존 `main()` case·함수 시그니처·HTML/`--from-theme` 모드를 **절대 제거·재작성하지 않는다**. 신규 모드만 추가.
 - **출력 스키마 키 불변**: `design-tokens.json`·`asset-manifest.json`·`layout-ir.json`의 키를 하나도 바꾸지 않는다(다운스트림 계약: design-architect·architecture-ui §5/§7/§8·implementation-flutter §8).
 - **`has_stitch_html`→`has_design_screen` 7곳 원자 개명**: `dddart/commands/dddart.md` L54·55·56·123·124·137·161. 하나라도 누락 시 게이트 silent off.
