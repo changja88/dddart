@@ -7,7 +7,8 @@
 철저한 MVVM 방식으로 요구→설계→구현까지 단계별 게이트로 빌드하도록 오케스트레이션한다.
 **Claude Code(`dddart/`)와 Codex(`codex-dddart/`) 양 런타임을 지원**하며, 둘 다
 같은 GitHub 레포에서 마켓으로 배포한다(Claude `dddart@changja88-dddart` · Codex `dddart@changja88-dddart`).
-정본은 `dddart/`이고 `codex-dddart/`는 byte-identical 미러(`corpus_mirror_sync`로 동기 검증).
+정본은 `dddart/`이고 `codex-dddart/`는 동기 미러(`corpus_mirror_sync`로 동기 검증)
+— 단, 디자인 관련 `agents/`·`SKILL.md`는 claude=Claude Design / codex=Stitch 비대칭으로 의도적으로 발산한다.
 
 ## 저장소 구조
 
@@ -35,7 +36,13 @@
 - 한 주제는 한 소유자가 — 역할 경계를 넘기지 않는다(설계 명세=architect, 코드=coder, 감수=discipline-reviewer).
 - 스킬은 소스 코퍼스(`workspace/reference/**`)를 근거로 작성하며, 플러그인 이름은 `dddart`로 일관되게 쓴다.
 - **양판 동기**: `dddart/`(정본)를 고치면 `codex-dddart/` 미러도 함께 맞춘다 — final.md는
-  `corpus_mirror_sync`로, agents/SKILL.md·백스톱 스크립트는 byte-identical 수동 미러로 동기한다.
+  `corpus_mirror_sync`로 동기하고, 백스톱 스크립트·추출 스크립트(`extract_design`·`fetch_images`)는
+  ADD-A-MODE(기존 모드 불변·신규 모드 추가) 방식으로 byte-identical 미러를 유지한다.
+  단, **`agents/`·`SKILL.md`는 디자인 출처 비대칭으로 의도적으로 발산**하므로 byte-identical로 단정하지 않는다.
+- **의도된 엔진 비대칭(디자인 출처)**: claude는 Claude Design(claude.ai 내장 `DesignSync`·읽기 전용)을
+  쓰고, codex는 Stitch MCP를 유지한다. 이유: Claude Design은 표준 MCP가 아니라 claude.ai에 내장된 도구라
+  OpenAI Codex에서 접근할 수 없다. 이 발산은 'drift'가 아닌 의도된 비대칭이므로, 미러 동기·diff 리뷰 시
+  `agents/`·`SKILL.md`의 디자인 관련 변경을 오탐으로 처리하지 않는다.
 - 플러그인 매니페스트나 구조를 바꾸면 `claude plugin validate dddart --strict`로 검증한다.
 
 ## 코퍼스 교정 원칙 (평가 폐곱)

@@ -57,7 +57,7 @@ codex plugin add dddart@changja88-dddart
 /dddart 도시별 7일 날씨 예보 화면 — 목록·상세, 서버 스키마 https://api.example.com/openapi.json
 ```
 
-기능 설명 한 줄이면 시작된다. (선택) OpenAPI URL을 같이 주면 서버 계약을 동결해 데이터 계층의 근거로 쓰고, 디자인 출처(Stitch design-ref 등)는 G0에서 정한다. 요구 정리부터 구현·테스트까지 단계별로 진행되며, 각 단계마다 당신이 승인한다.
+기능 설명 한 줄이면 시작된다. (선택) OpenAPI URL을 같이 주면 서버 계약을 동결해 데이터 계층의 근거로 쓰고, 디자인 출처는 G0에서 정한다(claude: Claude Design / codex: Stitch). 요구 정리부터 구현·테스트까지 단계별로 진행되며, 각 단계마다 당신이 승인한다.
 
 ---
 
@@ -89,7 +89,7 @@ codex plugin add dddart@changja88-dddart
 
 ### 디자인을 그대로 — design-ref → 토큰
 
-디자인 시안(Stitch design-ref HTML 등)을 G0에서 연결하면, 시안의 색·spacing·크기·아이콘이 `design-tokens.json`으로 추출돼 설계 명세에 박힌다. architect는 이 추출값을 design_system foundation 토큰으로 잇고, coder는 매직 넘버가 아니라 토큰을 인용해 화면을 재현한다 — 시안 충실도를 구조로 강제한다.
+디자인 시안을 G0에서 연결하면, 시안의 색·spacing·크기·아이콘이 `design-tokens.json`으로 추출돼 설계 명세에 박힌다(claude: Claude Design 화면 JSX + `_ds_manifest.json` / codex: Stitch design-ref HTML). architect는 이 추출값을 design_system foundation 토큰으로 잇고, coder는 매직 넘버가 아니라 토큰을 인용해 화면을 재현한다 — 시안 충실도를 구조로 강제한다.
 
 ### 워크스루: "7일 날씨 예보" 기능
 
