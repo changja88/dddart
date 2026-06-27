@@ -583,6 +583,35 @@ if [ $ok = 1 ]; then PASS=$((PASS+1)); echo "PASS F19 extract_design --from-ds-m
   FAIL=$((FAIL+1)); echo "FAIL F19 (exit=$E)"; echo "$C" | head -40 | sed 's/^/    /'; echo "$OUT" | sed 's/^/    /'
 fi
 
+# ---------- F20: fetch_images --asset-base — JSX 상대경로→복사·동적표현식→skipped
+P="$T/f20"; mkdir -p "$P/design-ref/ui_kits/app" "$P/design-ref/assets"
+# 더미 PNG 파일 (PNG magic bytes: 89 50 4E 47 0D 0A 1A 0A)
+printf '\x89PNG\r\n\x1a\n' > "$P/design-ref/assets/x.png"
+# JSX 화면: 정적 상대경로 + 동적 JSX 표현식
+cat > "$P/design-ref/ui_kits/app/HomeScreen.jsx" <<'EOF'
+export default function HomeScreen() {
+  return (
+    <div>
+      <img src="../../assets/x.png" alt="hero" />
+      <img src={dynamicUrl} alt="dynamic" />
+    </div>
+  );
+}
+EOF
+OUT=$(dart "$SCRIPTS/fetch_images.dart" "$P/design-ref" --assets-root "$P" --asset-base "$P/design-ref" --out "$P/manifest.json" 2>&1); E=$?
+C=$(cat "$P/manifest.json" 2>/dev/null || echo "")
+ok=1
+[ "$E" = 0 ] || ok=0
+grep -q '"status": "ok"' <<<"$C" || ok=0          # 정적 상대경로 → ok
+grep -q '"local_path": "assets/images/' <<<"$C" || ok=0  # local_path 채워짐
+grep -q '"alt": "hero"' <<<"$C" || ok=0           # alt 보존
+grep -q '"status": "skipped"' <<<"$C" || ok=0     # 동적 src={} → skipped
+grep -q '"src"' <<<"$C" || ok=0                   # 스키마 5키 존재
+grep -q '"token"' <<<"$C" || ok=0
+if [ $ok = 1 ]; then PASS=$((PASS+1)); echo "PASS F20 fetch_images --asset-base(JSX 상대경로→복사·동적표현식→skipped)"; else
+  FAIL=$((FAIL+1)); echo "FAIL F20 (exit=$E)"; echo "$C" | head -30 | sed 's/^/    /'; echo "$OUT" | sed 's/^/    /'
+fi
+
 echo ""
 echo "결과: PASS $PASS / FAIL $FAIL"
 [ $FAIL = 0 ]

@@ -10,7 +10,9 @@
 /// `design-ref/*.html`을 보는 형제 도구와 동일한 `<img>` 집합을 보장한다(attr 값 안의 `>`·단따옴표 src도 안 흘림).
 /// 토큰은 여기서 결정론 부여한다(coder는 매니페스트의 token을 베끼기만 — 파일명↔토큰 불일치 구조적 불가).
 ///
-/// 사용: dart run fetch_images.dart <design-ref-dir> --assets-root <project-root> --out <asset-manifest.json>
+/// 사용: dart run fetch_images.dart <design-ref-dir> --assets-root <project-root> --out <asset-manifest.json> [--asset-base <design-ref-dir>]
+/// --asset-base: JSX 모드 활성화 — JSX 안의 상대경로 src를 JSX 파일 디렉터리 기준으로 해소해 로컬 복사.
+///              동적 `<img src={expr}>`(따옴표 없는 JSX 표현식)는 정적 해소 불가 → skipped(fail-loud).
 /// 종료: 0=성공(부분 실패 허용 — status로 표면화) / 1=사용법·design-ref 부재.
 library;
 
@@ -25,18 +27,21 @@ Future<void> main(List<String> argv) async {
   String? dir;
   String? assetsRoot;
   String? outFile;
+  String? assetBase; // --asset-base <design-ref-dir>: JSX 상대경로 해소 모드 활성화
   for (var i = 0; i < argv.length; i++) {
     switch (argv[i]) {
       case '--assets-root':
         assetsRoot = argv[++i];
       case '--out':
         outFile = argv[++i];
+      case '--asset-base':
+        assetBase = argv[++i];
       default:
         dir = argv[i];
     }
   }
   if (dir == null || assetsRoot == null || outFile == null) {
-    stderr.writeln('사용: dart run fetch_images.dart <design-ref-dir> --assets-root <project-root> --out <asset-manifest.json>');
+    stderr.writeln('사용: dart run fetch_images.dart <design-ref-dir> --assets-root <project-root> --out <asset-manifest.json> [--asset-base <design-ref-dir>]');
     exit(1);
   }
   final d = Directory(dir);
@@ -50,6 +55,14 @@ Future<void> main(List<String> argv) async {
       .listSync()
       .whereType<File>()
       .where((File f) => f.path.toLowerCase().endsWith('.html'))
+      .toList()
+    ..sort((File a, File b) => a.path.compareTo(b.path));
+
+  // design-ref/**/*.jsx — 재귀 탐색(Claude Design: ui_kits/app/ 중첩). 결정론 정렬.
+  final jsxs = d
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((File f) => f.path.toLowerCase().endsWith('.jsx'))
       .toList()
     ..sort((File a, File b) => a.path.compareTo(b.path));
 
@@ -88,6 +101,40 @@ Future<void> main(List<String> argv) async {
     }
   }
 
+  // JSX 처리 — --asset-base 있을 때 상대경로 src를 JSX 파일 디렉터리 기준으로 해소
+  for (final f in jsxs) {
+    final slug = f.uri.pathSegments.last.replaceAll(RegExp(r'\.jsx$', caseSensitive: false), '');
+    final jsx = f.readAsStringSync();
+    final lower = jsx.toLowerCase();
+    var n = 0;
+    var i = 0;
+    while (true) {
+      final lt = lower.indexOf('<img', i);
+      if (lt < 0) break;
+      // `<img` 뒤가 단어문자면 `<image>` 등 다른 태그 — 건너뛴다(태그명 경계).
+      final boundary = lt + 4 >= jsx.length || !RegExp(r'[A-Za-z0-9]').hasMatch(jsx[lt + 4]);
+      if (!boundary) {
+        i = lt + 4;
+        continue;
+      }
+      final gt = _tagEnd(jsx, lt); // 따옴표 안 `>`는 무시(attr 값 안전)
+      if (gt < 0) break;
+      final raw = jsx.substring(lt + 1, gt);
+      final sp = raw.indexOf(RegExp(r'\s'));
+      final attrs = <String, String>{};
+      if (sp >= 0) _parseAttrs(raw.substring(sp + 1), attrs);
+      i = gt + 1;
+      final src = attrs['src'] ?? '';
+      if (src.isEmpty) continue;
+      n++;
+      final alt = attrs['alt'] ?? '';
+      final token = _uniqueToken(_camel('$slug-$n'), usedTokens);
+      // resolveBase: --asset-base 있을 때만 JSX 파일 디렉터리 기준 해소 활성화
+      final resolveBase = assetBase != null ? f.parent.absolute.path : null;
+      images.add(await _fetchOne(src, slug, n, token, alt, assetsDir, resolveBase: resolveBase));
+    }
+  }
+
   File(outFile).writeAsStringSync('${const JsonEncoder.withIndent('  ').convert(<String, dynamic>{'images': images})}\n');
 
   int count(String s) => images.where((e) => e['status'] == s).length;
@@ -96,9 +143,13 @@ Future<void> main(List<String> argv) async {
 }
 
 /// 한 `<img>`의 src를 스킴별로 처리하고 manifest 엔트리를 만든다.
-/// http(s)=다운로드(타임아웃 가드) / data:=인라인 디코드 / 그 외=skip(상대·file: — 다운로드 대상 아님).
+/// http(s)=다운로드(타임아웃 가드) / data:=인라인 디코드
+/// / resolveBase 있음=로컬 파일 복사(JSX 상대경로·`--asset-base` 모드)
+/// / 그 외=skip(상대·file: — 다운로드 대상 아님).
+/// resolveBase: JSX 파일 디렉터리의 절대 경로. null이면 상대경로는 skip(기존 동작 유지).
 Future<Map<String, dynamic>> _fetchOne(
-    String src, String slug, int n, String token, String alt, Directory assetsDir) async {
+    String src, String slug, int n, String token, String alt, Directory assetsDir,
+    {String? resolveBase}) async {
   String status;
   var ext = 'png';
   List<int>? bytes;
@@ -136,6 +187,29 @@ Future<Map<String, dynamic>> _fetchOne(
       status = 'failed'; // 타임아웃(stall)·네트워크·파싱 — 전부 status로 표면화(§7 fail-fast)
     } finally {
       client.close(force: true);
+    }
+  } else if (resolveBase != null) {
+    // 로컬 상대경로(JSX `--asset-base` 모드) — JSX 파일 디렉터리 기준 해소
+    if (src.startsWith('{')) {
+      // 동적 JSX 표현식 `src={expr}`: 정적 해소 불가 → fail-loud(skipped)
+      status = 'skipped';
+    } else {
+      try {
+        // URI 해소: resolveBase/ + src (../ 정규화 자동)
+        final resolvedPath = Uri.file('$resolveBase/').resolve(src).toFilePath();
+        final localFile = File(resolvedPath);
+        if (localFile.existsSync()) {
+          bytes = localFile.readAsBytesSync();
+          final dotIdx = resolvedPath.lastIndexOf('.');
+          ext = _extFromMagic(bytes) ??
+              (dotIdx >= 0 ? resolvedPath.substring(dotIdx + 1).toLowerCase() : 'png');
+          status = 'ok';
+        } else {
+          status = 'failed'; // 파일 없음 → fail-loud
+        }
+      } catch (_) {
+        status = 'failed';
+      }
     }
   } else {
     status = 'skipped'; // 상대경로·file: 등 — 표면화(조용한 폴백 금지)
