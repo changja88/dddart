@@ -25,6 +25,8 @@ void main(List<String> argv) {
   String? outFile;
   String? iconMapFile;
   String? themeFile;
+  String? manifestFile;
+  String? screenJsxDir;
   for (var i = 0; i < argv.length; i++) {
     switch (argv[i]) {
       case '--out':
@@ -33,14 +35,27 @@ void main(List<String> argv) {
         iconMapFile = argv[++i];
       case '--from-theme':
         themeFile = argv[++i];
+      case '--from-ds-manifest':
+        manifestFile = argv[++i];
+        // 다음 positional이 있고 플래그가 아니면 screen-jsx-dir로 받는다
+        if (i + 1 < argv.length && !argv[i + 1].startsWith('--')) {
+          screenJsxDir = argv[++i];
+        }
       default:
         dir = argv[i];
     }
   }
-  if (outFile == null || (dir == null && themeFile == null)) {
+  if (outFile == null || (dir == null && themeFile == null && manifestFile == null)) {
     stderr.writeln('사용(HTML): dart run extract_design.dart <design-ref-dir> --out <design-tokens.json> [--icon-map <icon_map.json>]');
     stderr.writeln('사용(designTheme): dart run extract_design.dart --from-theme <designtheme.json> --out <design-tokens.json>');
+    stderr.writeln('사용(dsManifest): dart run extract_design.dart --from-ds-manifest <_ds_manifest.json> [<screen-jsx-dir>] --out <design-tokens.json> [--icon-map <icon_map.json>]');
     exit(1);
+  }
+
+  // --from-ds-manifest: Claude Design _ds_manifest.json → 토큰. 별 함수가 산출·exit 한다.
+  if (manifestFile != null) {
+    _runDsManifestMode(manifestFile, screenJsxDir, outFile, iconMapFile);
+    return; // 도달 불가(_runDsManifestMode가 exit) — 명시
   }
 
   // --from-theme: Stitch designTheme(구조화 JSON) → 토큰. 별 함수가 산출·exit 한다(HTML 경로와 분리).
@@ -586,4 +601,164 @@ String _stripQuotes(String s) {
     if ((q == '"' || q == "'") && s[s.length - 1] == q) return s.substring(1, s.length - 1);
   }
   return s;
+}
+
+// ---- --from-ds-manifest: Claude Design _ds_manifest.json → 토큰 ----
+
+/// `_ds_manifest.json`의 `tokens[]`를 kind 버킷으로 분류해 design-tokens.json 산출.
+/// kind 매핑: color→colors · font→typography · spacing→spacing · radius→borderRadius
+///           · shadow→arbitraryValues · other→drop(버림).
+/// `var(--x)` 자기참조는 같은 tokens[]에서 리터럴로 해소한다.
+/// screen-jsx-dir가 주어지면 `*.jsx` 내 `window.BrkIcon` 아이콘명을 스캔해 icons[]를 채운다.
+void _runDsManifestMode(
+    String manifestFile, String? screenJsxDir, String outFile, String? iconMapFile) {
+  final f = File(manifestFile);
+  if (!f.existsSync()) {
+    stderr.writeln('[extract-design] ds-manifest 파일 없음: $manifestFile');
+    exit(1);
+  }
+  dynamic doc;
+  try {
+    doc = jsonDecode(f.readAsStringSync());
+  } catch (e) {
+    stderr.writeln('[extract-design] ds-manifest JSON 파싱 실패: $e — 동결본을 확인하라.');
+    exit(1);
+  }
+
+  final tokensList = doc is Map ? doc['tokens'] : null;
+  if (tokensList is! List) {
+    stderr.writeln('[extract-design] ds-manifest: tokens 배열 없음 또는 형태 오류.');
+    exit(1);
+  }
+
+  // 1단계: name→value 원시 맵 구축 — var(--x) 해소에 필요한 사전(리터럴 값만 먼저 등록).
+  final rawValues = <String, String>{};
+  for (final t in tokensList) {
+    if (t is! Map) continue;
+    final name = t['name']?.toString();
+    final value = t['value']?.toString();
+    if (name != null && value != null) rawValues[name] = value;
+  }
+
+  // var(--x) 자기참조 해소 — 순환·미해소는 원본 그대로 유지(최대 깊이 10).
+  String resolve(String value) {
+    var v = value;
+    const maxDepth = 10;
+    var depth = 0;
+    final re = RegExp(r'var\((--[^)]+)\)');
+    while (re.hasMatch(v) && depth < maxDepth) {
+      v = v.replaceAllMapped(re, (m) => rawValues[m.group(1)!] ?? m.group(0)!);
+      depth++;
+    }
+    return v;
+  }
+
+  // 2단계: kind 버킷 분류.
+  final colors = <String, String>{};
+  final typography = <String, Map<String, String>>{};
+  final spacing = <String, String>{};
+  final borderRadius = <String, String>{};
+  final arbitraryValues = <String>[];
+  // kind='other' → 버림(명시적 무수집)
+
+  for (final t in tokensList) {
+    if (t is! Map) continue;
+    final name = t['name']?.toString();
+    final value = t['value']?.toString();
+    final kind = t['kind']?.toString();
+    if (name == null || value == null || kind == null) continue;
+    final resolved = resolve(value);
+    switch (kind) {
+      case 'color':
+        colors[name] = resolved;
+      case 'font':
+        typography[name] = <String, String>{'size': resolved};
+      case 'spacing':
+        spacing[name] = resolved;
+      case 'radius':
+        borderRadius[name] = resolved;
+      case 'shadow':
+        arbitraryValues.add(name); // 토큰명을 임의값 채널로 전달(다운스트림이 해석)
+      // 'other' → 수집하지 않음
+    }
+  }
+
+  // fail-loud: 핵심 토큰군이 모두 비면 manifest가 비정상.
+  if (colors.isEmpty && typography.isEmpty && spacing.isEmpty) {
+    stderr.writeln('[extract-design] ds-manifest tokens[]에서 색·타이포·간격 토큰 0 — manifest가 비었거나 형태가 다르다.');
+    exit(1);
+  }
+
+  // 3단계: 아이콘 — screen-jsx-dir의 *.jsx에서 window.BrkIcon 스캔.
+  final iconMap = _loadIconMap(iconMapFile);
+  final icons = <String, _IconAgg>{};
+  if (screenJsxDir != null) {
+    final jsxDir = Directory(screenJsxDir);
+    if (jsxDir.existsSync()) {
+      final jsxFiles = jsxDir
+          .listSync()
+          .whereType<File>()
+          .where((File jf) => jf.path.endsWith('.jsx'))
+          .toList()
+        ..sort((File a, File b) => a.path.compareTo(b.path));
+      for (final jsx in jsxFiles) {
+        _collectBrkIcons(
+          jsx.readAsStringSync(),
+          jsx.path.split(Platform.pathSeparator).last,
+          iconMap,
+          icons,
+        );
+      }
+    }
+  }
+
+  final unmapped = icons.values
+      .where((_IconAgg a) => a.flutter == null)
+      .map((_IconAgg a) => a.name)
+      .toSet()
+      .toList()
+    ..sort();
+
+  final out = <String, dynamic>{
+    'meta': <String, dynamic>{
+      'generator': 'extract_design.dart',
+      'version': 1,
+      'source': 'dsManifest',
+    },
+    'colors': _sorted(colors),
+    'spacing': _sorted(spacing),
+    'borderRadius': _sorted(borderRadius),
+    'typography': _sortedNested(typography),
+    'icons': _emitIcons(icons),
+    'arbitraryValues': arbitraryValues..sort(),
+    'unmappedIcons': unmapped,
+  };
+
+  File(outFile).writeAsStringSync('${const JsonEncoder.withIndent('  ').convert(out)}\n');
+  if (unmapped.isNotEmpty) {
+    stdout.writeln('[warn] 미매핑 아이콘 ${unmapped.length}종(icon_map.json 미수록): ${unmapped.join(', ')}');
+  }
+  stdout.writeln('[extract-design] dsManifest → 색 ${colors.length} · 간격 ${spacing.length}'
+      ' · 모서리 ${borderRadius.length} · 타이포 ${typography.length}'
+      ' · 아이콘 ${icons.length}(미매핑 ${unmapped.length}) → $outFile');
+  exit(0);
+}
+
+// window.BrkIcon 아이콘 스캔 — screen-jsx-dir *.jsx의 name="…" 속성으로 아이콘명 추출.
+// FILL: fill={1}·fill={0} 속성 파싱. 없으면 Material Symbols 기본 0.
+final _brkIconRe = RegExp(r'<window\.BrkIcon\b[^>]*\bname="([^"]+)"');
+final _brkFillRe = RegExp(r'\bfill=\{(\d)\}');
+
+void _collectBrkIcons(
+    String jsx, String screen, Map<String, String> iconMap, Map<String, _IconAgg> into) {
+  for (final m in _brkIconRe.allMatches(jsx)) {
+    final name = m.group(1)!;
+    if (name.isEmpty) continue;
+    final tag = m.group(0)!;
+    final fm = _brkFillRe.firstMatch(tag);
+    final fill = fm != null ? int.parse(fm.group(1)!) : 0;
+    final key = '$name|$fill';
+    final agg = into.putIfAbsent(key, () => _IconAgg(name, fill, iconMap[name]));
+    agg.screens.add(screen);
+  }
 }

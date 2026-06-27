@@ -539,6 +539,49 @@ EOF
 OUT=$(run_backstop "$P" --diff-base "$BASE" --only md); E=$?
 assert "F18c 컬렉션 없는 plain 루트 → MD1 발화·템플릿 미제시(과대범위 반증)" 2 "MD1" "named factory" "$E" "$OUT"
 
+# ---------- F19: extract_design --from-ds-manifest — kind 버킷·var() 해소·BrkIcon 아이콘 스캔
+P="$T/f19"; mkdir -p "$P/screens"
+cat > "$P/manifest.json" <<'EOF'
+{
+  "tokens": [
+    {"name": "--green-forest", "value": "#123a22", "kind": "color"},
+    {"name": "--cream",        "value": "#f5f0e8", "kind": "color"},
+    {"name": "--bg-canvas",    "value": "var(--cream)", "kind": "color"},
+    {"name": "--text-h1",      "value": "32px",    "kind": "font"},
+    {"name": "--space-md",     "value": "16px",    "kind": "spacing"},
+    {"name": "--radius-md",    "value": "12px",    "kind": "radius"},
+    {"name": "--shadow-card",  "value": "0px 4px 20px rgba(0,0,0,0.04)", "kind": "shadow"},
+    {"name": "--ignored",      "value": "whatever","kind": "other"}
+  ],
+  "components": []
+}
+EOF
+cat > "$P/screens/HomeScreen.jsx" <<'EOF'
+export default function HomeScreen() {
+  return (
+    <div>
+      <window.BrkIcon name="sunny" />
+    </div>
+  );
+}
+EOF
+OUT=$(dart "$SCRIPTS/extract_design.dart" --from-ds-manifest "$P/manifest.json" "$P/screens" --out "$P/design-tokens.json" --icon-map "$SCRIPTS/icon_map.json" 2>&1); E=$?
+C=$(cat "$P/design-tokens.json" 2>/dev/null || echo "")
+ok=1
+[ "$E" = 0 ] || ok=0
+grep -q '"--green-forest": "#123a22"' <<<"$C" || ok=0        # color→colors 직접 매핑
+grep -q '"--bg-canvas": "#f5f0e8"' <<<"$C" || ok=0           # var(--cream) 해소 → 리터럴
+grep -q '"--text-h1"' <<<"$C" || ok=0                        # font→typography
+grep -q '"--space-md": "16px"' <<<"$C" || ok=0               # spacing→spacing
+grep -q '"--radius-md": "12px"' <<<"$C" || ok=0              # radius→borderRadius
+grep -q '"--shadow-card"' <<<"$C" || ok=0                    # shadow→arbitraryValues
+grep -q '"--ignored"' <<<"$C" && ok=0                        # other→drop(버림) 확인
+grep -q '"name": "sunny"' <<<"$C" || ok=0                    # window.BrkIcon 스캔
+grep -q '"flutter": "Icons.sunny"' <<<"$C" || ok=0           # icon_map 룩업
+if [ $ok = 1 ]; then PASS=$((PASS+1)); echo "PASS F19 extract_design --from-ds-manifest(kind 버킷·var()해소·BrkIcon 스캔·icon_map 룩업)"; else
+  FAIL=$((FAIL+1)); echo "FAIL F19 (exit=$E)"; echo "$C" | head -40 | sed 's/^/    /'; echo "$OUT" | sed 's/^/    /'
+fi
+
 echo ""
 echo "결과: PASS $PASS / FAIL $FAIL"
 [ $FAIL = 0 ]
