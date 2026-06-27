@@ -1,5 +1,5 @@
 {
-  "_comment": "Material Symbols(Stitch data-icon) → Flutter Icons 상수 고정표. extract_design.dart가 design-tokens.json의 각 아이콘에 flutter 값을 박는다. 미수록 아이콘은 unmappedIcons로 표시되어 architect가 ui_extension(architecture-ui §5)에 수동 매핑한다. FILL 1=채움(Icons.<name>)·FILL 0=윤곽(가능하면 Icons.<name>_outlined). 여기 상수는 코더가 호스트 Flutter SDK의 green 래칫(dart analyze)으로 실재 검증한다 — 미확신 상수는 의도적으로 누락해 unmapped로 흘려보낸다.",
+  "_comment": "Material Symbols(Stitch `data-icon` / Claude Design `window.BrkIcon` — 동일 키 공간) → Flutter Icons 상수 고정표. extract_design.dart가 design-tokens.json의 각 아이콘에 flutter 값을 박는다. 미수록 아이콘은 unmappedIcons로 표시되어 architect가 ui_extension(architecture-ui §5)에 수동 매핑한다. FILL 1=채움(Icons.<name>)·FILL 0=윤곽(가능하면 Icons.<name>_outlined). 여기 상수는 코더가 호스트 Flutter SDK의 green 래칫(dart analyze)으로 실재 검증한다 — 미확신 상수는 의도적으로 누락해 unmapped로 흘려보낸다.",
   "icons": {
     "sunny": "Icons.sunny",
     "clear_day": "Icons.wb_sunny",
