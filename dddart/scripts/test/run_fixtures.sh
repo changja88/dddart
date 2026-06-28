@@ -612,6 +612,85 @@ if [ $ok = 1 ]; then PASS=$((PASS+1)); echo "PASS F20 fetch_images --asset-base(
   FAIL=$((FAIL+1)); echo "FAIL F20 (exit=$E)"; echo "$C" | head -30 | sed 's/^/    /'; echo "$OUT" | sed 's/^/    /'
 fi
 
+# ---------- F21: extract_dc — .dc.html 아이콘·이미지·게이트텍스트 결정론 추출(.screen 서브트리·device-chrome 제외·design-tokens RMW)
+#            claude 전용·미러 게이트 밖. 앱 PROJECT(.dc.html)을 시안 출처로 읽는 인입 스크립트.
+P="$T/f21"; mkdir -p "$P/assets"
+# 더미 PNG (PNG magic bytes 89 50 4E 47 0D 0A 1A 0A) — <img src="assets/icon.png"> 해소·복사 대상
+printf '\x89PNG\r\n\x1a\n' > "$P/assets/icon.png"
+# extract_design --from-ds-manifest 선행 산출 모사: colors 1개·icons[] 빈 design-tokens.json (extract_dc가 RMW)
+cat > "$P/design-tokens.json" <<'EOF'
+{
+  "meta": {"generator": "extract_design.dart", "version": 1, "source": "dsManifest"},
+  "colors": {"--green-brand": "#123a22"},
+  "spacing": {},
+  "borderRadius": {},
+  "typography": {},
+  "icons": [],
+  "arbitraryValues": [],
+  "negativeMargins": [],
+  "unmappedIcons": []
+}
+EOF
+# Claude Design PROJECT 앱화면 .dc.html — device-chrome(.stage/.phone/.decor/.statusbar) + .screen 앱콘텐츠
+cat > "$P/role.dc.html" <<'EOF'
+<x-dc><helmet><style>.title{}.subtitle{}.rtitle{}</style></helmet>
+<div class="stage"><div class="phone">
+  <div class="decor"><span class="blob"></span></div>
+  <div class="statusbar">
+    <span class="material-symbols-rounded">signal_cellular_alt</span>
+    <span class="material-symbols-rounded">wifi</span>
+    <span class="material-symbols-rounded">battery_full</span></div>
+  <div class="screen"><div class="body">
+    <div class="brandtop"><img src="assets/icon.png" alt="Logo"></div>
+    <div class="head"><div class="title">누가 사용하나요?</div>
+      <div class="subtitle">사용자에 맞게 시작할 화면을 안내해드릴게요.</div></div>
+    <div class="cards">
+      <a class="rolecard" href="login.dc.html"><span class="ricon">
+        <span class="material-symbols-rounded">manage_accounts</span></span>
+        <span class="rtitle">부모입니다</span>
+        <span class="material-symbols-rounded">chevron_right</span></a>
+      <button class="rolecard"><span class="ricon">
+        <span class="material-symbols-rounded">school</span></span>
+        <span class="rtitle">자녀입니다</span>
+        <span class="material-symbols-rounded">chevron_right</span></button>
+    </div></div></div>
+</div></div></x-dc>
+EOF
+OUT=$(dart "$SCRIPTS/extract_dc.dart" "$P/role.dc.html" --tokens "$P/design-tokens.json" \
+  --asset-manifest "$P/asset-manifest.json" --assets-root "$P" --asset-base "$P" \
+  --meta "$P/screen-meta.json" --icon-map "$SCRIPTS/icon_map.json" 2>&1); E=$?
+C=$(cat "$P/design-tokens.json" 2>/dev/null || echo "")
+M=$(cat "$P/screen-meta.json" 2>/dev/null || echo "")
+A=$(cat "$P/asset-manifest.json" 2>/dev/null || echo "")
+ok=1
+[ "$E" = 0 ] || ok=0
+# 아이콘: .screen 내부 3종 수집(material-symbols 리거처)
+grep -q '"name": "manage_accounts"' <<<"$C" || ok=0
+grep -q '"name": "school"' <<<"$C" || ok=0
+grep -q '"name": "chevron_right"' <<<"$C" || ok=0
+# device-chrome(.statusbar) 아이콘 제외(MF-4) — .screen 밖이라 절대 안 나와야
+grep -q 'signal_cellular_alt' <<<"$C" && ok=0
+grep -q 'wifi' <<<"$C" && ok=0
+grep -q 'battery_full' <<<"$C" && ok=0
+# RMW: 기존 colors 보존(MF-3·통째 덮어쓰기 금지 — colors 소실 방지)
+grep -q '"--green-brand": "#123a22"' <<<"$C" || ok=0
+# icons[] 스키마 키(name·fill·flutter·screens)
+grep -q '"fill":' <<<"$C" || ok=0
+grep -q '"flutter": "Icons.chevron_right"' <<<"$C" || ok=0   # icon_map 룩업(읽기)→매핑
+grep -q '"screens":' <<<"$C" || ok=0
+# screen-meta.json 게이트 텍스트(MF-1·§7 확인 게이트 단일 인용처)
+grep -qF '"title": "누가 사용하나요?"' <<<"$M" || ok=0
+grep -q '"subtitle":' <<<"$M" || ok=0
+grep -qF '시작할 화면을' <<<"$M" || ok=0
+grep -qF '부모입니다' <<<"$M" || ok=0
+grep -qF '자녀입니다' <<<"$M" || ok=0
+# asset-manifest.json 이미지(icon.png 상대경로 해소·복사)
+grep -q '"status": "ok"' <<<"$A" || ok=0
+grep -q '"local_path": "assets/images/' <<<"$A" || ok=0
+if [ $ok = 1 ]; then PASS=$((PASS+1)); echo "PASS F21 extract_dc(.screen 서브트리·device-chrome 제외·아이콘·이미지·게이트텍스트·RMW colors 보존)"; else
+  FAIL=$((FAIL+1)); echo "FAIL F21 (exit=$E)"; echo "$C" | head -40 | sed 's/^/    /'; echo "    --meta--"; echo "$M" | sed 's/^/    /'; echo "    --manifest--"; echo "$A" | head -20 | sed 's/^/    /'; echo "    --stderr--"; echo "$OUT" | sed 's/^/    /'
+fi
+
 echo ""
 echo "결과: PASS $PASS / FAIL $FAIL"
 [ $FAIL = 0 ]
