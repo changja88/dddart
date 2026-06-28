@@ -622,9 +622,9 @@ cat > "$P/design-tokens.json" <<'EOF'
 {
   "meta": {"generator": "extract_design.dart", "version": 1, "source": "dsManifest"},
   "colors": {"--green-brand": "#123a22"},
-  "spacing": {},
-  "borderRadius": {},
-  "typography": {},
+  "spacing": {"--space-md": "16px"},
+  "borderRadius": {"--radius-card": "12px"},
+  "typography": {"--text-h1": {"size": "32px"}},
   "icons": [],
   "arbitraryValues": [],
   "negativeMargins": [],
@@ -672,8 +672,11 @@ grep -q '"name": "chevron_right"' <<<"$C" || ok=0
 grep -q 'signal_cellular_alt' <<<"$C" && ok=0
 grep -q 'wifi' <<<"$C" && ok=0
 grep -q 'battery_full' <<<"$C" && ok=0
-# RMW: 기존 colors 보존(MF-3·통째 덮어쓰기 금지 — colors 소실 방지)
-grep -q '"--green-brand": "#123a22"' <<<"$C" || ok=0
+# RMW: 기존 토큰 버킷 전수 보존(MF-3·통째 덮어쓰기 금지 — colors뿐 아니라 spacing/borderRadius/typography도 소실 방지)
+grep -q '"--green-brand": "#123a22"' <<<"$C" || ok=0      # colors 보존
+grep -q '"--space-md": "16px"' <<<"$C" || ok=0            # spacing 보존(RMW가 안 날렸나)
+grep -q '"--radius-card": "12px"' <<<"$C" || ok=0         # borderRadius 보존
+grep -q '"--text-h1"' <<<"$C" || ok=0                     # typography 보존
 # icons[] 스키마 키(name·fill·flutter·screens)
 grep -q '"fill":' <<<"$C" || ok=0
 grep -q '"flutter": "Icons.chevron_right"' <<<"$C" || ok=0   # icon_map 룩업(읽기)→매핑
