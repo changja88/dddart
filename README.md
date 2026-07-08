@@ -49,6 +49,33 @@ codex plugin add dddart@changja88-dddart
 
 ---
 
+## 업데이트
+
+**Claude Code** — 슬래시 커맨드로 (마켓 메타 갱신 → 플러그인 갱신 순서):
+
+```
+/plugin marketplace update changja88-dddart
+/plugin update dddart@changja88-dddart
+```
+
+**Codex** — CLI로. Codex에는 별도 `plugin update` 커맨드가 없다 — 설치된 플러그인이 마켓플레이스 스냅샷 디렉터리에서 직접 로드되므로, **스냅샷을 갱신하면 그게 곧 플러그인 업데이트**다:
+
+```
+codex plugin marketplace upgrade changja88-dddart
+```
+
+설치된 버전 확인은 `codex plugin list` — 마켓플레이스별로 플러그인 상태·버전·경로가 표로 나온다:
+
+```
+$ codex plugin list
+PLUGIN                    STATUS              VERSION  PATH
+dddart@changja88-dddart   installed, enabled  1.1.0    ~/.codex/.tmp/marketplaces/changja88-dddart/codex-dddart
+```
+
+> 업데이트 후 세션을 재시작하세요. `upgrade`에서 마켓 이름을 생략하면 설정된 모든 Git 마켓플레이스를 한 번에 갱신합니다.
+
+---
+
 ## 빠른 시작
 
 기존 Flutter 프로젝트 루트에서 Claude Code를 실행하고:
