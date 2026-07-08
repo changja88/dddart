@@ -282,9 +282,32 @@ bool hasSeg(String libRel, String seg) => segsOf(libRel).contains(seg);
 
 /// BC 판별 — `lib/application/` 다음 경로 성분 비교(접두 문자열 비교 금지:
 /// `chat`이 `chat_request`를 자기 BC로 오인 — §4-5).
-String? bcOf(String libRel) {
+/// [areas]가 주어지면 s[1]이 area일 때 그 다음 성분이 BC다(feedback-031 —
+/// area는 적극 증명된 폴더만 [BackstopContext.areas], 그 외 전부 기존 s[1]
+/// 폴백 = 보수적. 레거시·drift 형상의 분류가 불변이라 CY 베이스라인·IM 분류 무회귀).
+String? bcOf(String libRel, [Set<String> areas = const {}]) {
   final s = segsOf(libRel);
-  return (s.length > 1 && s.first == 'application') ? s[1] : null;
+  if (s.length < 2 || s.first != 'application') return null;
+  if (areas.contains(s[1])) return s.length > 2 ? s[2] : null;
+  return s[1];
+}
+
+/// BC 루트 직속 파일 경로인가 — `application/<bc>/<file>` 또는
+/// `application/<area>/<bc>/<file>`(feedback-031).
+bool isBcRootPath(String libRel, Set<String> areas) {
+  final s = segsOf(libRel);
+  if (s.first != 'application') return false;
+  final bi = (s.length > 2 && areas.contains(s[1])) ? 2 : 1;
+  return s.length == bi + 2;
+}
+
+/// 파일·디렉터리가 속한 BC 루트 디렉터리 경로 — `application/<bc>` 또는
+/// `application/<area>/<bc>`(feedback-031). BC 성분이 없으면 null.
+String? bcDirOf(String libRel, Set<String> areas) {
+  final s = segsOf(libRel);
+  if (s.length < 2 || s.first != 'application') return null;
+  final bi = (s.length > 2 && areas.contains(s[1])) ? 2 : 1;
+  return s.length > bi ? s.sublist(0, bi + 1).join('/') : null;
 }
 
 /// 직계 부모 디렉터리명.
@@ -312,6 +335,7 @@ class BackstopContext {
   final bool allMode;
   final List<String> dartFiles; // lib-상대, 제외 규칙 적용 후
   final Set<String> allDirs; // lib-상대 디렉터리 전체
+  final Set<String> areas; // application/ 직속 area 폴더(feedback-031 — 적극 증명분만)
   final Set<String> touched;
   final Set<String> added;
   final Set<String> baseFiles; // diff-base 시점의 lib-상대 파일 (ls-tree)
@@ -321,8 +345,8 @@ class BackstopContext {
   final Map<String, List<ImportEdge>> _edgeCache = {};
 
   BackstopContext._(this.root, this.packageName, this.gitRepo, this.diffBase,
-      this.allMode, this.dartFiles, this.allDirs, this.touched, this.added,
-      this.baseFiles, this._addedSpans);
+      this.allMode, this.dartFiles, this.allDirs, this.areas, this.touched,
+      this.added, this.baseFiles, this._addedSpans);
 
   /// 게이트가 살아 있는가 (비git·--all이면 전역 퇴화).
   bool get gated => gitRepo && diffBase != null && !allMode;
@@ -386,6 +410,36 @@ class BackstopContext {
       }
     }
     files.sort();
+
+    // area 판별(feedback-031) — 적극 증명될 때만: `application/` 직속 <x>의 직속에
+    // dart 파일이 없고, 직속 디렉터리가 1개 이상이며 전부 BC꼴(각각 4계층 폴더 중
+    // 하나 이상을 직속 보유)일 때만 x=area. 그 외 전부 기존 s[1]=BC 폴백(보수 —
+    // 레거시·drift 형상의 분류 불변 → CY 베이스라인·IM 분류 무회귀). 중첩 area는
+    // 이 규칙상 성립 불가(자식이 계층 폴더를 직속 보유해야 하므로).
+    final areas = <String>{};
+    final appChildDirs = <String, Set<String>>{};
+    final appChildHasFile = <String>{};
+    for (final d in dirs) {
+      final s = d.split('/');
+      if (s[0] != 'application') continue;
+      if (s.length == 2) appChildDirs.putIfAbsent(s[1], () => {});
+      if (s.length == 3) appChildDirs.putIfAbsent(s[1], () => {}).add(s[2]);
+    }
+    for (final f in files) {
+      final s = f.split('/');
+      if (s.length == 3 && s[0] == 'application') appChildHasFile.add(s[1]);
+    }
+    for (final e in appChildDirs.entries) {
+      final x = e.key;
+      final children = e.value;
+      if (appChildHasFile.contains(x)) continue;
+      if (layerNames.contains(x)) continue;
+      if (children.isEmpty) continue;
+      if (children.any(layerNames.contains)) continue; // x 자신이 BC(계층 직속 보유)
+      final allBcShaped = children.every((y) =>
+          layerNames.any((l) => dirs.contains('application/$x/$y/$l')));
+      if (allBcShaped) areas.add(x);
+    }
 
     final gitRepo = _git(root, ['rev-parse', '--is-inside-work-tree']) == 'true';
     var touched = <String>{};
@@ -479,7 +533,7 @@ class BackstopContext {
     }
 
     return BackstopContext._(root, pkg, gitRepo, diffBase, allMode, files, dirs,
-        touched, added, baseFiles, addedSpans);
+        areas, touched, added, baseFiles, addedSpans);
   }
 }
 

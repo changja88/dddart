@@ -25,18 +25,23 @@ List<Finding> runTests(BackstopContext ctx) {
 
   for (final d in ctx.allDirs) {
     final s = segsOf(d);
-    if (!(s.length == 2 && s[0] == 'application' && ctx.isAddedDir(d))) continue;
-    final bc = s[1];
-    final bcTestDir = Directory('$testRoot/application/$bc');
+    // BC = `application/<bc>` 또는 `application/<area>/<bc>`(feedback-031) —
+    // test/는 lib/ 1:1 미러라 area 경로를 그대로 따른다.
+    final isBc = s[0] == 'application' &&
+        ((s.length == 2 && !ctx.areas.contains(s[1])) ||
+            (s.length == 3 && ctx.areas.contains(s[1])));
+    if (!(isBc && ctx.isAddedDir(d))) continue;
+    final bc = s.last;
+    final bcTestDir = Directory('$testRoot/$d');
     final hasBehaviorTest = bcTestDir.existsSync() &&
         bcTestDir
             .listSync(recursive: true, followLinks: false)
             .any((e) => e is File && e.path.endsWith('_test.dart'));
     if (!hasBehaviorTest) {
       out.add(Finding('TG1', d, null,
-          '신규 BC `$bc` 행위검증 테스트 부재 — `test/application/$bc/`에 `*_test.dart` 0건. green 빌드가 비-vacuous 검증으로 안 이어진다(FC-2).',
+          '신규 BC `$bc` 행위검증 테스트 부재 — `test/$d/`에 `*_test.dart` 0건. green 빌드가 비-vacuous 검증으로 안 이어진다(FC-2).',
           _ruleTg,
-          '명세 행위목록 각 항목마다 그 행위를 두드리는(깨지면 red) widget/unit test를 `test/application/$bc/<계층>/`에 산출한다(루트 widget_test.dart 스모크는 불충분).'));
+          '명세 행위목록 각 항목마다 그 행위를 두드리는(깨지면 red) widget/unit test를 `test/$d/<계층>/`에 산출한다(루트 widget_test.dart 스모크는 불충분).'));
     }
   }
   return out;

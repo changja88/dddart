@@ -18,11 +18,11 @@ List<Finding> runCycles(BackstopContext ctx, {required bool updateBaseline}) {
   // BC 그래프 (전역 — 게이트 없음)
   final edges = <String, Set<String>>{};
   for (final f in ctx.dartFiles) {
-    final a = bcOf(f);
+    final a = bcOf(f, ctx.areas);
     if (a == null) continue;
     for (final e in ctx.edgesOf(f)) {
       if (e.type != TargetType.internal) continue;
-      final b = bcOf(e.target!);
+      final b = bcOf(e.target!, ctx.areas);
       if (b != null && b != a) edges.putIfAbsent(a, () => {}).add(b);
     }
   }

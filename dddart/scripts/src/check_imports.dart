@@ -12,14 +12,14 @@ List<Finding> runImports(BackstopContext ctx) {
   final out = <Finding>[];
   for (final f in ctx.dartFiles.where(ctx.isTouched)) {
     final segs = segsOf(f);
-    final bc = bcOf(f);
+    final bc = bcOf(f, ctx.areas);
     final base = baseNameOf(f);
     final parent = parentDirOf(f);
     final inDomain = hasSeg(f, 'domain_layer');
     final inApp = hasSeg(f, 'application_layer');
     final inInfra = hasSeg(f, 'infra_layer');
     final inPres = hasSeg(f, 'presentation_layer');
-    final isBcRootFile = segs.length == 3 && segs[0] == 'application';
+    final isBcRootFile = isBcRootPath(f, ctx.areas);
     final isNavigator = isBcRootFile && base == '${bc}_navigator.dart';
     final isBcRouter = isBcRootFile && base == '${bc}_router.dart';
     final isMain = f == 'main.dart';
@@ -65,17 +65,19 @@ List<Finding> runImports(BackstopContext ctx) {
 
       // ---- IM5: 교차 BC 4채널
       if (bc != null && isInternal) {
-        final tbc = bcOf(t);
+        final tbc = bcOf(t, ctx.areas);
         if (tbc != null && tbc != bc) {
           final tsegs = segsOf(t);
           final inTDomain = hasSeg(t, 'domain_layer');
           final domainType = inTDomain &&
               (hasSeg(t, 'entity') || hasSeg(t, 'value_object') || hasSeg(t, 'enum') ||
-                  (tsegs.length == 5 && tsegs[4] == '${tsegs[3]}.dart') ||
+                  (tsegs.length >= 3 &&
+                      tsegs[tsegs.length - 3] == 'domain_layer' &&
+                      tsegs.last == '${tsegs[tsegs.length - 2]}.dart') ||
                   baseNameOf(t) == 'exception.dart');
           final ok = domainType ||
               hasSeg(t, 'use_case') ||
-              (tsegs.length == 3 && tsegs[2] == '${tbc}_navigator.dart') ||
+              (isBcRootPath(t, ctx.areas) && baseNameOf(t) == '${tbc}_navigator.dart') ||
               (hasSeg(t, 'presentation_layer') && hasSeg(t, 'view'));
           if (!ok) {
             final reason = inTDomain
@@ -208,12 +210,12 @@ List<Finding> runImports(BackstopContext ctx) {
 
       // ---- IM22: router 허용 목록
       if (isBcRouter && isInternal) {
-        final tbc = bcOf(t);
+        final tbc = bcOf(t, ctx.areas);
         final ok = t.startsWith('design_system/') || // 전환 토큰(IM13 허용과 정합)
             t.startsWith('common/') || // 중립 유틸·네트워크(houserules §5 — common은 domain만 예외·전 계층 합법; IM21 navigator와 정합·feedback-012 R1)
             (tbc == bc &&
                 ((hasSeg(t, 'presentation_layer') && hasSeg(t, 'view')) ||
-                    segsOf(t).length == 3)); // 자기 BC 루트
+                    isBcRootPath(t, ctx.areas))); // 자기 BC 루트
         if (!ok) {
           add('IM22', e.line, 'router에서 `$t` import — router는 자기 BC view(GoRoute builder)·BC 루트·design_system·common만',
               '제1 규약 §3.7·§3.1', 'section·widget은 view가 조립하고, 게이트 상태 확인은 root_router redirect(UseCase 직접 생성)의 일.');

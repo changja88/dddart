@@ -84,7 +84,7 @@ List<Finding> runNaming(BackstopContext ctx) {
   final viewPrefixes = <String, Set<String>>{}; // bc(또는 'root') → 접두
   for (final f in ctx.dartFiles) {
     if (parentDirOf(f) == 'view' && baseNameOf(f).endsWith('_view.dart')) {
-      final owner = bcOf(f) ?? (f.startsWith('root/scaffold/') ? 'root' : '');
+      final owner = bcOf(f, ctx.areas) ?? (f.startsWith('root/scaffold/') ? 'root' : '');
       if (owner.isEmpty) continue;
       viewPrefixes.putIfAbsent(owner, () => {}).add(
           baseNameOf(f).substring(0, baseNameOf(f).length - '_view.dart'.length));
@@ -95,10 +95,10 @@ List<Finding> runNaming(BackstopContext ctx) {
     final segs = segsOf(f);
     final base = baseNameOf(f);
     final parent = parentDirOf(f);
-    final bc = bcOf(f);
+    final bc = bcOf(f, ctx.areas);
     final inApp = hasSeg(f, 'application_layer');
     final isRouter = base.endsWith('_router.dart') &&
-        ((segs.length == 3 && segs[0] == 'application') || f == 'root/router/root_router.dart');
+        (isBcRootPath(f, ctx.areas) || f == 'root/router/root_router.dart');
 
     // ---- NM1: 종류 폴더 ↔ 접미사 (긴 접미사 우선)
     final kindOfFolder = _kindSuffixes[parent];
@@ -154,7 +154,7 @@ List<Finding> runNaming(BackstopContext ctx) {
     if (parent == 'view_model' && base.endsWith('_vm.dart') &&
         (inApp || f.startsWith('root/scaffold/'))) {
       final prefix = base.substring(0, base.length - '_vm.dart'.length);
-      final scope = bc != null ? 'application/$bc/' : 'root/scaffold/';
+      final scope = bc != null ? '${bcDirOf(f, ctx.areas)}/' : 'root/scaffold/';
       final hasView = ctx.dartFiles.any((g) => g.startsWith(scope) && baseNameOf(g) == '${prefix}_view.dart');
       final hasState = ctx.dartFiles.any((g) => g.startsWith(scope) && baseNameOf(g) == '${prefix}_state.dart');
       if (!hasView || !hasState) {

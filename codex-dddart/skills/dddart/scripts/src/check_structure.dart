@@ -36,21 +36,25 @@ List<Finding> runStructure(BackstopContext ctx) {
   }
 
   // ---- ST1: application/ 직속 파일 금지
+  // area 직속 파일은 별도 불요 — 직속 파일이 있으면 area로 판별되지 않아(보수 폴백,
+  // feedback-031) 그 폴더는 BC 취급 → ST2/ST4가 발화한다.
   for (final f in addedFiles) {
     final s = segsOf(f);
     if (s.length == 2 && s[0] == 'application') {
       out.add(Finding('ST1', f, null,
-          'application/ 직속 파일 — 직속은 BC 디렉터리만', _rule2,
+          'application/ 직속 파일 — 직속은 BC(또는 area) 디렉터리만', _rule2,
           '소속 BC를 정해 application/<bc>/ 안으로 옮긴다(라우터·내비게이터면 그 BC 직속).'));
     }
   }
 
-  // ---- ST2: BC 직속 파일 2종 + <bc> 바인딩
+  // ---- ST2: BC 직속 파일 2종 + <bc> 바인딩 (area 하위 BC 포함 — feedback-031)
   for (final f in addedFiles) {
     final s = segsOf(f);
-    if (s.length == 3 && s[0] == 'application') {
-      final bc = s[1];
-      final name = s[2];
+    if (s[0] != 'application') continue;
+    final bi = (s.length > 2 && ctx.areas.contains(s[1])) ? 2 : 1;
+    if (s.length == bi + 2) {
+      final bc = s[bi];
+      final name = s.last;
       if (name != '${bc}_router.dart' && name != '${bc}_navigator.dart') {
         out.add(Finding('ST2', f, null,
             'BC 직속 허용 외 파일 — 허용은 `${bc}_router.dart`·`${bc}_navigator.dart` 2종(접두=BC 폴더명)뿐',
@@ -59,12 +63,14 @@ List<Finding> runStructure(BackstopContext ctx) {
     }
   }
 
-  // ---- ST3: BC 1뎁스 = 4계층 화이트리스트
+  // ---- ST3: BC 1뎁스 = 4계층 화이트리스트 (area 하위 BC 포함 — feedback-031)
   for (final d in ctx.allDirs) {
     final s = segsOf(d);
-    if (s.length == 3 && s[0] == 'application' && !layerNames.contains(s[2]) && ctx.isAddedDir(d)) {
+    if (s[0] != 'application') continue;
+    final bi = (s.length > 2 && ctx.areas.contains(s[1])) ? 2 : 1;
+    if (s.length == bi + 2 && !layerNames.contains(s.last) && ctx.isAddedDir(d)) {
       out.add(Finding('ST3', d, null,
-          'BC 직속 허용 외 디렉터리 `${s[2]}/` — 4계층 고정 표기만(domain_layer·application_layer·infra_layer·presentation_layer)${_typoHint(s[2], layerNames)}',
+          'BC 직속 허용 외 디렉터리 `${s.last}/` — 4계층 고정 표기만(domain_layer·application_layer·infra_layer·presentation_layer)${_typoHint(s.last, layerNames)}',
           _rule2, '4계층 중 정체에 맞는 폴더로 옮기고 오타면 표기를 교정한다.'));
     }
   }
@@ -99,22 +105,24 @@ List<Finding> runStructure(BackstopContext ctx) {
     }
   }
 
-  // ---- ST6: 계층/개념 폴더 직속 종류 화이트리스트 (+infra 평면)
+  // ---- ST6: 계층/개념 폴더 직속 종류 화이트리스트 (+infra 평면, area 하위 BC 포함)
   for (final d in ctx.allDirs) {
     final s = segsOf(d);
-    if (s[0] != 'application' || s.length < 4 || !ctx.isAddedDir(d)) continue;
-    final layer = s[2];
+    if (s[0] != 'application' || !ctx.isAddedDir(d)) continue;
+    final bi = (s.length > 2 && ctx.areas.contains(s[1])) ? 2 : 1;
+    if (s.length < bi + 3) continue;
+    final layer = s[bi + 1];
     final name = s.last;
     if (layer == 'application_layer' || layer == 'presentation_layer') {
       final kinds = layer == 'application_layer' ? appKinds : presKinds;
-      if (s.length == 4) continue; // 계층 직속 비종류 디렉터리 = 개념 폴더(합법, §4)
-      if (s.length == 5 && !kinds.contains(name)) {
+      if (s.length == bi + 3) continue; // 계층 직속 비종류 디렉터리 = 개념 폴더(합법, §4)
+      if (s.length == bi + 4 && !kinds.contains(name)) {
         out.add(Finding('ST6', d, null,
             '개념 폴더 하위 허용 외 디렉터리 `$name/` — ${layer == 'application_layer' ? 'app 5종' : 'pres 4종'}만${_typoHint(name, kinds)}',
             '제1 규약 §4·§5', '종류 폴더 표기로 교정하거나 제자리로 옮긴다.'));
       }
     } else if (layer == 'infra_layer') {
-      if (s.length == 4 && !infraKinds.contains(name)) {
+      if (s.length == bi + 3 && !infraKinds.contains(name)) {
         out.add(Finding('ST6', d, null,
             'infra_layer 직속 허용 외 디렉터리 `$name/` — infra는 평면 유지(개념 폴더 금지), 3종(data_source·repository·service)만${_typoHint(name, infraKinds)}',
             '제1 규약 §4', 'HaffHaff 16개 BC 전수에서 infra는 평면 — 종류 3폴더로 정리한다.'));
@@ -122,13 +130,21 @@ List<Finding> runStructure(BackstopContext ctx) {
     }
   }
 
-  // ---- ST7: 구명칭 디렉터리 deny
+  // ---- ST7: 구명칭 디렉터리 deny + BC·area 이름 deny(계층·컨테이너명 — feedback-031)
   const bcDeny = {'app', 'bridge', 'block', 'viewmodel', 'repo', 'container'};
+  const nameDeny = {...layerNames, 'root', 'application', 'common', 'design_system'};
   for (final d in ctx.allDirs.where(ctx.isAddedDir)) {
     final s = segsOf(d);
     if (s[0] == 'application' && s.length > 2 && bcDeny.contains(s.last)) {
       out.add(Finding('ST7', d, null, '구명칭 디렉터리 `${s.last}/`', '제1 규약 §8·§9-8',
           'app→use_case, bridge→shared_state, block→section, viewmodel→view_model, repo→repository, container→view/section/widget 정리.'));
+    }
+    if (s[0] == 'application' &&
+        (s.length == 2 || (s.length == 3 && ctx.areas.contains(s[1]))) &&
+        nameDeny.contains(s.last)) {
+      out.add(Finding('ST7', d, null,
+          'BC·area 이름 `${s.last}/` — 계층명·컨테이너명은 BC·area 이름으로 금지(경로 판별 오염)',
+          '제1 규약 §2', '기능 어휘로 개명한다 — 계층·컨테이너명은 트리의 예약어다.'));
     }
     if (s[0] == 'common' && s.length == 2 && s.last == 'provider') {
       out.add(Finding('ST7', d, null, 'common/provider/ — 폐지된 종류(2026-06-12)', '제1 규약 §9-11',
@@ -261,15 +277,17 @@ List<Finding> _skeleton(BackstopContext ctx) {
     }
   }
 
-  // 신규 BC
-  final newBcs = <String>{};
+  // 신규 BC (area 하위 포함 — feedback-031: `application/<bc>` 또는 `application/<area>/<bc>`)
   for (final d in ctx.allDirs) {
     final s = segsOf(d);
-    if (s.length == 2 && s[0] == 'application' && ctx.isAddedDir(d)) {
-      newBcs.add(s[1]);
+    final isBc = s[0] == 'application' &&
+        ((s.length == 2 && !ctx.areas.contains(s[1])) ||
+            (s.length == 3 && ctx.areas.contains(s[1])));
+    if (isBc && ctx.isAddedDir(d)) {
+      final bcName = s.last;
       final bcDir = d;
       // 4계층 + 계층별 종류
-      requireUnit(bcDir, '신규 BC `${s[1]}`', {
+      requireUnit(bcDir, '신규 BC `$bcName`', {
         'application_layer': appKinds,
         'infra_layer': infraKinds,
         'presentation_layer': presKinds,
@@ -281,29 +299,33 @@ List<Finding> _skeleton(BackstopContext ctx) {
         final aggs = domDir.listSync().whereType<Directory>().toList();
         if (aggs.isEmpty) {
           out.add(Finding('ST4', '$bcDir/domain_layer', null,
-              '신규 BC `${s[1]}` domain_layer에 애그리거트 폴더 없음 — 기본값은 BC 동명 애그리거트',
-              _rule5, '`domain_layer/${s[1]}/` + `${s[1]}.dart` + 5종 폴더를 생성한다.'));
+              '신규 BC `$bcName` domain_layer에 애그리거트 폴더 없음 — 기본값은 BC 동명 애그리거트',
+              _rule5, '`domain_layer/$bcName/` + `$bcName.dart` + 5종 폴더를 생성한다.'));
         }
       }
     }
   }
-  // 신규 애그리거트 (신규 BC 내부 포함 — 단위 중복 보고는 무해하므로 단순 유지)
+  // 신규 애그리거트 (신규 BC 내부 포함 — 단위 중복 보고는 무해하므로 단순 유지.
+  // domain_layer 상대 판별이라 area 깊이 무관)
   for (final d in ctx.allDirs) {
     final s = segsOf(d);
-    if (s.length == 4 && s[0] == 'application' && s[2] == 'domain_layer' && ctx.isAddedDir(d)) {
-      requireUnit(d, '신규 애그리거트 `${s[3]}`', {'': domainKinds},
-          requiredFiles: ['${s[3]}.dart']);
+    final di = s.indexOf('domain_layer');
+    if (s[0] == 'application' && di >= 0 && di == s.length - 2 && ctx.isAddedDir(d)) {
+      requireUnit(d, '신규 애그리거트 `${s.last}`', {'': domainKinds},
+          requiredFiles: ['${s.last}.dart']);
     }
   }
-  // 신규 개념 폴더 (app·pres)
+  // 신규 개념 폴더 (app·pres — area 하위 BC 포함)
   for (final d in ctx.allDirs) {
     final s = segsOf(d);
-    if (s.length == 4 && s[0] == 'application' && ctx.isAddedDir(d)) {
-      if (s[2] == 'application_layer' && !appKinds.contains(s[3])) {
-        requireUnit(d, '신규 개념 폴더 `${s[3]}`(application)', {'': appKinds});
+    if (s[0] != 'application' || !ctx.isAddedDir(d)) continue;
+    final bi = (s.length > 2 && ctx.areas.contains(s[1])) ? 2 : 1;
+    if (s.length == bi + 3) {
+      if (s[bi + 1] == 'application_layer' && !appKinds.contains(s.last)) {
+        requireUnit(d, '신규 개념 폴더 `${s.last}`(application)', {'': appKinds});
       }
-      if (s[2] == 'presentation_layer' && !presKinds.contains(s[3])) {
-        requireUnit(d, '신규 개념 폴더 `${s[3]}`(presentation)', {'': presKinds});
+      if (s[bi + 1] == 'presentation_layer' && !presKinds.contains(s.last)) {
+        requireUnit(d, '신규 개념 폴더 `${s.last}`(presentation)', {'': presKinds});
       }
     }
   }

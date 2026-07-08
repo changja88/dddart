@@ -92,7 +92,7 @@
 
 | ID | 항목 | §근거 | PASS | FAIL | 레인 | 치명 |
 |---|---|---|---|---|---|---|
-| **HR-1** 4계층·BC 컨테이너 | 위치·계층·직속 | hr §0 | 신규 BC가 `application/<bc>/` 하위, BC 1뎁스={domain,application,infra,presentation}_layer, BC 직속 2파일(router·navigator)만, application/ 직속 BC 폴더만 | 루트 평면, 4계층 누락/평면, 직속 잡파일 | 결정 | ✅ |
+| **HR-1** 4계층·BC 컨테이너 | 위치·계층·직속 | hr §0 | 신규 BC가 `application/<bc>/` 하위(G0 area 판정 시 `application/<area>/<bc>/` — feedback-031·houserules §1 area 핵심 사실), BC 1뎁스={domain,application,infra,presentation}_layer, BC 직속 2파일(router·navigator)만, application/(또는 area) 직속 BC 폴더만 | 루트 평면, 4계층 누락/평면, 직속 잡파일, 판정 없는 area 신설·area가 식별자에 등장 | 결정 | ✅ |
 | **HR-2** 종류 폴더·접미사 | 화이트리스트·지정 접미사 | hr §0·§4.2 | 새 파일이 계층별 종류 폴더 화이트리스트 안, 폴더별 *지정* 접미사(view_model→`_vm`·repository→`_repo`·shared_state→`_shared_state`[긴 우선]·나머지 동명) 일치 | 화이트리스트 밖 폴더(provider/·viewmodel/ 등) 또는 폴더-지정접미사 불일치 | 결정 | — |
 | **HR-3** 신규 골격 완비 | 4계층+종류 폴더+.gitkeep | hr ST4 | 신규 BC가 4계층·종류 폴더 전부·애그리거트 루트, 빈 폴더 .gitkeep | 골격 누락 | 결정 | — |
 | **HR-4** 계층 import 역류 금지 | §5 매트릭스 | hr §5 | domain은 순수 Dart만(flutter·common 포함 비순수 0), application은 presentation import 0, presentation은 infra import 0, infra는 상위 import 0 | 매트릭스 ✗ 셀 위반 | 결정 | ✅ |
