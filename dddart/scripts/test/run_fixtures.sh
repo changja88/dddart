@@ -738,21 +738,31 @@ mkdir -p "$P/lib/application/fleet/rider_trip/application_layer/use_case"
 cat > "$P/lib/application/fleet/driver_trip/application_layer/view_model/driver_trip_vm.dart" <<'EOF'
 import '../../../rider_trip/infra_layer/repository/rider_trip_repository.dart';
 import '../../../rider_trip/application_layer/use_case/get_rider_trip_use_case.dart';
+import '../../../rider_trip/domain_layer/rider_trip/entity/trip.dart';
+import '../../../rider_trip/domain_layer/rider_trip/rider_trip.dart';
+import '../../../rider_trip/rider_trip_navigator.dart';
 class DriverTripVm {}
 EOF
 OUT=$(run_backstop "$P" --diff-base "$BASE" --only im); E=$?
 assert "F23 area 교차 BC — 비채널(repository) IM5 발화" 2 'IM5' - "$E" "$OUT"
 assert "F23 area 교차 BC — use_case 채널 통과" 2 - 'get_rider_trip_use_case' "$E" "$OUT"
+assert "F23 도메인 타입·애그리거트 루트 채널 통과(상대 인덱싱 판별)" 2 - 'rider_trip/domain_layer' "$E" "$OUT"
+assert "F23 navigator 채널 통과(area BC 루트 판별)" 2 - 'rider_trip_navigator' "$E" "$OUT"
 
-# ---------- F24: area 위반 형상 — 이름 deny(ST7)·중첩 area 보수 폴백(ST3)
+# ---------- F24: area 위반 형상 — 이름 deny(ST7)·중첩 area(ST3)·직속 파일(ST2)·빈 area(ST4) 보수 폴백
 P="$T/f24"; BASE=$(mkproj "$P")
 mkbc "$P" "application/fleet/driver_trip"
 mkdir -p "$P/lib/application/fleet/common/domain_layer"           # area 하위 BC 이름 deny
 mkdir -p "$P/lib/application/domain_layer"                        # application 직속 계층명 deny
 mkdir -p "$P/lib/application/mega/fleet/driver_trip/domain_layer" # 중첩 area — 폴백으로 ST3
+mkdir -p "$P/lib/application/depot/hub_trip/domain_layer"         # 직속 파일 있는 area 후보 —
+echo "class Notes {}" > "$P/lib/application/depot/notes.dart"     #   폴백으로 depot=BC → ST2
+mkdir -p "$P/lib/application/zone"                                # 빈 area — 폴백으로 BC → ST4
 OUT=$(run_backstop "$P" --diff-base "$BASE" --only st); E=$?
 assert "F24 BC·area 이름 deny — ST7 발화" 2 'ST7' - "$E" "$OUT"
 assert "F24 중첩 area 보수 폴백 — ST3 발화" 2 'ST3' - "$E" "$OUT"
+assert "F24 area 직속 파일 보수 폴백 — ST2 발화" 2 'ST2' - "$E" "$OUT"
+assert "F24 빈 area 보수 폴백 — ST4 골격 미완비 발화" 2 'zone' - "$E" "$OUT"
 
 # ---------- F25: 레거시 drift 평면 보수 폴백 — canonical 층 0개 BC가 area로 오분류되지 않음(CY 분류 불변)
 P="$T/f25"; BASE=$(mkproj "$P")

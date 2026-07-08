@@ -32,13 +32,13 @@
 
 | # | 우선 | ① 대상 결함(dim·FC골든) | ② 원인(뿌리·코퍼스 어느 책무 공백) | ③ 처방(어느 코퍼스 파일·미러경로) | ④ **예상효과**(전→후) | ⑤ 시술커밋 | ⑥ 실측·판정 |
 |---|---|---|---|---|---|---|---|
-| 1 | P1 | 표준 트리에 BC 그루핑 차원이 없어 다중 역할 앱(broccoli류 아키타입 — 부모/자녀·구매자/판매자·기사/승객)에서 역할 축이 이름 접두로만 존재 — 측정 dim 없음(기능 확장·예방적) | final.md §1이 `application/` 직속=BC만을 유일 형태로 고정 — "여러 BC를 사람 눈에 묶어 보여줄 자리" 책무 부재 | **배포본 먼저 손편집**(feedback-006 확립 절차): `dddart/skills/discipline-houserules/references/final.md` §1·§2·§3·§7·**§8(17종→18종)** → `corpus_mirror_sync.py --write`(배포→소스·codex 동기) → `--check` 0 drift | 다음 런에서 area 선언 시 HR-1이 `application/<area>/<bc>/`를 표준으로 인정. 평면 프로젝트 무영향(opt-in) | | |
-| 2 | P1 | 러너가 area 경로를 위반으로 오발화(ST1·ST2·ST3·ST4·TG1 깊이 고정) — 결정적 측정: 신규 픽스처 F22~F25 | `common.dart bcOf()`가 `s[1]` 고정 — BC 식별에 "경로 구조" 개념 부재 | `dddart/scripts/src/common.dart`(bcOf 보수 폴백 판별)·`check_structure.dart`·`check_tests.dart`(TG1 — test/ area 미러)·`check_imports.dart`·`check_naming.dart`·`check_models.dart`·**`check_cycles.dart`**(bcOf 호출부) → **codex `scripts/src/`(+`backstop.dart` 변경 시) 기계적 cp 동기**(byte-identical 미러 실측 확인) | F22(area BC 골격·TG1)·F23(area 교차 import 4채널)·F24(area 위반 — 직속 파일·중첩·빈 area·이름 deny)·F25(레거시 drift BC 보수 폴백 — canonical 층 0개 + CY 베이스라인) PASS + F1~F21 무회귀 | | |
-| 3 | P1 | 접두 그룹이 생겨도 파이프라인이 감지·질문하지 않아 area가 사실상 도달 불가 — 측정 dim 없음(기능 확장) | `commands/dddart.md` G0에 BC *배치* 질문은 있으나 BC *그루핑* 질문 부재 · config.json에 판정 기록 자리 부재 | `dddart/commands/dddart.md` G0 배너(§Phase 0 step 5 — 계약 4의 기계 명세 그대로)·config.json 절(키 2→3 — "출처 주소만 저장" 불변식 문장 동반 개작) — claude 전용 | 다음 런(신규 BC 가능 + 기존 동일 접두 존재)에서 G0 배너에 그루핑 질문 표면화·config에 판정 기록·재런 시 재질문 없음 | | |
-| 4 | P2 | "접두가 area인가 도메인 어휘인가" 판별의 소유자 미배정 — 오탐(개념 접두) 방어 부재 | undecidable.md 17종에 BC 그루핑 판별 부재 | `dddart/skills/discipline-houserules/references/undecidable.md` §13 신설 + 배정표 1행 + **1·5행 "17종"→18종** — 양판 미러(codex 동일 파일 cp, byte-identical 실측) | 판별 절차·신호·반례(`chat_request`)가 문서화되어 Coordinator·architect·reviewer가 같은 기준 참조 | | |
-| 5 | P2 | SKILL.md §1·§3이 area를 모름(배치 결정 순서·레드 플래그·**25·65행 "17종"**) + architect/coder/reviewer가 area 경로 취급 규칙 없음 | 산문 규약이 트리 사실(final.md)만 따라가는 구조 — 신규 사실 미반영 | `dddart/skills/discipline-houserules/SKILL.md`(양판 미러 cp) + `agents/design-architect.md`·`agents/coder.md`·`agents/discipline-reviewer.md`(claude 전용 — codex agents 산문은 의도 분기·별도 라운드) | coder가 명세의 area 경로를 그대로 생성(자의 해석 0)·reviewer가 area 규칙 감사 가능 | | |
-| 6 | P2 | **architecture-ddd final.md 4곳(:30·:45·:222·:230)이 "BC = `application/<bc>/`"로 물리 형태 고정** — houserules만 고치면 design-review-ddd가 area 경로를 배치 위반으로 지적하는 스킬 간 모순(코퍼스 리뷰 F-2) | 선조사가 houserules final.md만 보고 멈춤 — BC 물리 형태 서술이 두 스킬에 분산 | **배포본 먼저 손편집**: `dddart/skills/architecture-ddd/references/final.md` 4곳에 "(area 그루핑 시 `application/<area>/<bc>/` — houserules 소유)" 병기 → #1과 같은 `--write` 1회에 합류 | area 선언 런에서 design-review-ddd가 area 경로를 위반으로 오지적하지 않음 | | |
-| 7 | P3 | eval 루브릭 HR-1이 area 경로를 위반으로 채점할 위험 | RUBRIC.md:95 "신규 BC가 `application/<bc>/` 하위" 고정 문구 | `workspace/eval/rubric/RUBRIC.md` HR-1 — 단일 출처(미러 불필요) | area 선언 런에서 HR-1 거짓-FAIL 방지. 평면 런 채점 불변 | | |
+| 1 | P1 | 표준 트리에 BC 그루핑 차원이 없어 다중 역할 앱(broccoli류 아키타입 — 부모/자녀·구매자/판매자·기사/승객)에서 역할 축이 이름 접두로만 존재 — 측정 dim 없음(기능 확장·예방적) | final.md §1이 `application/` 직속=BC만을 유일 형태로 고정 — "여러 BC를 사람 눈에 묶어 보여줄 자리" 책무 부재 | **배포본 먼저 손편집**(feedback-006 확립 절차): `dddart/skills/discipline-houserules/references/final.md` §1·§2·§3·§7·**§8(17종→18종)** → `corpus_mirror_sync.py --write`(배포→소스·codex 동기) → `--check` 0 drift | 다음 런에서 area 선언 시 HR-1이 `application/<area>/<bc>/`를 표준으로 인정. 평면 프로젝트 무영향(opt-in) | `b746d02` — §2는 무변경(정합 감사: BC 내부 성장 규칙이라 area 무관·정당 no-op) | (라이브런 대기) |
+| 2 | P1 | 러너가 area 경로를 위반으로 오발화(ST1·ST2·ST3·ST4·TG1 깊이 고정) — 결정적 측정: 신규 픽스처 F22~F25 | `common.dart bcOf()`가 `s[1]` 고정 — BC 식별에 "경로 구조" 개념 부재 | `dddart/scripts/src/common.dart`(bcOf 보수 폴백 판별)·`check_structure.dart`·`check_tests.dart`(TG1 — test/ area 미러)·`check_imports.dart`·`check_naming.dart`·`check_models.dart`·**`check_cycles.dart`**(bcOf 호출부) → **codex `scripts/src/`(+`backstop.dart` 변경 시) 기계적 cp 동기**(byte-identical 미러 실측 확인) | F22(area BC 골격·TG1)·F23(area 교차 import 4채널)·F24(area 위반 — 직속 파일·중첩·빈 area·이름 deny)·F25(레거시 drift BC 보수 폴백 — canonical 층 0개 + CY 베이스라인) PASS + F1~F21 무회귀 | `b746d02`+감사 보강 커밋 — `check_models.dart`·`backstop.dart`는 무변경(정합 감사: 끝-상대 판별·경로 무의존이라 정당 no-op) | 시술 시점 실측: 픽스처 46/46 PASS·F1~F21 무회귀 ✓ |
+| 3 | P1 | 접두 그룹이 생겨도 파이프라인이 감지·질문하지 않아 area가 사실상 도달 불가 — 측정 dim 없음(기능 확장) | `commands/dddart.md` G0에 BC *배치* 질문은 있으나 BC *그루핑* 질문 부재 · config.json에 판정 기록 자리 부재 | `dddart/commands/dddart.md` G0 배너(§Phase 0 step 5 — 계약 4의 기계 명세 그대로)·config.json 절(키 2→3 — "출처 주소만 저장" 불변식 문장 동반 개작) — claude 전용 | 다음 런(신규 BC 가능 + 기존 동일 접두 존재)에서 G0 배너에 그루핑 질문 표면화·config에 판정 기록·재런 시 재질문 없음 | `b746d02` | (라이브런 대기) |
+| 4 | P2 | "접두가 area인가 도메인 어휘인가" 판별의 소유자 미배정 — 오탐(개념 접두) 방어 부재 | undecidable.md 17종에 BC 그루핑 판별 부재 | `dddart/skills/discipline-houserules/references/undecidable.md` §13 신설 + 배정표 1행 + **1·5행 "17종"→18종** — 양판 미러(codex 동일 파일 cp, byte-identical 실측) | 판별 절차·신호·반례(`chat_request`)가 문서화되어 Coordinator·architect·reviewer가 같은 기준 참조 | `b746d02` | (라이브런 대기) |
+| 5 | P2 | SKILL.md §1·§3이 area를 모름(배치 결정 순서·레드 플래그·**25·65행 "17종"**) + architect/coder/reviewer가 area 경로 취급 규칙 없음 | 산문 규약이 트리 사실(final.md)만 따라가는 구조 — 신규 사실 미반영 | `dddart/skills/discipline-houserules/SKILL.md`(양판 미러 cp) + `agents/design-architect.md`·`agents/coder.md`·`agents/discipline-reviewer.md`(claude 전용 — codex agents 산문은 의도 분기·별도 라운드) | coder가 명세의 area 경로를 그대로 생성(자의 해석 0)·reviewer가 area 규칙 감사 가능 | `b746d02` | (라이브런 대기) |
+| 6 | P2 | **architecture-ddd final.md 4곳(:30·:45·:222·:230)이 "BC = `application/<bc>/`"로 물리 형태 고정** — houserules만 고치면 design-review-ddd가 area 경로를 배치 위반으로 지적하는 스킬 간 모순(코퍼스 리뷰 F-2) | 선조사가 houserules final.md만 보고 멈춤 — BC 물리 형태 서술이 두 스킬에 분산 | **배포본 먼저 손편집**: `dddart/skills/architecture-ddd/references/final.md` 4곳에 "(area 그루핑 시 `application/<area>/<bc>/` — houserules 소유)" 병기 → #1과 같은 `--write` 1회에 합류 | area 선언 런에서 design-review-ddd가 area 경로를 위반으로 오지적하지 않음 | `b746d02` | (라이브런 대기) |
+| 7 | P3 | eval 루브릭 HR-1이 area 경로를 위반으로 채점할 위험 | RUBRIC.md:95 "신규 BC가 `application/<bc>/` 하위" 고정 문구 | `workspace/eval/rubric/RUBRIC.md` HR-1 — 단일 출처(미러 불필요) | area 선언 런에서 HR-1 거짓-FAIL 방지. 평면 런 채점 불변 | `b746d02` | (라이브런 대기) |
 
 ## 시술 순서 (의존 순)
 
@@ -63,6 +63,17 @@
 | 코퍼스 모순 | 선조사 유효·블로커 2 | `--write` 방향 역전(배포본 먼저 — 표 #1·#6·시술 2) · architecture-ddd 4곳 동반 교정(표 #6 신설) | codex config 키 충돌 위험 — 가드 ⓓ에 인지 기록·다음 라운드 이관 |
 | 과적합 | 과적합 아님·블로커 1 | bcOf 비결정 폴백 → 보수 폴백 확정(러너 판별 규칙 절) + drift 픽스처 F25 | 접두 토큰 기계 정의(계약 4) · 예시 중립 어휘(시술 0) · 17종→18종 4곳(표 #1·#4·#5) · F21 충돌 → F22~(표 #2) · 리트머스 문구 교정(계약 3) |
 | 실효성 | 조건부 진행 가능 | 판별 기본값 역전 — area 적극 증명 + 보수 폴백(러너 판별 규칙 절, 과적합 블로커와 동일 처방) | test/ 1:1 미러 방침 확정(계약 3) · check_cycles 목록 추가(표 #2) · 이름 deny(계약 2) · G0 감지 기계 명세·1런 지연 문서화(계약 4) · config 문구 2건·area 판정도 기록(계약 5·표 #3) · 혼재 advisory(계약 4) · 구조 판별 > config 선언 대안 판정(채택 유지) · 이동기 YAGNI 유지 |
+
+## 정합 감사 기록 (2026-07-08 — 시술 직후 독립 서브에이전트 감사)
+
+계획 문면 ↔ 커밋 `b746d02` diff 전수 대조. **판정: 중대 편차 0 · 경미 편차 4건(전부 "처방보다 덜 한" 방향) — 전건 처리 완료**:
+
+1. final.md **§2 무변경** — 실측상 BC 내부 성장 규칙이라 area 무관(정당 no-op) → 표 #1 ⑤에 사유 기재.
+2. **check_models.dart 무변경** — 끝-상대 판별(`di == s.length-3`)이라 area 깊이 불변(정당 no-op) → 표 #2 ⑤에 사유 기재.
+3. F24 커버리지 갭(직속 파일·빈 area 미검증) → 보수 폴백 경유 ST2·ST4 발화 픽스처 보강(46/46 PASS).
+4. F23 커버리지 갭(이번에 판별 코드가 바뀐 IM5 애그리거트 루트 상대 인덱싱·navigator `isBcRootPath` 경로 미커버) → 도메인 타입·애그리거트 루트·navigator 채널 통과 픽스처 보강.
+
+계약 5조항 세부 9건(ⓐ~ⓘ)·리뷰 블로커 3건·미러 경계(코덱스 오케스트레이터 제외 포함)·중립 어휘 규율은 전량 반영 실측 확인. 감사 관찰 1건(편차 아님): 러너의 area 판별은 dart 파일만 보므로 비-dart 직속 파일(area 직속 `analysis_options.yaml` 류)은 러너 비가시 — 기존 ST1/ST2도 동일한 한계라 회귀 아님, 규약(final.md §1 ⓑ)+discipline-reviewer 감사 소유로 정리.
 
 ## 회차 요약 (다음 런 후)
 - (대기)
