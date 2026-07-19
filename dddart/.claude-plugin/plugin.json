@@ -1,7 +1,7 @@
 {
   "name": "dddart",
   "displayName": "dddart",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "간소화 DDD + 철저한 MVVM으로 Flutter 기능을 설계·구현하는 오케스트레이터. /dddart로 요구→설계→구현을 단계별 게이트로 빌드한다.",
   "author": { "name": "changja88", "email": "dev@numchida.com" },
   "license": "MIT",
