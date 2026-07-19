@@ -34,7 +34,7 @@
 | [016](feedback-016-fid-measurement-dt2.md) | 14차 양판(`20260622-1636`) | `<미커밋>` | ⏳15차 검증대기 | **DT-2 단일출구 누수**(safeApiCall `on DioException` 절 *내부* `fromJson` throw를 형제 `on TypeError`·말미 catch-all이 못 잡고 샘·N=2 swap) 골든 try/on Object 가드 + **screenProbes green 강제**(6회 게이트 미발동 종결·헬퍼 아닌 별도 `render_smoke_test.dart`+isNotEmpty). image set-membership은 017로 분리 |
 | [017](feedback-017-image-fidelity-eye.md) | 14차 후속(게이트 활성 부작용) | `<미커밋>` | ⏳15차 검증대기 | feedback-016가 FID 게이트 실발동시키며 **image area↔slot 레벨차 거짓 FAIL 위험** → `compare` L1/L2에서 image 제외(위치=L4 **육안**)·`§9` "`<img>`도 형상" 제자리 재현 유도(생성측 단독·coder/architect/review-ui 불변)·positive-control ⓐⓑ 반증. fetch_images 통째빠짐은 014 후속 분리 |
 | 018~031 | — | — | (인덱스 미기재) | 각 `feedback-0NN-*.md` 파일 직접 참조 — 인덱스 백필은 별도 작업 |
-| [032](feedback-032-hive-local-storage-restructure.md) | broccoli_app hive 첫 도입(NM3 오탐 리포트) | `<미커밋>` | 🔧적용·검증대기(다음 hive 런) | **hive 배치 재설계** — `data_source/local_storage/` 하위층(접근+스키마 `_box.dart` 파일당 1모델+배선 등록 함수만), NM1·NM3 **면제 소멸**, ST6 하위 경계, **HV1 신설**(box @HiveType 필수 — HV2·HV3는 보류·승격조건 명기), registrar footgun §5 명문화, §6→§5 drift, 총계 60종 일괄. **시술 전 적대 리뷰 3렌즈**(코퍼스 모순·과적합·실효성) 반영 v2 — 픽스처 56/56·positive-control hv 무발화·미러 11/11 |
+| [032](feedback-032-hive-local-storage-restructure.md) | broccoli_app hive 첫 도입(NM3 오탐 리포트) | `d4d201a` | 🔧적용·검증대기(다음 hive 런) | **hive 배치 재설계** — `data_source/local_storage/` 하위층(접근+스키마 `_box.dart` 파일당 1모델+배선 등록 함수만), NM1·NM3 **면제 소멸**, ST6 하위 경계, **HV1 신설**(box @HiveType 필수 — HV2·HV3는 보류·승격조건 명기), registrar footgun §5 명문화, §6→§5 drift, 총계 60종 일괄. **시술 전 적대 리뷰 3렌즈**(코퍼스 모순·과적합·실효성) 반영 v2 — 픽스처 56/56·positive-control hv 무발화·미러 11/11 |
 
 ## 규약
 
