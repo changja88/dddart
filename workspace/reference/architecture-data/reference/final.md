@@ -20,12 +20,12 @@
 
 ## §1. infra_layer 지도 — 단일 진실 원천 Repo와 세 이웃
 
-infra_layer는 종류 3폴더다 (규약 §3.4 — 폴더·명명 사실은 discipline-houserules §1·§4):
+infra_layer는 종류 3폴더다 (규약 §3.4 — 폴더·명명 사실은 discipline-houserules §1·§4). 유일 하위층 예외는 `data_source/local_storage/`(로컬 저장 모듈 — §5):
 
 | 종류 | 역할 | 계약 |
 |---|---|---|
 | `data_source/` 원격 | retrofit 추상 클래스 — 엔드포인트 정의 | 도메인 엔티티 **직접 반환** (§4) |
-| `data_source/` 로컬 | BC 도메인 데이터의 로컬 저장 접근자 — hive box 읽기/쓰기 | §5 |
+| `data_source/local_storage/` 로컬 | BC 도메인 데이터의 로컬 저장 모듈 — 접근(hive box 읽기/쓰기)+스키마+배선 | §5 |
 | `repository/` | **구체 클래스 (인터페이스 없음** — 규약 §9-1**)**. 원격·로컬 DataSource를 조합하는 **단일 진실 원천** | `safeApiCall`로 감싸 `Either<BadRequestResponse, T>` 반환 (§2·§3) |
 | `service/` | 수동 SDK 어댑터 — 호출당하는 쪽 | §6 |
 
@@ -104,7 +104,7 @@ class ChannelRepo {
 원격 DataSource는 retrofit 추상 클래스로 엔드포인트를 정의하고 **도메인 엔티티를 직접 반환한다** — `dto/` 계층이 없다 (규약 §3.4·§9-2). 서버 JSON은 도메인 엔티티(freezed + json_annotation)가 직접 파싱한다.
 
 - 엔티티의 모델링(entity/value_object 구분은 architecture-ddd §3·애그리거트 경계는 §4)은 architecture-ddd 소유 — 이 스킬은 "유입 경로에 변환 계층을 두지 않는다"는 계약만 소유한다.
-- 도메인 엔티티에 storage 어노테이션을 붙이지 않는다 — hive 어댑터 선언은 §5의 어댑터 파일 소속이다.
+- 도메인 엔티티에 storage 어노테이션을 붙이지 않는다 — @HiveType 저장 모델은 §5의 `local_storage/` box 파일(`<개념>_box.dart`) 소속이다.
 - retrofit `@RestApi`·dio 클라이언트 표기법은 implementation-flutter §4 소유.
 
 ## §5. 로컬 데이터 2층 — BC 캐시 vs 엔진·전역
@@ -113,12 +113,15 @@ class ChannelRepo {
 
 | 층 | 위치 | 담는 것 |
 |---|---|---|
-| BC 도메인 데이터 캐시 | 그 BC `infra_layer/data_source/<개념>_local_data_source.dart` | BC 엔티티의 hive box 정의·읽기/쓰기 |
+| BC 도메인 데이터 캐시 | 그 BC `infra_layer/data_source/local_storage/` | BC 엔티티의 로컬 저장 모듈 — 접근·스키마·배선 3파일 |
 | 엔진·전역 데이터 | `common/local_database/` | hive 초기화, 토큰·앱 설정 — BC 어휘 없는 것만 |
 
+이름 대비가 2층 구분을 어휘로 고정한다 — common은 `local_database`(엔진·전역), BC는 `local_storage`(캐시 모듈).
+
+- **`local_storage/`는 3파일 구성이다** (hive는 출처가 아니라 출처의 부속이라 data_source *하위층*에 산다 — feedback-032): ① 접근 `<개념>_local_data_source.dart`(hive box 정의·읽기/쓰기 — 로컬 출처) ② 스키마 `<개념>_box.dart`(**@HiveType 저장 전용 Box 모델, 파일당 1개** — 파일명=클래스명 `<개념>Box`) ③ 배선 `<bc>_hive_adapters.dart`(**등록 함수 `register<Bc>HiveAdapters()`만 — 클래스 0**). **@GenerateAdapters는 비채택**(패키지 1파일 강제가 BC 분산 선언과 충돌). hive 표기법·typeId 대역 규칙은 implementation-flutter §5 소유.
 - **Repo 하나가 원격+로컬 DataSource를 조합**해 단일 진실 원천 역할을 한다 — 자리 부재로 생기던 `*_box_repo` 변형(HaffHaff drift)을 만들지 않는다.
 - 다른 BC·전역 서비스가 이 데이터를 원하면 **이 BC의 UseCase를 호출**한다 — box 직접 접근 금지 (규약 §9-9: HaffHaff에서 member·notice 캐시가 common에 가면서 역의존과 문 없는 직접 접근 10곳+이 실측됐다).
-- **hive 어댑터 노출**: BC 엔티티의 어댑터 등록 함수는 `data_source/<bc>_hive_adapters.dart` 한 파일에 모은다 — `root_initializer`가 import할 수 있는 유일한 BC infra 파일이다(시동 배선 — 규약 §3.4·§3.6). 어댑터 선언(@HiveType 저장 전용 Box 모델)도 이 파일 소속 — **@GenerateAdapters는 비채택**(패키지 1파일 강제가 BC 분산 선언과 충돌). hive 표기법·typeId 대역 규칙은 implementation-flutter §5 소유.
+- **시동 배선 예외**: `<bc>_hive_adapters.dart`는 `root_initializer`가 import할 수 있는 유일한 BC infra 파일이다(규약 §3.4·§3.6). box 파일·접근 파일은 이 예외에 포함되지 않는다.
 - 디스크 캐시(이 절) vs 메모리 keepAlive 캐시의 소유 경계는 §1 — 메모리 쪽은 architecture-state §9.
 
 ## §6. infra service — 수동 SDK 어댑터

@@ -31,7 +31,7 @@ Coordinator가 architect의 설계 명세(초안)와, 동결됐으면 `openapi-f
 - **'계약 위험 행위' 표기 검증**: 스냅샷·기존 패턴으로 확인 불가한 의미 가정이 걸린 행위에 명세가 '계약 위험'을 표기했는가 — 표기 누락(가정인데 미표기 → tracer가 발동 안 됨)과 과표기(확인 가능한데 표기 → 불필요한 tracer) 양방향. 표기 기준은 공유 reference(아래)와 대조한다.
 - **Either 계약**: 실패가 정규화돼 Either로 흐르는가(Right=성공) — DataSource가 예외를 흘리거나 VM이 개별 예외를 잡는 설계가 없는가. 근거 `architecture-data` §2·§3.
 - **DataSource 분해**: 엔드포인트 묶음 단위가 적절한가 — 한 DataSource가 무관한 자원을 끌어안거나, 같은 자원이 둘로 쪼개지지 않았는가. 근거 `architecture-data` §4.
-- **hive 저장·무효화**: 로컬 저장 채택 여부의 *왜*가 있는가 — 채택했으면 Box 모델·무효화(언제 stale로 보나) 전략이 명세에 있는가. 근거 `architecture-data` §6.
+- **hive 저장·무효화**: 로컬 저장 채택 여부의 *왜*가 있는가 — 채택했으면 Box 모델·무효화(언제 stale로 보나) 전략이 명세에 있는가. 근거 `architecture-data` §5.
 
 기계 판별 불가 판별('계약 위험 행위' 표기)을 검증할 때는 필요 시 `discipline-houserules` 스킬을 추가 로드해 그 `references/undecidable.md`의 해당 절차와 대조한다 — architect와 같은 파일을 보므로 절차 어긋남이 그대로 발견이 된다.
 

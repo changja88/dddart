@@ -125,7 +125,18 @@ List<Finding> runStructure(BackstopContext ctx) {
       if (s.length == bi + 3 && !infraKinds.contains(name)) {
         out.add(Finding('ST6', d, null,
             'infra_layer 직속 허용 외 디렉터리 `$name/` — infra는 평면 유지(개념 폴더 금지), 3종(data_source·repository·service)만${_typoHint(name, infraKinds)}',
-            '제1 규약 §4', 'HaffHaff 16개 BC 전수에서 infra는 평면 — 종류 3폴더로 정리한다.'));
+            '제1 규약 §4', 'HaffHaff 16개 BC 전수에서 infra는 평면 — 종류 3폴더로 정리한다(유일 하위층 예외는 data_source/local_storage/).'));
+      } else if (s.length == bi + 4 && s[bi + 2] == 'data_source' && name != 'local_storage') {
+        // 신설 예외(local_storage)의 경계 정의 — data_source 하위는 local_storage/뿐(feedback-032).
+        // repository/·service/ 하위는 실증 0이라 미검사(보류 — feedback-032 보류 목록).
+        out.add(Finding('ST6', d, null,
+            'data_source 하위 디렉터리 `$name/` — 유일 허용은 `local_storage/`(로컬 저장 모듈: 접근·스키마·배선)',
+            '제1 규약 §4', 'hive 접근·스키마·배선은 data_source/local_storage/에, 그 외 하위 폴더는 금지.'));
+      } else if (s.length == bi + 5 &&
+          s[bi + 2] == 'data_source' && s[bi + 3] == 'local_storage') {
+        out.add(Finding('ST6', d, null,
+            'local_storage 하위 디렉터리 `$name/` — local_storage는 평면(접근·스키마·배선 파일만)',
+            '제1 규약 §4', '하위 폴더 없이 `_local_data_source`·`_box`·`_hive_adapters` 파일로만 구성한다.'));
       }
     }
   }

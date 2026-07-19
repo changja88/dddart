@@ -15,7 +15,7 @@
 - `dddart/` — 실제 플러그인. `.claude-plugin/plugin.json`(매니페스트) +
   `commands/dddart.md`(Coordinator) + `agents/*.md`(7개 subagent) +
   `skills/*/references/final.md`(11개 스킬) + `scripts/`(extract·fetch 도구 +
-  `backstop.dart`/`src/check_*.dart` 결정적 백스톱 58종).
+  `backstop.dart`/`src/check_*.dart` 결정적 백스톱 60종).
 - `codex-dddart/` — Codex 런타임 미러. `skills/*/SKILL.md` + `skills/dddart/scripts/`(백스톱 미러).
 - `workspace/reference/**` — 소스 코퍼스(아키텍처·구현 레퍼런스의 `final.md`). 스킬 재생성의 1차 근거.
 - `workspace/design/`, `workspace/plan/` — 빌드 설계 메모와 계획서.

@@ -3,7 +3,9 @@
 /// *왜 결정적 백스톱인가*: 종류 폴더↔접미사↔클래스명의 3중 일치(제1 규약 §7)는
 /// casefold 문자열 비교로 환원된다. 본문 검사(NM9·NM10·NM13)는 주석·문자열 마스킹
 /// 본문(§4-2) + 괄호 균형 스캔(§4-6)으로 멀티라인·제네릭 변형까지 버틴다.
-/// 거짓양성 게이트 = added 한정 + 검사별 명시 예외(router·exception.dart·hive_adapters).
+/// 거짓양성 게이트 = added 한정 + 검사별 명시 예외(router·exception.dart).
+/// hive는 예외가 아니라 정식 종류다 — data_source/local_storage/에 접근(_local_data_source)·
+/// 스키마(_box·파일당 1모델)·배선(_hive_adapters·클래스 0)이 살고, 내용 검사는 HV 소유(feedback-032).
 library;
 
 
@@ -11,7 +13,8 @@ import 'common.dart';
 
 // 접미사 → 종류 (긴 것 우선 매칭용으로 정렬해 사용)
 const _suffixKind = {
-  '_local_data_source.dart': 'data_source(로컬)',
+  '_local_data_source.dart': 'local_storage(접근)',
+  '_hive_adapters.dart': 'local_storage(배선)',
   '_shared_state.dart': 'shared_state',
   '_ui_extension.dart': 'ui_extension',
   '_specification.dart': 'specification',
@@ -24,6 +27,7 @@ const _suffixKind = {
   '_state.dart': 'state',
   '_view.dart': 'view',
   '_repo.dart': 'repository',
+  '_box.dart': 'local_storage(스키마)',
   '_vm.dart': 'view_model',
 };
 
@@ -34,7 +38,8 @@ const _kindSuffixes = <String, List<String>>{
   'state': ['_state.dart'],
   'shared_state': ['_shared_state.dart'],
   'service': ['_service.dart'],
-  'data_source': ['_data_source.dart', '_local_data_source.dart'],
+  'data_source': ['_data_source.dart'],
+  'local_storage': ['_local_data_source.dart', '_box.dart', '_hive_adapters.dart'],
   'repository': ['_repo.dart'],
   'view': ['_view.dart'],
   'section': ['_section.dart'],
@@ -103,22 +108,19 @@ List<Finding> runNaming(BackstopContext ctx) {
     // ---- NM1: 종류 폴더 ↔ 접미사 (긴 접미사 우선)
     final kindOfFolder = _kindSuffixes[parent];
     if (kindOfFolder != null && _folderContextOk(f, parent)) {
-      final exemptHive = parent == 'data_source' && base.endsWith('_hive_adapters.dart');
-      if (!exemptHive) {
-        String? fileKind;
-        for (final s in _suffixKind.keys) {
-          if (base.endsWith(s)) {
-            fileKind = s;
-            break; // map 정의 순서 = 긴 것 우선
-          }
+      String? fileKind;
+      for (final s in _suffixKind.keys) {
+        if (base.endsWith(s)) {
+          fileKind = s;
+          break; // map 정의 순서 = 긴 것 우선
         }
-        final ok = fileKind != null && kindOfFolder.contains(fileKind);
-        if (!ok) {
-          out.add(Finding('NM1', f, null,
-              '`$parent/` 안 파일 접미사 불일치 — 허용: ${kindOfFolder.join('·')}'
-              '${fileKind != null ? ' (현재 접미사는 ${_suffixKind[fileKind]} 종류)' : ''}',
-              '제1 규약 §7.1-2', '종류는 폴더가 결정하고 접미사가 재확인한다 — 접미사를 폴더 종류에 맞춘다.'));
-        }
+      }
+      final ok = fileKind != null && kindOfFolder.contains(fileKind);
+      if (!ok) {
+        out.add(Finding('NM1', f, null,
+            '`$parent/` 안 파일 접미사 불일치 — 허용: ${kindOfFolder.join('·')}'
+            '${fileKind != null ? ' (현재 접미사는 ${_suffixKind[fileKind]} 종류)' : ''}',
+            '제1 규약 §7.1-2', '종류는 폴더가 결정하고 접미사가 재확인한다 — 접미사를 폴더 종류에 맞춘다.'));
       }
     }
 
@@ -366,6 +368,7 @@ bool _folderContextOk(String f, String parent) {
       // app·infra service 모두 `_service.dart` — common/service도 §7.2상 동일 접미사
       return hasSeg(f, 'application_layer') || hasSeg(f, 'infra_layer') || f.startsWith('common/');
     case 'data_source':
+    case 'local_storage':
     case 'repository':
       return hasSeg(f, 'infra_layer');
     case 'view':

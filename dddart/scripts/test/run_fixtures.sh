@@ -779,6 +779,121 @@ EOF
 OUT=$(run_backstop "$P" --diff-base "$BASE" --only cy); E=$?
 assert "F25 drift BC 보수 폴백 — CY 쌍이 BC명 단위로 1개 동결" 0 '순환 쌍 1개 동결' - "$E" "$OUT"
 
+# ==== F26~F27: hive local_storage 재배치 (feedback-032) ====
+# data_source/local_storage/ = 접근(_local_data_source)+스키마(_box·파일당 1모델)+배선(_hive_adapters·클래스 0).
+# flat 배치는 NM1 정당 발화(원 사건과 동종 오탐의 역방향 고정), 새 구조는 면제 0으로 green.
+
+# ---------- F26: local_storage 구조·명명 — flat 위반 / 정본 green / box명 불일치 / 하위 폴더 경계
+P="$T/f26"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/application/channel/infra_layer/data_source"
+cat > "$P/lib/application/channel/infra_layer/data_source/channel_hive_adapters.dart" <<'EOF'
+void registerChannelHiveAdapters() {}
+EOF
+cat > "$P/lib/application/channel/infra_layer/data_source/channel_local_data_source.dart" <<'EOF'
+class ChannelLocalDataSource {}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only nm); E=$?
+assert "F26a flat 배선 파일 — NM1 발화(local_storage 소속)" 2 'NM1.*channel_hive_adapters.dart' - "$E" "$OUT"
+assert "F26a2 flat 로컬 접근 파일 — NM1 발화(문서 마이그레이션 회귀 방지)" 2 'NM1.*channel_local_data_source.dart' - "$E" "$OUT"
+
+# F26b: 정본 — 완전 골격(mkbc·ST4 통과형) + local_storage 3파일 → st·nm·hv 전부 green (원 사건 재발 방지의 결정적 재현)
+P="$T/f26b"; BASE=$(mkproj "$P")
+mkbc "$P" "application/channel"
+echo "class Channel {}" > "$P/lib/application/channel/domain_layer/channel/channel.dart" # NM3 정합(mkbc 기본 Aggregate 치환)
+LS="$P/lib/application/channel/infra_layer/data_source/local_storage"; mkdir -p "$LS"
+cat > "$LS/channel_local_data_source.dart" <<'EOF'
+class ChannelLocalDataSource {}
+EOF
+cat > "$LS/channel_box.dart" <<'EOF'
+import 'package:hive_ce/hive.dart';
+
+part 'channel_box.g.dart';
+
+@HiveType(typeId: 20)
+class ChannelBox {
+  const ChannelBox(this.id);
+
+  @HiveField(0)
+  final String id;
+}
+EOF
+cat > "$LS/channel_hive_adapters.dart" <<'EOF'
+import 'package:hive_ce/hive.dart';
+
+import 'channel_box.dart';
+
+void registerChannelHiveAdapters() {
+  if (!Hive.isAdapterRegistered(20)) Hive.registerAdapter(ChannelBoxAdapter());
+}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only st,nm,hv); E=$?
+assert "F26b 새 구조 정본 — ST·NM·HV 전부 green(면제 0)" 0 - 'BLOCKER' "$E" "$OUT"
+
+# F26c: box 파일명≠클래스명 — NM3 발화(_box.dart+NM3 결합이 <개념>Box 강제)
+P="$T/f26c"; BASE=$(mkproj "$P")
+LS="$P/lib/application/channel/infra_layer/data_source/local_storage"; mkdir -p "$LS"
+cat > "$LS/channel_box.dart" <<'EOF'
+@HiveType(typeId: 20)
+class ChannelHiveModel {}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only nm); E=$?
+assert "F26c box 파일명≠클래스명 — NM3 발화" 2 'NM3' - "$E" "$OUT"
+
+# F26d: data_source 하위 경계 — local_storage 외 하위 폴더·local_storage 자체의 하위 폴더 금지
+P="$T/f26d"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/application/channel/infra_layer/data_source/junk"
+echo "class X {}" > "$P/lib/application/channel/infra_layer/data_source/junk/x.dart"
+mkdir -p "$P/lib/application/channel/infra_layer/data_source/local_storage/models"
+echo "class Y {}" > "$P/lib/application/channel/infra_layer/data_source/local_storage/models/y.dart"
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only st); E=$?
+assert "F26d data_source 하위 잡폴더 — ST6 발화" 2 'junk' - "$E" "$OUT"
+assert "F26d local_storage 하위 폴더 — ST6 발화(평면)" 2 'models' - "$E" "$OUT"
+
+# ---------- F27: HV1 — box 스키마 @HiveType 정체 검사 (위반 / freezed 병용 무발화 / common 범위 반증 / 레거시 래칫)
+P="$T/f27"; BASE=$(mkproj "$P")
+LS="$P/lib/application/channel/infra_layer/data_source/local_storage"; mkdir -p "$LS"
+cat > "$LS/channel_box.dart" <<'EOF'
+class ChannelBox {
+  const ChannelBox(this.id);
+  final String id;
+}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only hv); E=$?
+assert "F27a box 무어노테이션 — HV1 발화" 2 'HV1' - "$E" "$OUT"
+
+# F27b: freezed 병용(@freezed @HiveType 동시) — 존재 검사라 무발화(거짓-FAIL 반증)
+P="$T/f27b"; BASE=$(mkproj "$P")
+LS="$P/lib/application/channel/infra_layer/data_source/local_storage"; mkdir -p "$LS"
+cat > "$LS/channel_box.dart" <<'EOF'
+@freezed
+@HiveType(typeId: 21)
+class ChannelBox {}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only hv); E=$?
+assert "F27b freezed 병용 box — HV1 무발화" 0 - 'HV1' "$E" "$OUT"
+
+# F27c: common/local_database의 전역 box — HV1 비대상(범위 반증·common 규율 침묵 유지)
+P="$T/f27c"; BASE=$(mkproj "$P")
+mkdir -p "$P/lib/common/local_database"
+cat > "$P/lib/common/local_database/token_box.dart" <<'EOF'
+class TokenBox {}
+EOF
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only hv); E=$?
+assert "F27c common 전역 box — HV1 비대상 무발화" 0 - 'HV1' "$E" "$OUT"
+
+# F27d: 레거시 box(비added) touched — added 게이트 면책(래칫)
+P="$T/f27d"; BASE=$(mkproj "$P")
+LS="$P/lib/application/channel/infra_layer/data_source/local_storage"; mkdir -p "$LS"
+cat > "$LS/channel_box.dart" <<'EOF'
+class ChannelBox {}
+EOF
+git -C "$P" -c user.name=t -c user.email=t@t add -A
+git -C "$P" -c user.name=t -c user.email=t@t commit -qm legacy
+BASE=$(git -C "$P" rev-parse HEAD)
+echo "// touched" >> "$LS/channel_box.dart"
+OUT=$(run_backstop "$P" --diff-base "$BASE" --only hv); E=$?
+assert "F27d 레거시 box touched — added 게이트 면책" 0 - 'HV1' "$E" "$OUT"
+
 echo ""
 echo "결과: PASS $PASS / FAIL $FAIL"
 [ $FAIL = 0 ]

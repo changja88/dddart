@@ -1,10 +1,10 @@
 #!/usr/bin/env dart
-/// dddart 결정적 백스톱 러너 — 단일 엔트리, 검사 57종 인프로세스 실행.
+/// dddart 결정적 백스톱 러너 — 단일 엔트리, 검사 60종 인프로세스 실행.
 /// 설계: workspace/design/2026-06-12-backstop-design.md (확정 2026-06-12)
 ///
 /// 사용:
 ///   dart run backstop.dart <대상 프로젝트 루트> [--diff-base <commit>] [--all]
-///                          [--only st,im,nm,cy,tg,pj,rv|<검사ID>…] [--update-baseline]
+///                          [--only st,md,im,nm,cy,tg,pj,rv,hv|<검사ID>…] [--update-baseline]
 ///
 /// 종료코드: 0=clean / 1=사용·내부 오류 / 2=blocker(발견 일괄 출력 — fail-fast 금지).
 /// 게이트: 구조·명명=added, import=touched의 added 줄, 골격=신규 단위, 순환=전역+베이스라인.
@@ -14,6 +14,7 @@ library;
 import 'dart:io';
 
 import 'src/check_cycles.dart';
+import 'src/check_hive.dart';
 import 'src/check_imports.dart';
 import 'src/check_models.dart';
 import 'src/check_naming.dart';
@@ -23,7 +24,7 @@ import 'src/check_structure.dart';
 import 'src/check_tests.dart';
 import 'src/common.dart';
 
-const _totalChecks = 58; // ST12 + IM22 + NM17 + CY1 + TG1 + PJ2 + MD2 + RV1
+const _totalChecks = 60; // ST12 + IM23 + NM17 + CY1 + TG1 + PJ2 + MD2 + RV1 + HV1
 
 void main(List<String> argv) {
   String? targetPath;
@@ -53,7 +54,7 @@ void main(List<String> argv) {
   }
   if (targetPath == null) {
     stderr.writeln('사용: dart run backstop.dart <대상 프로젝트 루트> '
-        '[--diff-base <commit>] [--all] [--only st,im,nm,cy,tg,pj,rv] [--update-baseline]');
+        '[--diff-base <commit>] [--all] [--only st,md,im,nm,cy,tg,pj,rv,hv] [--update-baseline]');
     exit(1);
   }
 
@@ -92,6 +93,7 @@ void main(List<String> argv) {
     if (familyOn('tg')) findings.addAll(runTests(ctx));
     if (familyOn('pj')) findings.addAll(runPubspec(ctx));
     if (familyOn('rv')) findings.addAll(runRiverpod(ctx));
+    if (familyOn('hv')) findings.addAll(runHive(ctx));
   } catch (e, st) {
     stderr.writeln('[backstop] 내부 오류: $e\n$st');
     exit(1);

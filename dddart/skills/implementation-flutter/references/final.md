@@ -144,17 +144,16 @@ abstract class ChannelDataSource {
 
 ## §5. hive_ce — @HiveType 방식·등록 함수·@GenerateAdapters 비채택
 
-**@GenerateAdapters는 비채택이다**: 생성기가 패키지 전체에서 **정확히 1파일·1회**만 허용한다(2파일째부터 `HiveError: GenerateAdapters annotation found in more than one file` — 빌드 실패, 생성기 소스 실측). BC별 `<bc>_hive_adapters.dart` 분산 선언(architecture-data §5)과 양립 불가다.
+**@GenerateAdapters는 비채택이다**: 생성기가 패키지 전체에서 **정확히 1파일·1회**만 허용한다(2파일째부터 `HiveError: GenerateAdapters annotation found in more than one file` — 빌드 실패, 생성기 소스 실측). BC별 `local_storage/` box 파일 분산 선언(파일당 1모델 — architecture-data §5)과 양립 불가다.
 
-**표준은 @HiveType per-class 방식**(HaffHaff 실물 — hive_ce가 그대로 지원): **저장 전용 Box 모델**에 어노테이션을 붙인다 — 도메인 엔티티에는 붙지 않으므로(별도 클래스) "엔티티 무어노테이션"(architecture-data §4)이 보존된다:
+**표준은 @HiveType per-class 방식**(HaffHaff 실물 — hive_ce가 그대로 지원): **저장 전용 Box 모델**에 어노테이션을 붙인다 — 도메인 엔티티에는 붙지 않으므로(별도 클래스) "엔티티 무어노테이션"(architecture-data §4)이 보존된다. 배치는 `data_source/local_storage/` 3파일이다(스키마=box 파일당 1모델·배선=등록 함수 전용 — architecture-data §5·feedback-032):
 
 ```dart
-// infra_layer/data_source/<bc>_hive_adapters.dart — BC의 어댑터 선언+등록 함수 한 파일
-// typeId 대역: channel = 20~29 (앱 전역 유일 — BC별 대역을 이 주석으로 조정)
+// infra_layer/data_source/local_storage/channel_box.dart — 저장 스키마 (파일당 @HiveType 모델 1개)
 import 'package:hive_ce/hive.dart';
-import '../../domain_layer/channel/channel.dart';
+import '../../../domain_layer/channel/channel.dart';
 
-part 'channel_hive_adapters.g.dart';
+part 'channel_box.g.dart';
 
 @HiveType(typeId: 20)
 class ChannelBox { // 저장 전용 모델 — 도메인 Channel과 분리 (HaffHaff 실물: plain class·const 생성자·final 필드)
@@ -168,13 +167,22 @@ class ChannelBox { // 저장 전용 모델 — 도메인 Channel과 분리 (Haff
   Channel toDomain() => Channel(id: id, name: name);
   static ChannelBox from(Channel c) => ChannelBox(id: c.id, name: c.name);
 }
+```
+
+```dart
+// infra_layer/data_source/local_storage/channel_hive_adapters.dart — 시동 배선 (등록 함수만·클래스 0)
+// typeId 대역: channel = 20~29 (앱 전역 유일 — BC별 대역을 이 주석으로 조정)
+import 'package:hive_ce/hive.dart';
+
+import 'channel_box.dart';
 
 void registerChannelHiveAdapters() { // root_initializer가 호출하는 유일한 노출면
   if (!Hive.isAdapterRegistered(20)) Hive.registerAdapter(ChannelBoxAdapter());
 }
 ```
 
-- **typeId는 앱 전역 유일**이다 — 중복 등록은 런타임 `HiveError`. 파일 머리의 **BC별 typeId 대역 주석**으로 조정한다(전역 유일성의 결정적 검사는 백스톱 향후 후보).
+- **typeId는 앱 전역 유일**이다 — 중복 등록은 런타임 `HiveError`. 등록 파일 머리의 **BC별 typeId 대역 주석**으로 조정한다(전역 유일성의 결정적 검사는 백스톱 향후 후보 — feedback-032 보류 목록·백스톱 HV1은 box 파일의 @HiveType 부착만 검사한다).
+- **hive_ce_generator의 registrar 일괄 확장은 호출 금지**: 생성기는 프로젝트의 @HiveType을 스캔해 `lib/hive_registrar.g.dart`에 전역 `Hive.registerAdapters()` 확장을 함께 생성할 수 있다 — dddart는 이를 호출하지 않는다. 등록 노출면은 BC별 `register<Bc>HiveAdapters()`가 유일하며, 일괄 확장은 BC 소유·멱등 가드·시동 순서를 우회한다(생성물은 미사용으로 둔다 — build.yaml 억제 가능 여부는 생성기 실측 후 확정).
 - **초기화·box** (시동은 root_initializer 소유 — architecture-state §10):
 
 ```dart
@@ -185,7 +193,7 @@ await Hive.openBox<ChannelBox>('channel_cache');
 final box = Hive.box<ChannelBox>('channel_cache'); // 맵 인터페이스 — put/get은 await 불요
 ```
 
-- box 정의·읽기/쓰기는 `<개념>_local_data_source.dart`의 일(architecture-data §5), Box 모델↔도메인 변환(toDomain/from)은 그 경계의 표기다.
+- box 정의·읽기/쓰기는 `local_storage/<개념>_local_data_source.dart`의 일(architecture-data §5), Box 모델↔도메인 변환(toDomain/from)은 그 경계의 표기다.
 - box 변화 감시(`box.listenable()`)는 쓰지 않는다 — 상태 반응은 riverpod 소관(architecture-state).
 
 ## §6. 위젯 수명·BuildContext 안전 — 컨트롤러 쌍·mounted
